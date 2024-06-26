@@ -3,10 +3,12 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { compare, hash } from 'bcrypt';
 import { RegisterDto } from 'src/auth/dto/auth.dto';
+import { mailService } from 'src/lib/mail.service';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class AuthService {
+  static jwtService: any;
   constructor(
     private prismaService: PrismaService,
     private jwtService: JwtService,
@@ -88,5 +90,69 @@ export class AuthService {
       access_token,
       refresh_token,
     };
+  };
+
+  createToken = async (id: string): Promise<string> => {
+    if (!process.env.ACCESS_TOKEN_KEY) {
+      throw new Error(
+        'Access token secret key not found in environment variables.',
+      );
+    }
+
+    return this.jwtService.sign(
+      { id },
+      {
+        expiresIn: '7d',
+        secret: process.env.ACCESS_TOKEN_KEY,
+      },
+    );
+  };
+
+  forgotPassword = async (data: { email: string }) => {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        email: data.email,
+      },
+    });
+
+    if (!user) {
+      throw new HttpException(
+        { message: `Email ${data.email} not found` },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    const access_token = this.createToken(user.id);
+
+    await mailService.sendMail({
+      to: data.email,
+      html: `Click <a href="http://localhost:5173/reset-password?access_token=${access_token}">here</a> to reset your password`,
+      subject: 'Reset  password',
+    });
+
+    return {
+      message:
+        'Your password has been reset successfully. Please login with your new password.',
+    };
+  };
+  resetPassword = async (data: User, newPassword: string) => {
+    const isSamePassword = await compare(newPassword, data.password);
+    if (isSamePassword) {
+      throw new HttpException(
+        { message: 'New password cannot be the same as old password' },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const hashPassword = await hash(newPassword, 10);
+    const res = await this.prismaService.user.update({
+      where: {
+        id: data.id,
+      },
+      data: {
+        password: hashPassword,
+        confirmPassword: hashPassword,
+      },
+    });
+    return res;
   };
 }

@@ -1,7 +1,13 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { User } from '@prisma/client';
+import { Request } from 'express';
 import { AuthService } from 'src/auth/auth.service';
-import { LoginDto, RegisterDto } from 'src/auth/dto/auth.dto';
+import {
+  ForgotPasswordDto,
+  LoginDto,
+  RegisterDto,
+  ResetPasswordDto,
+} from 'src/auth/dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -15,5 +21,19 @@ export class AuthController {
   @Post('login')
   login(@Body() body: LoginDto): Promise<any> {
     return this.authService.login(body);
+  }
+
+  @Post('forgot-password')
+  forgotPassword(@Body() body: ForgotPasswordDto): Promise<any> {
+    return this.authService.forgotPassword(body);
+  }
+  @UseGuards()
+  @Put('reset-password')
+  async resetPassword(
+    @Req() req: Request,
+    @Body() body: ResetPasswordDto,
+  ): Promise<any> {
+    const user: User = req.user as User;
+    return this.authService.resetPassword(user, body.newPassword);
   }
 }

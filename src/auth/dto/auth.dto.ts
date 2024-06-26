@@ -17,8 +17,13 @@ export class RegisterDto {
   @IsEmail()
   email: string;
 
+  @IsNotEmpty()
   @MinLength(6)
   password: string;
+
+  @IsNotEmpty()
+  @MinLength(6)
+  confirmPassword: string;
 }
 
 export class LoginDto {
@@ -28,8 +33,4 @@ export class LoginDto {
   @IsNotEmpty()
   @MinLength(6)
   password: string;
-
-  @IsNotEmpty()
-  @MinLength(6)
-  confirmPassword: string;
 }

@@ -11,4 +11,5 @@ Table users {
   name String [not null]
   createAt DateTime [default: `now()`, not null]
   updateAt DateTime
+  confirmPassword String
 }

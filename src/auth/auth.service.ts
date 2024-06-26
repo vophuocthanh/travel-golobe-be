@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { compare, hash } from 'bcrypt';
-import { LoginDto, RegisterDto } from 'src/auth/dto/auth.dto';
+import { RegisterDto } from 'src/auth/dto/auth.dto';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
@@ -22,24 +22,32 @@ export class AuthService {
 
     if (user) {
       throw new HttpException(
-        { messgae: 'This email has already used' },
+        { message: 'This email has already been used' },
         HttpStatus.BAD_REQUEST,
       );
     }
 
-    // step 2:  has password and store to database
+    // step 2: check confirm password
+    if (userData.password !== userData.confirmPassword) {
+      throw new HttpException(
+        { message: 'Passwords do not match' },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // step 3: hash password and store to database
     const hashPassword = await hash(userData.password, 10);
     const res = await this.prismaService.user.create({
-      data: { ...userData, password: hashPassword },
+      data: {
+        ...userData,
+        password: hashPassword,
+        confirmPassword: hashPassword,
+      },
     });
 
     return res;
   };
-
-  login = async (
-    data: { email: string; password: string },
-    userData: LoginDto,
-  ): Promise<any> => {
+  login = async (data: { email: string; password: string }): Promise<any> => {
     // step 1: checking user is exist by email
     const user = await this.prismaService.user.findUnique({
       where: {
@@ -64,15 +72,7 @@ export class AuthService {
       );
     }
 
-    //  step 3: check confirm password
-    if (userData.password !== userData.confirmPassword) {
-      throw new HttpException(
-        { message: 'Passwords do not match' },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    // step 4: generate access_token and refresh_token
+    // step 3: generate access_token and refresh_token
     const payload = { id: user.id, name: user.name, email: user.email };
     const access_token = await this.jwtService.signAsync(payload, {
       secret: process.env.ACCESS_TOKEN_KEY,

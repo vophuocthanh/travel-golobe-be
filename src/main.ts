@@ -8,7 +8,7 @@ async function bootstrap() {
 
   // Configure port on Frontend access side
   const corsOptions: CorsOptions = {
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173', 'https://travel-golobe.vercel.app'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   };

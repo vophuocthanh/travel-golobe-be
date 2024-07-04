@@ -12,4 +12,32 @@ Table users {
   createAt DateTime [default: `now()`, not null]
   updateAt DateTime
   confirmPassword String
+  hotels hotels [not null]
 }
+
+Table hotels {
+  id String [pk]
+  name String [not null]
+  address String [not null]
+  createAt DateTime [default: `now()`, not null]
+  updateAt DateTime
+  evaluate String
+  price String [not null]
+  description String [not null]
+  images String [not null]
+  image_two String
+  image_three String
+  image_four String
+  users users [not null]
+  userId String [not null]
+}
+
+Table reviews {
+  id String [pk]
+  message String [not null]
+  createAt DateTime [default: `now()`, not null]
+  updateAt DateTime
+  userId String [not null]
+}
+
+Ref: hotels.userId > users.id

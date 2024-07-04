@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { compare, hash } from 'bcrypt';
@@ -155,4 +160,13 @@ export class AuthService {
     });
     return res;
   };
+
+  async validateToken(token: string): Promise<{ userId: string }> {
+    try {
+      const decoded = this.jwtService.verify(token);
+      return { userId: decoded.sub };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid token');
+    }
+  }
 }

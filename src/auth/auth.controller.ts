@@ -1,6 +1,7 @@
 import { Body, Controller, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { Request } from 'express';
+import { HandleAuthGuard } from 'src/auth/auth.guard';
 import { AuthService } from 'src/auth/auth.service';
 import {
   ForgotPasswordDto,
@@ -27,7 +28,7 @@ export class AuthController {
   forgotPassword(@Body() body: ForgotPasswordDto): Promise<any> {
     return this.authService.forgotPassword(body);
   }
-  @UseGuards()
+  @UseGuards(HandleAuthGuard)
   @Put('reset-password')
   async resetPassword(
     @Req() req: Request,

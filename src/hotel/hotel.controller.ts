@@ -16,6 +16,7 @@ import {
   CreateHotelDto,
   HotelDto,
   HotelPaginationResponseType,
+  RequestWithUser,
 } from 'src/hotel/dto/hotel.dto';
 import { HotelService } from 'src/hotel/hotel.service';
 
@@ -35,7 +36,10 @@ export class HotelController {
 
   @UseGuards(HandleAuthGuard)
   @Post()
-  async createHotel(@Body() createHotelDto: CreateHotelDto, @Req() req: any) {
+  async createHotel(
+    @Body() createHotelDto: CreateHotelDto,
+    @Req() req: RequestWithUser,
+  ) {
     const userId = req.user.id;
     console.log('userId:', userId);
     return this.hotelService.createHotel(createHotelDto, userId);

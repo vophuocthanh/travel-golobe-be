@@ -50,6 +50,7 @@ model Hotel {
   @@map("hotels")
 }
 
+
 model Review {
   id              String    @id @default(cuid())
   message         String

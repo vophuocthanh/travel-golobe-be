@@ -7,6 +7,7 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { Hotel } from '@prisma/client';
@@ -34,8 +35,10 @@ export class HotelController {
 
   @UseGuards(HandleAuthGuard)
   @Post()
-  createHotel(@Body() body: CreateHotelDto): Promise<Hotel> {
-    return this.hotelService.createHotel(body);
+  async createHotel(@Body() createHotelDto: CreateHotelDto, @Req() req: any) {
+    const userId = req.user.id;
+    console.log('userId:', userId);
+    return this.hotelService.createHotel(createHotelDto, userId);
   }
 
   @UseGuards(HandleAuthGuard)

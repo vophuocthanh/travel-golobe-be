@@ -32,27 +32,30 @@ export class CreateHotelDto {
 
   @IsOptional()
   @IsString()
-  userId?: string;
-
-  @IsOptional()
   created_at?: string;
 
   @IsOptional()
+  @IsString()
   updated_at?: string;
 
   @IsOptional()
+  @IsString()
   image_two?: string;
 
   @IsOptional()
+  @IsString()
   image_three?: string;
 
   @IsOptional()
+  @IsString()
   image_four?: string;
 
   @IsOptional()
+  @IsString()
   evaluate?: string;
 
   @IsOptional()
+  @IsString()
   id?: string;
 }
 

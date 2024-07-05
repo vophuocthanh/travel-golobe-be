@@ -70,34 +70,12 @@ export class HotelService {
     });
   }
 
-  async createHotel(data: CreateHotelDto): Promise<Hotel> {
-    const { userId, ...rest } = data;
-
-    let hotelData: any = { ...rest };
-
-    if (userId) {
-      hotelData = {
-        ...hotelData,
-        users: {
-          connect: { id: userId },
-        },
-      };
-    } else {
-      const defaultUser = await this.prismaServie.user.findFirst();
-      if (defaultUser) {
-        hotelData = {
-          ...hotelData,
-          users: {
-            connect: { id: defaultUser.id },
-          },
-        };
-      } else {
-        throw new Error('No default user found.');
-      }
-    }
-
+  async createHotel(data: CreateHotelDto, userId: string): Promise<Hotel> {
     return this.prismaServie.hotel.create({
-      data: hotelData,
+      data: {
+        ...data,
+        userId,
+      },
     });
   }
 

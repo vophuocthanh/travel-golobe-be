@@ -15,8 +15,8 @@ import {
   UpdateUserDto,
   UserFilterType,
   UserPaginationResponseType,
-} from 'src/user/dto/user.dto';
-import { UserService } from 'src/user/user.service';
+} from 'src/modules/user/dto/user.dto';
+import { UserService } from 'src/modules/user/user.service';
 
 @Controller('user')
 export class UserController {

@@ -5,7 +5,9 @@ import { HotelModule } from 'src/modules/hotel/hotel.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
-import { UserModule } from './user/user.module';
+import { FlightModule } from './modules/flight/flight.module';
+import { TourModule } from './modules/tour/tour.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
@@ -15,6 +17,8 @@ import { UserModule } from './user/user.module';
     AuthModule,
     UserModule,
     HotelModule,
+    TourModule,
+    FlightModule,
   ],
   controllers: [AppController],
   providers: [

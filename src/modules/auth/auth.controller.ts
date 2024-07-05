@@ -1,7 +1,6 @@
 import { Body, Controller, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { Request } from 'express';
-import { HandleAuthGuard } from 'src/modules/auth/auth.guard';
 import { AuthService } from 'src/modules/auth/auth.service';
 import {
   ForgotPasswordDto,
@@ -9,6 +8,7 @@ import {
   RegisterDto,
   ResetPasswordDto,
 } from 'src/modules/auth/dto/auth.dto';
+import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 
 @Controller('auth')
 export class AuthController {

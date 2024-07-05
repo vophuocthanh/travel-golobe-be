@@ -11,7 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Hotel } from '@prisma/client';
-import { HandleAuthGuard } from 'src/modules/auth/auth.guard';
+import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import {
   CreateHotelDto,
   HotelDto,

@@ -4,7 +4,7 @@ import {
   CreateHotelDto,
   HotelDto,
   HotelPaginationResponseType,
-} from 'src/hotel/dto/hotel.dto';
+} from 'src/modules/hotel/dto/hotel.dto';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()

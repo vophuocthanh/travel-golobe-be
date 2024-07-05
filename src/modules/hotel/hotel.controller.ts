@@ -11,24 +11,22 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Hotel } from '@prisma/client';
-import { HandleAuthGuard } from 'src/auth/auth.guard';
+import { HandleAuthGuard } from 'src/modules/auth/auth.guard';
 import {
   CreateHotelDto,
   HotelDto,
   HotelPaginationResponseType,
   RequestWithUser,
-} from 'src/hotel/dto/hotel.dto';
-import { HotelService } from 'src/hotel/hotel.service';
+} from 'src/modules/hotel/dto/hotel.dto';
+import { HotelService } from 'src/modules/hotel/hotel.service';
 
 @Controller('hotel')
 export class HotelController {
   constructor(private hotelService: HotelService) {}
-  @UseGuards(HandleAuthGuard)
   @Get()
   getHotels(@Query() params: HotelDto): Promise<HotelPaginationResponseType> {
     return this.hotelService.getHotels(params);
   }
-  @UseGuards(HandleAuthGuard)
   @Get(':id')
   getHotelById(@Query('id') id: string): Promise<Hotel> {
     return this.hotelService.getHotelById(id);

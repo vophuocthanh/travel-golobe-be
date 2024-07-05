@@ -1,10 +1,10 @@
 import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
-import { HotelModule } from 'src/hotel/hotel.module';
+import { HotelModule } from 'src/modules/hotel/hotel.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './user/user.module';
 
 @Module({

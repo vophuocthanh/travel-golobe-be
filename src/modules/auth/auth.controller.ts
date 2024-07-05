@@ -1,14 +1,14 @@
 import { Body, Controller, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { Request } from 'express';
-import { HandleAuthGuard } from 'src/auth/auth.guard';
-import { AuthService } from 'src/auth/auth.service';
+import { HandleAuthGuard } from 'src/modules/auth/auth.guard';
+import { AuthService } from 'src/modules/auth/auth.service';
 import {
   ForgotPasswordDto,
   LoginDto,
   RegisterDto,
   ResetPasswordDto,
-} from 'src/auth/dto/auth.dto';
+} from 'src/modules/auth/dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {

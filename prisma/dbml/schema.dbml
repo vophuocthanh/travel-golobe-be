@@ -12,7 +12,15 @@ Table users {
   createAt DateTime [default: `now()`, not null]
   updateAt DateTime
   confirmPassword String
+  roleId String
+  role roles
   hotels hotels [not null]
+}
+
+Table roles {
+  id String [pk]
+  name String [unique, not null]
+  users users [not null]
 }
 
 Table hotels {
@@ -39,5 +47,7 @@ Table reviews {
   updateAt DateTime
   userId String [not null]
 }
+
+Ref: users.roleId > roles.id
 
 Ref: hotels.userId > users.id

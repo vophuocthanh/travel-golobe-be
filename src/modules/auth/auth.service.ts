@@ -20,7 +20,7 @@ export class AuthService {
   ) {}
 
   register = async (userData: RegisterDto): Promise<User> => {
-    // step: check email has already used
+    // step 1: check email has already been used
     const user = await this.prismaService.user.findUnique({
       where: {
         email: userData.email,
@@ -42,23 +42,44 @@ export class AuthService {
       );
     }
 
-    // step 3: hash password and store to database
+    // step 3: hash password
     const hashPassword = await hash(userData.password, 10);
+
+    // step 4: get default role
+    const defaultRole = await this.prismaService.role.findUnique({
+      where: { name: 'USER' },
+    });
+
+    if (!defaultRole) {
+      throw new HttpException(
+        { message: 'Default role "user" not found' },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    // step 5: store user in the database with default role
     const res = await this.prismaService.user.create({
       data: {
         ...userData,
         password: hashPassword,
         confirmPassword: hashPassword,
+        role: {
+          connect: { id: defaultRole.id },
+        },
       },
     });
 
     return res;
   };
+
   login = async (data: { email: string; password: string }): Promise<any> => {
-    // step 1: checking user is exist by email
+    // step 1: checking user exists by email
     const user = await this.prismaService.user.findUnique({
       where: {
         email: data.email,
+      },
+      include: {
+        role: true,
       },
     });
 
@@ -70,7 +91,6 @@ export class AuthService {
     }
 
     // step 2: checking password is correct
-
     const verify = await compare(data.password, user.password);
     if (!verify) {
       throw new HttpException(
@@ -79,8 +99,21 @@ export class AuthService {
       );
     }
 
-    // step 3: generate access_token and refresh_token
-    const payload = { id: user.id, name: user.name, email: user.email };
+    // step 3: check if user has a role
+    if (!user.role) {
+      throw new HttpException(
+        { message: 'User role not assigned' },
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    // step 4: generate access_token and refresh_token
+    const payload = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role.name,
+    };
     const access_token = await this.jwtService.signAsync(payload, {
       secret: process.env.ACCESS_TOKEN_KEY,
       expiresIn: '1h',
@@ -94,6 +127,12 @@ export class AuthService {
     return {
       access_token,
       refresh_token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role.name,
+      },
     };
   };
 

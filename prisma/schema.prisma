@@ -21,11 +21,21 @@ model User {
   createAt        DateTime  @default(now())
   updateAt        DateTime? @updatedAt
   confirmPassword String?
+  roleId   String?
+  role     Role?    @relation(fields: [roleId], references: [id])
 
   // reviews         Review[]
   hotels Hotel[] 
 
   @@map("users")
+}
+
+model Role {
+  id    String @id @default(cuid())
+  name  String @unique
+  users User[]
+
+  @@map("roles")
 }
 
 model Hotel {

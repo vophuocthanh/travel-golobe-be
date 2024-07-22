@@ -106,4 +106,27 @@ export class UserService {
       data,
     });
   }
+  async updateUserRole(userId: string, roleId: string): Promise<User> {
+    const role = await this.prismaService.role.findUnique({
+      where: {
+        id: roleId,
+      },
+    });
+
+    if (!role) {
+      throw new HttpException(
+        { message: 'Role not found.' },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return await this.prismaService.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        roleId,
+      },
+    });
+  }
 }

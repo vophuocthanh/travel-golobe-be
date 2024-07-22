@@ -45,4 +45,12 @@ export class UserController {
   update(@Param('id') id: string, @Body() data: UpdateUserDto): Promise<User> {
     return this.userService.update(id, data);
   }
+
+  @Put(':id/role')
+  async updateUserRole(
+    @Param('id') id: string,
+    @Body('roleId') roleId: string,
+  ) {
+    return this.userService.updateUserRole(id, roleId);
+  }
 }

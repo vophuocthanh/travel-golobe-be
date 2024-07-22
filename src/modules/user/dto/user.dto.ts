@@ -33,6 +33,9 @@ export class UpdateUserDto {
   phone: string;
 
   status: number;
+
+  @IsOptional()
+  roleId: string;
 }
 
 export interface UserFilterType {

@@ -6,6 +6,7 @@ import {
   Post,
   Put,
   Query,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
@@ -21,6 +22,14 @@ import { UserService } from 'src/modules/user/user.service';
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
+
+  @UseGuards(HandleAuthGuard)
+  @Get('me')
+  async getCurrentUser(@Request() req): Promise<User> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...user } = req.user;
+    return user;
+  }
 
   @UseGuards(HandleAuthGuard)
   @Post('add')

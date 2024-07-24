@@ -39,7 +39,6 @@ export class HotelController {
     @Req() req: RequestWithUser,
   ) {
     const userId = req.user.id;
-    console.log('userId:', userId);
     return this.hotelService.createHotel(createHotelDto, userId);
   }
 

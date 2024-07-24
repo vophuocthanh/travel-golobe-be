@@ -24,6 +24,8 @@ model User {
   roleId   String?
   role     Role?    @relation(fields: [roleId], references: [id])
 
+  flights  UserOnFlight[]
+
   // reviews         Review[]
   hotels Hotel[] 
 
@@ -72,4 +74,35 @@ model Review {
   // hotels          Hotel     @relation(fields: [hotelId], references: [id])
 
   @@map("reviews")
+}
+
+
+model Flight {
+  id              String    @id @default(cuid())
+  name            String
+  createAt        DateTime  @default(now())
+  updateAt        DateTime? @updatedAt
+  userId          String
+  description     String
+  price           String
+  startDate       String
+  endDate         String
+  perios          String
+  images          String
+
+  users           UserOnFlight[]
+  // hotels          Hotel     @relation(fields: [hotelId], references: [id])
+  // users           User      @relation(fields: [userId], references: [id])
+
+  @@map("flights")
+}
+
+model UserOnFlight {
+  userId          String
+  users           User      @relation(fields: [userId], references: [id])
+  flightId        String
+  flights         Flight    @relation(fields: [flightId], references: [id])
+
+  @@id([userId, flightId])
+  @@map("user_on_flights")
 }

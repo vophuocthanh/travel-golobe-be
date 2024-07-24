@@ -14,6 +14,7 @@ Table users {
   confirmPassword String
   roleId String
   role roles
+  flights user_on_flights [not null]
   hotels hotels [not null]
 }
 
@@ -48,6 +49,36 @@ Table reviews {
   userId String [not null]
 }
 
+Table flights {
+  id String [pk]
+  name String [not null]
+  createAt DateTime [default: `now()`, not null]
+  updateAt DateTime
+  userId String [not null]
+  description String [not null]
+  price String [not null]
+  startDate String [not null]
+  endDate String [not null]
+  perios String [not null]
+  images String [not null]
+  users user_on_flights [not null]
+}
+
+Table user_on_flights {
+  userId String [not null]
+  users users [not null]
+  flightId String [not null]
+  flights flights [not null]
+
+  indexes {
+    (userId, flightId) [pk]
+  }
+}
+
 Ref: users.roleId > roles.id
 
 Ref: hotels.userId > users.id
+
+Ref: user_on_flights.userId > users.id
+
+Ref: user_on_flights.flightId > flights.id

@@ -4,10 +4,10 @@ import { Request } from 'express';
 import { AuthService } from 'src/modules/auth/auth.service';
 import {
   ForgotPasswordDto,
-  LoginDto,
-  RegisterDto,
   ResetPasswordDto,
 } from 'src/modules/auth/dto/auth.dto';
+import { LoginDto } from 'src/modules/auth/dto/login.dto';
+import { RegisterDto } from 'src/modules/auth/dto/register.dto';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 
 @Controller('auth')

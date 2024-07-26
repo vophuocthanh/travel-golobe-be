@@ -16,9 +16,9 @@ import {
   CreateHotelDto,
   HotelDto,
   HotelPaginationResponseType,
-  RequestWithUser,
 } from 'src/modules/hotel/dto/hotel.dto';
 import { HotelService } from 'src/modules/hotel/hotel.service';
+import { RequestWithUser } from 'src/types/users';
 
 @Controller('hotel')
 export class HotelController {

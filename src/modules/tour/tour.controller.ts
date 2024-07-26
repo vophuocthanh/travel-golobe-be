@@ -12,13 +12,13 @@ import {
 } from '@nestjs/common';
 import { Tour } from '@prisma/client';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
-import { RequestWithUser } from 'src/modules/hotel/dto/hotel.dto';
 import { CreateDtoTour } from 'src/modules/tour/dto/create.dto';
 import {
   TourDto,
   TourPaginationResponseType,
 } from 'src/modules/tour/dto/tour.dto';
 import { TourService } from 'src/modules/tour/tour.service';
+import { RequestWithUser } from 'src/types/users';
 
 @Controller('tour')
 export class TourController {

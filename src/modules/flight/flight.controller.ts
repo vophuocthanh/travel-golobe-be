@@ -12,13 +12,13 @@ import {
 } from '@nestjs/common';
 import { Flight } from '@prisma/client';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
+import { CreateFlightDto } from 'src/modules/flight/dto/create.dto';
 import {
-  CreateFlightDto,
   FlightDto,
   FlightPaginationResponseType,
 } from 'src/modules/flight/dto/flight.dto';
 import { FlightService } from 'src/modules/flight/flight.service';
-import { RequestWithUser } from 'src/modules/hotel/dto/hotel.dto';
+import { RequestWithUser } from 'src/types/users';
 
 @Controller('flight')
 export class FlightController {

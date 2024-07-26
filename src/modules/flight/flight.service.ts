@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Flight } from '@prisma/client';
+import { CreateFlightDto } from 'src/modules/flight/dto/create.dto';
 import {
-  CreateFlightDto,
   FlightDto,
   FlightPaginationResponseType,
 } from 'src/modules/flight/dto/flight.dto';

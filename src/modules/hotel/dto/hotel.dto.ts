@@ -60,9 +60,3 @@ export class CreateHotelDto {
 }
 
 export class UpdateHotelDto extends CreateHotelDto {}
-
-export interface RequestWithUser extends Request {
-  user: {
-    id: string;
-  };
-}

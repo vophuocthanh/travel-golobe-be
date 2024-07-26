@@ -15,6 +15,7 @@ Table users {
   roleId String
   role roles
   flights user_on_flights [not null]
+  tours user_on_tours [not null]
   hotels hotels [not null]
 }
 
@@ -64,6 +65,33 @@ Table flights {
   users user_on_flights [not null]
 }
 
+Table tour {
+  id String [pk]
+  name String [not null]
+  description String [not null]
+  userId String [not null]
+  image String [not null]
+  location String [not null]
+  price Float
+  createAt DateTime [default: `now()`, not null]
+  updateAt DateTime
+  remainingCount Int
+  count String
+  cuisine String
+  suitable_subject String
+  vchouer String
+  time_out String
+  ideal_time String
+  image2 String
+  image3 String
+  image4 String
+  transport String
+  hotel String
+  starting_gate String
+  sight_seeing String
+  users user_on_tours [not null]
+}
+
 Table user_on_flights {
   userId String [not null]
   users users [not null]
@@ -75,6 +103,17 @@ Table user_on_flights {
   }
 }
 
+Table user_on_tours {
+  userId String [not null]
+  users users [not null]
+  tourId String [not null]
+  tours tour [not null]
+
+  indexes {
+    (userId, tourId) [pk]
+  }
+}
+
 Ref: users.roleId > roles.id
 
 Ref: hotels.userId > users.id
@@ -82,3 +121,7 @@ Ref: hotels.userId > users.id
 Ref: user_on_flights.userId > users.id
 
 Ref: user_on_flights.flightId > flights.id
+
+Ref: user_on_tours.userId > users.id
+
+Ref: user_on_tours.tourId > tour.id

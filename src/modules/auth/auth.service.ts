@@ -13,7 +13,7 @@ import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class AuthService {
-  static jwtService: any;
+  // static jwtService: any;
   constructor(
     private prismaService: PrismaService,
     private jwtService: JwtService,
@@ -166,7 +166,7 @@ export class AuthService {
       );
     }
 
-    const access_token = this.createToken(user.id);
+    const access_token = await this.createToken(user.id);
 
     await mailService.sendMail({
       to: data.email,

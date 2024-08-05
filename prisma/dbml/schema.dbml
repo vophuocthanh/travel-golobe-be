@@ -89,6 +89,8 @@ Table tour {
   hotel String
   starting_gate String
   sight_seeing String
+  startLocation String
+  endLocation String
   users user_on_tours [not null]
 }
 

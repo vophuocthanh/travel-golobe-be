@@ -85,4 +85,13 @@ export class TourService {
       },
     });
   }
+
+  async findToursByLocation(startLocation: string, endLocation: string) {
+    return this.prismaService.tour.findMany({
+      where: {
+        startLocation,
+        endLocation,
+      },
+    });
+  }
 }

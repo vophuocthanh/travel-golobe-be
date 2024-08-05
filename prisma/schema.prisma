@@ -121,6 +121,8 @@ model Flight {
     hotel String?
     starting_gate String?
     sight_seeing String?
+    startLocation   String?
+    endLocation     String?
 
 
     users  UserOnTour[]

@@ -34,6 +34,14 @@ export class TourController {
     return this.tourService.getTourById(id);
   }
 
+  @Get('search')
+  async searchTours(
+    @Query('start') startLocation: string,
+    @Query('end') endLocation: string,
+  ) {
+    return this.tourService.findToursByLocation(startLocation, endLocation);
+  }
+
   @UseGuards(HandleAuthGuard)
   @Post()
   createTour(

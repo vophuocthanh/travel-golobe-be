@@ -11,22 +11,22 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Tour } from '@prisma/client';
+import { CustomLocation } from '@prisma/client';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
-import { CreateDtoTour } from 'src/modules/tour/dto/create.dto';
+import { CreateLocationDto } from 'src/modules/location/dto/create.location.dto';
 import {
-  TourDto,
-  TourPaginationResponseType,
-} from 'src/modules/tour/dto/tour.dto';
-import { UpdateDtoTour } from 'src/modules/tour/dto/update.dto';
-import { TourService } from 'src/modules/tour/tour.service';
+  LocationDto,
+  LocationPaginationResponseType,
+} from 'src/modules/location/dto/location.dto';
+import { UpdateLocationDto } from 'src/modules/location/dto/update.location.dto';
+import { LocationService } from 'src/modules/location/location.service';
 import { RequestWithUser } from 'src/types/users';
 
 @ApiBearerAuth()
-@ApiTags('tour')
-@Controller('tour')
-export class TourController {
-  constructor(private tourService: TourService) {}
+@ApiTags('location')
+@Controller('location')
+export class LocationController {
+  constructor(private locationService: LocationService) {}
 
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'items_per_page', required: false })
@@ -36,8 +36,10 @@ export class TourController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  getTours(@Query() params: TourDto): Promise<TourPaginationResponseType> {
-    return this.tourService.getTours(params);
+  getLocations(
+    @Query() params: LocationDto,
+  ): Promise<LocationPaginationResponseType> {
+    return this.locationService.getLocations(params);
   }
 
   @Get(':id')
@@ -45,16 +47,8 @@ export class TourController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  getTourById(@Query('id') id: string): Promise<Tour> {
-    return this.tourService.getTourById(id);
-  }
-
-  @Get('search')
-  async searchTours(
-    @Query('start') startLocation: string,
-    @Query('end') endLocation: string,
-  ) {
-    return this.tourService.findToursByLocation(startLocation, endLocation);
+  getLocationById(@Query('id') id: string): Promise<CustomLocation> {
+    return this.locationService.getLocationById(id);
   }
 
   @UseGuards(HandleAuthGuard)
@@ -63,22 +57,24 @@ export class TourController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  createTour(
-    @Body() createTour: CreateDtoTour,
+  createLocation(
+    @Body() createLocation: CreateLocationDto,
     @Req() req: RequestWithUser,
-  ): Promise<Tour> {
+  ): Promise<CustomLocation> {
     const userId = req.user.id;
-    return this.tourService.createTours(createTour, userId);
+    return this.locationService.createLocation(createLocation, userId);
   }
 
-  @UseGuards(HandleAuthGuard)
   @Put(':id')
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  async updateTour(@Param('id') id: string, @Body() updateTour: UpdateDtoTour) {
-    return this.tourService.updateTour(id, updateTour);
+  async updateLocation(
+    @Param('id') id: string,
+    @Body() updateLocation: UpdateLocationDto,
+  ) {
+    return this.locationService.updateLocation(id, updateLocation);
   }
 
   @UseGuards(HandleAuthGuard)
@@ -87,7 +83,7 @@ export class TourController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  async deleteTour(@Param('id') id: string) {
-    return this.tourService.deleteTour(id);
+  async deleteLocation(@Param('id') id: string) {
+    return this.locationService.deleteLocation(id);
   }
 }

@@ -11,13 +11,14 @@ import { PrismaService } from 'src/prisma.service';
 @Injectable()
 export class TourService {
   constructor(private prismaService: PrismaService) {}
+
   async getTours(filters: TourDto): Promise<TourPaginationResponseType> {
     const items_per_page = Number(filters.items_per_page) || 10;
     const page = Number(filters.page) || 1;
     const search = filters.search || '';
     const skip = page > 1 ? (page - 1) * items_per_page : 0;
 
-    const tour = await this.prismaService.tour.findMany({
+    const tours = await this.prismaService.tour.findMany({
       take: items_per_page,
       skip,
       where: {
@@ -33,6 +34,7 @@ export class TourService {
         createAt: 'desc',
       },
     });
+
     const total = await this.prismaService.tour.count({
       where: {
         OR: [
@@ -44,8 +46,9 @@ export class TourService {
         ],
       },
     });
+
     return {
-      data: tour,
+      data: tours,
       total,
       currentPage: page,
       itemsPerPage: items_per_page,
@@ -53,9 +56,9 @@ export class TourService {
   }
 
   async getTourById(id: string) {
-    return this.prismaService.tour.findFirst({
+    return this.prismaService.tour.findUnique({
       where: {
-        id: id,
+        id,
       },
     });
   }
@@ -65,6 +68,11 @@ export class TourService {
       data: {
         ...data,
         userId,
+        price: data.price.toString(),
+        location: {
+          connect: { id: data.location },
+        },
+        images: { set: data.image.split(',') },
       },
     });
   }
@@ -74,7 +82,14 @@ export class TourService {
       where: {
         id,
       },
-      data,
+      data: {
+        ...data,
+        price: data.price.toString(),
+        location: {
+          connect: { id: data.location },
+        },
+        images: { set: data.image.split(',') },
+      },
     });
   }
 

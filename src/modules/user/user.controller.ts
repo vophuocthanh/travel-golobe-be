@@ -9,6 +9,7 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import {
@@ -19,6 +20,8 @@ import {
 } from 'src/modules/user/dto/user.dto';
 import { UserService } from 'src/modules/user/user.service';
 
+@ApiBearerAuth()
+@ApiTags('user')
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}

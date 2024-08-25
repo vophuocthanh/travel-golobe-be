@@ -1,36 +1,60 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateFlightDto {
-  @IsNotEmpty()
+  @IsString()
+  @IsOptional()
+  userId?: string;
+
+  @ApiProperty()
+  @IsString()
   name: string;
 
-  @IsNotEmpty()
+  @ApiProperty()
+  @IsString()
   description: string;
 
-  @IsNotEmpty()
+  @ApiProperty()
+  @IsString()
   images: string;
 
-  @IsNotEmpty()
+  @ApiProperty()
+  @IsString()
   price: string;
 
-  @IsNotEmpty()
+  @ApiProperty()
+  @IsString()
   startDate: string;
 
-  @IsNotEmpty()
+  @ApiProperty()
+  @IsString()
   endDate: string;
 
-  @IsNotEmpty()
+  @ApiProperty()
+  @IsString()
   perios: string;
 
   @IsOptional()
   @IsString()
-  created_at?: string;
+  startLocation?: string;
 
   @IsOptional()
   @IsString()
-  updated_at?: string;
+  endLocation?: string;
+
+  @IsOptional()
+  @IsNumber()
+  remainingCount?: number;
+
+  @IsOptional()
+  @IsNumber()
+  count?: number;
 
   @IsOptional()
   @IsString()
-  id?: string;
+  cuisine?: string;
+
+  @IsOptional()
+  @IsString()
+  sightSeeing?: string;
 }

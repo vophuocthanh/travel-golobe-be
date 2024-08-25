@@ -16,7 +16,12 @@ Table users {
   role roles
   flights user_on_flights [not null]
   tours user_on_tours [not null]
-  hotels hotels [not null]
+  hotels user_on_hotels [not null]
+  hotelReviews hotel_reviews [not null]
+  flightReviews flight_reviews [not null]
+  tourReviews tour_reviews [not null]
+  transactions transactions [not null]
+  location locations [not null]
 }
 
 Table roles {
@@ -28,6 +33,7 @@ Table roles {
 Table hotels {
   id String [pk]
   name String [not null]
+  userId String [not null]
   address String [not null]
   createAt DateTime [default: `now()`, not null]
   updateAt DateTime
@@ -35,27 +41,24 @@ Table hotels {
   price String [not null]
   description String [not null]
   images String [not null]
-  image_two String
-  image_three String
-  image_four String
-  users users [not null]
-  userId String [not null]
-}
-
-Table reviews {
-  id String [pk]
-  message String [not null]
-  createAt DateTime [default: `now()`, not null]
-  updateAt DateTime
-  userId String [not null]
+  image_2 String
+  image_3 String
+  image_4 String
+  image_5 String
+  locationId String [not null]
+  location locations [not null]
+  users user_on_hotels [not null]
+  hotelReviews hotel_reviews [not null]
+  transactions transactions [not null]
+  AmenityToHotel amenity_to_hotel [not null]
 }
 
 Table flights {
   id String [pk]
   name String [not null]
+  userId String [not null]
   createAt DateTime [default: `now()`, not null]
   updateAt DateTime
-  userId String [not null]
   description String [not null]
   price String [not null]
   startDate String [not null]
@@ -63,35 +66,100 @@ Table flights {
   perios String [not null]
   images String [not null]
   users user_on_flights [not null]
+  flightReviews flight_reviews [not null]
+  transactions transactions [not null]
 }
 
-Table tour {
+Table tours {
   id String [pk]
   name String [not null]
-  description String [not null]
   userId String [not null]
-  image String [not null]
-  location String [not null]
-  price Float
+  description String [not null]
+  locationId String [not null]
+  location locations [not null]
+  price String [not null]
   createAt DateTime [default: `now()`, not null]
   updateAt DateTime
   remainingCount Int
-  count String
-  cuisine String
-  suitable_subject String
-  vchouer String
-  time_out String
-  ideal_time String
-  image2 String
-  image3 String
-  image4 String
+  image String [not null]
+  image_2 String
+  image_3 String
+  image_4 String
+  image_5 String
+  images String[] [not null]
   transport String
   hotel String
-  starting_gate String
-  sight_seeing String
   startLocation String
   endLocation String
   users user_on_tours [not null]
+  tourReviews tour_reviews [not null]
+  transactions transactions [not null]
+}
+
+Table hotel_reviews {
+  id String [pk]
+  message String [not null]
+  createAt DateTime [default: `now()`, not null]
+  updateAt DateTime
+  userId String [not null]
+  users users [not null]
+  hotelId String [not null]
+  hotels hotels [not null]
+}
+
+Table flight_reviews {
+  id String [pk]
+  message String [not null]
+  createAt DateTime [default: `now()`, not null]
+  updateAt DateTime
+  userId String [not null]
+  users users [not null]
+  flightId String [not null]
+  flights flights [not null]
+}
+
+Table tour_reviews {
+  id String [pk]
+  message String [not null]
+  createAt DateTime [default: `now()`, not null]
+  updateAt DateTime
+  userId String [not null]
+  users users [not null]
+  tourId String [not null]
+  tours tours [not null]
+}
+
+Table locations {
+  id String [pk]
+  name String [not null]
+  description String [not null]
+  createAt DateTime [default: `now()`, not null]
+  updateAt DateTime
+  hotels hotels [not null]
+  tours tours [not null]
+  userId String [not null]
+  user users
+}
+
+Table transactions {
+  id String [pk]
+  amount Float [not null]
+  date DateTime [default: `now()`, not null]
+  userId String [not null]
+  users users [not null]
+  hotelId String
+  hotels hotels
+  flightId String
+  flights flights
+  tourId String
+  tours tours
+}
+
+Table amenities {
+  id String [pk]
+  name String [not null]
+  description String [not null]
+  AmenityToHotel amenity_to_hotel [not null]
 }
 
 Table user_on_flights {
@@ -109,16 +177,62 @@ Table user_on_tours {
   userId String [not null]
   users users [not null]
   tourId String [not null]
-  tours tour [not null]
+  tours tours [not null]
 
   indexes {
     (userId, tourId) [pk]
   }
 }
 
+Table user_on_hotels {
+  userId String [not null]
+  users users [not null]
+  hotelId String [not null]
+  hotels hotels [not null]
+
+  indexes {
+    (userId, hotelId) [pk]
+  }
+}
+
+Table amenity_to_hotel {
+  amenityId String [not null]
+  hotelId String [not null]
+  amenity amenities [not null]
+  hotel hotels [not null]
+
+  indexes {
+    (amenityId, hotelId) [pk]
+  }
+}
+
 Ref: users.roleId > roles.id
 
-Ref: hotels.userId > users.id
+Ref: hotels.locationId > locations.id
+
+Ref: tours.locationId > locations.id
+
+Ref: hotel_reviews.userId > users.id
+
+Ref: hotel_reviews.hotelId > hotels.id
+
+Ref: flight_reviews.userId > users.id
+
+Ref: flight_reviews.flightId > flights.id
+
+Ref: tour_reviews.userId > users.id
+
+Ref: tour_reviews.tourId > tours.id
+
+Ref: locations.userId > users.id
+
+Ref: transactions.userId > users.id
+
+Ref: transactions.hotelId > hotels.id
+
+Ref: transactions.flightId > flights.id
+
+Ref: transactions.tourId > tours.id
 
 Ref: user_on_flights.userId > users.id
 
@@ -126,4 +240,12 @@ Ref: user_on_flights.flightId > flights.id
 
 Ref: user_on_tours.userId > users.id
 
-Ref: user_on_tours.tourId > tour.id
+Ref: user_on_tours.tourId > tours.id
+
+Ref: user_on_hotels.userId > users.id
+
+Ref: user_on_hotels.hotelId > hotels.id
+
+Ref: amenity_to_hotel.amenityId > amenities.id
+
+Ref: amenity_to_hotel.hotelId > hotels.id

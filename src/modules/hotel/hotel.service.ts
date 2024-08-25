@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Hotel } from '@prisma/client';
+import { CreateHotelDto } from 'src/modules/hotel/dto/create.dto';
 import {
-  CreateHotelDto,
   HotelDto,
   HotelPaginationResponseType,
 } from 'src/modules/hotel/dto/hotel.dto';
+import { UpdateHotelDto } from 'src/modules/hotel/dto/update.dto';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
@@ -79,7 +80,7 @@ export class HotelService {
     });
   }
 
-  async updateHotel(id: string, data: Hotel): Promise<Hotel> {
+  async updateHotel(id: string, data: UpdateHotelDto): Promise<Hotel> {
     return this.prismaServie.hotel.update({
       where: {
         id,

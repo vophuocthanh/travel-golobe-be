@@ -1,5 +1,4 @@
 import { Flight } from '@prisma/client';
-import { CreateFlightDto } from 'src/modules/flight/dto/create.dto';
 
 export interface FlightDto {
   items_per_page?: number;
@@ -13,5 +12,3 @@ export interface FlightPaginationResponseType {
   currentPage: number;
   itemsPerPage: number;
 }
-
-export class UpdateFlightDto extends CreateFlightDto {}

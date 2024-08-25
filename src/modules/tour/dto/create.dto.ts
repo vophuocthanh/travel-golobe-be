@@ -1,19 +1,25 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateDtoTour {
+  @ApiProperty()
   @IsNotEmpty()
   name: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   description: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   image: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsNumber()
   price: number;
 
+  @ApiProperty()
   @IsNotEmpty()
   location: string;
 

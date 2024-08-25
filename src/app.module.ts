@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { FlightModule } from './modules/flight/flight.module';
+import { LocationModule } from './modules/location/location.module';
 import { RoleModule } from './modules/role/role.module';
 import { TourModule } from './modules/tour/tour.module';
 import { UserModule } from './modules/user/user.module';
@@ -21,6 +22,7 @@ import { UserModule } from './modules/user/user.module';
     TourModule,
     FlightModule,
     RoleModule,
+    LocationModule,
   ],
   controllers: [AppController],
   providers: [

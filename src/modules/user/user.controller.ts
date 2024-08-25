@@ -8,7 +8,6 @@ import {
   Put,
   Query,
   Req,
-  Request,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -41,9 +40,9 @@ export class UserController {
 
   @UseGuards(HandleAuthGuard)
   @Get('me')
-  async getCurrentUser(@Request() req): Promise<User> {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...user } = req.user;
+  async getCurrentUser(@Req() req): Promise<User> {
+    const userId = req.user.id;
+    const user = await this.userService.getDetail(userId);
     return user;
   }
 

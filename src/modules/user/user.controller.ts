@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -6,11 +7,17 @@ import {
   Post,
   Put,
   Query,
+  Req,
   Request,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
+import { extname } from 'path';
+import { storageConfig } from 'src/helpers/config';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import {
   CreateUserDto,
@@ -64,5 +71,40 @@ export class UserController {
     @Body('roleId') roleId: string,
   ) {
     return this.userService.updateUserRole(id, roleId);
+  }
+  @Post('upload-avatar')
+  @UseGuards(HandleAuthGuard)
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: storageConfig('avatar'),
+      fileFilter: (req, file, cb) => {
+        const ext = extname(file.originalname);
+        const allowedExtArr = ['.jpg', '.jpeg', '.png', '.webp'];
+        if (!allowedExtArr.includes(ext)) {
+          req.fileValidationError = `Wrong extension type. Accept file ext are: ${allowedExtArr.toString()}`;
+          cb(null, false);
+        } else {
+          const fileSize = parseInt(req.headers['content-length']);
+          if (fileSize > 1024 * 1024 * 5) {
+            req.fileValidationError = 'File size must be less than 5MB';
+            cb(null, false);
+          } else {
+            cb(null, true);
+          }
+        }
+      },
+    }),
+  )
+  uploadAvatar(@Req() req, @UploadedFile() file: Express.Multer.File) {
+    if (req.fileValidationError) {
+      throw new BadRequestException(req.fileValidationError);
+    }
+    if (!file) {
+      throw new BadRequestException('File not found');
+    }
+    return this.userService.updateAvatar(
+      req.user.id,
+      file.destination + '/' + file.filename,
+    );
   }
 }

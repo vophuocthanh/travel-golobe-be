@@ -14,7 +14,13 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { extname } from 'path';
 import { storageConfig } from 'src/helpers/config';
@@ -72,6 +78,7 @@ export class UserController {
   ) {
     return this.userService.updateUserRole(id, roleId);
   }
+
   @Post('upload-avatar')
   @UseGuards(HandleAuthGuard)
   @UseInterceptors(
@@ -95,6 +102,22 @@ export class UserController {
       },
     }),
   )
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        avatar: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   uploadAvatar(@Req() req, @UploadedFile() file: Express.Multer.File) {
     if (req.fileValidationError) {
       throw new BadRequestException(req.fileValidationError);

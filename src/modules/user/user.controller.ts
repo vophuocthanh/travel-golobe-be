@@ -130,7 +130,7 @@ export class UserController {
     }
     return this.userService.updateAvatar(
       req.user.id,
-      file.destination + '/' + file.filename,
+      file.fieldname + '/' + file.filename,
     );
   }
 }

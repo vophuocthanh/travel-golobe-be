@@ -40,7 +40,9 @@ export class UserController {
 
   @UseGuards(HandleAuthGuard)
   @Get('me')
-  async getCurrentUser(@Req() req): Promise<User> {
+  async getCurrentUser(
+    @Req() req,
+  ): Promise<Omit<User, 'password' | 'confirmPassword'>> {
     const userId = req.user.id;
     const user = await this.userService.getDetail(userId);
     return user;
@@ -60,7 +62,9 @@ export class UserController {
 
   @UseGuards(HandleAuthGuard)
   @Get(':id')
-  getDetail(@Param('id') id: string): Promise<User> {
+  getDetail(
+    @Param('id') id: string,
+  ): Promise<Omit<User, 'password' | 'confirmPassword'>> {
     return this.userService.getDetail(id);
   }
 

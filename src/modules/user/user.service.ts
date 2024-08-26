@@ -90,12 +90,15 @@ export class UserService {
     };
   }
 
-  async getDetail(id: string): Promise<User> {
-    return this.prismaService.user.findFirst({
-      where: {
-        id,
-      },
-    });
+  async getDetail(
+    id: string,
+  ): Promise<Omit<User, 'password' | 'confirmPassword'>> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, confirmPassword, ...userWithoutPassword } =
+      await this.prismaService.user.findFirst({
+        where: { id },
+      });
+    return userWithoutPassword;
   }
 
   async update(id: string, data: UpdateUserDto): Promise<User> {

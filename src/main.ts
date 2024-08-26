@@ -13,12 +13,12 @@ async function bootstrap() {
     .setDescription('The Travel-Golobe API description')
     .setVersion('1.0')
     .addTag('auth')
+    .addTag('user')
     .addTag('flight')
     .addTag('hotel')
     .addTag('location')
     .addTag('role')
     .addTag('tour')
-    .addTag('user')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);

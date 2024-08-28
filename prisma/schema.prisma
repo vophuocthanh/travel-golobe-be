@@ -96,7 +96,6 @@ model Tour {
   id          String    @id @default(cuid())
   name        String
   userId     String
-  description String
   locationId  String
   location    CustomLocation @relation(fields: [locationId], references: [id])
   price       String

@@ -75,7 +75,6 @@ Table tours {
   id String [pk]
   name String [not null]
   userId String [not null]
-  description String [not null]
   locationId String [not null]
   location locations [not null]
   price String [not null]

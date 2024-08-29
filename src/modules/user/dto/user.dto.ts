@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import {
   IsEmail,
@@ -26,16 +27,29 @@ export class CreateUserDto {
 }
 
 export class UpdateUserDto {
-  name: string;
+  @ApiProperty()
+  @IsOptional()
+  name?: string;
 
+  @ApiProperty()
+  @IsOptional()
+  address?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  date_of_birth?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  country?: string;
+
+  @ApiProperty()
   @IsOptional()
   @Matches(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/)
-  phone: string;
-
-  status: number;
+  phone?: string;
 
   @IsOptional()
-  roleId: string;
+  roleId?: string;
 }
 
 export interface UserFilterType {

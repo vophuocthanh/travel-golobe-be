@@ -89,11 +89,12 @@ export class HotelService {
     });
   }
 
-  async deleteHotel(id: string): Promise<Hotel> {
-    return this.prismaServie.hotel.delete({
+  async deleteHotel(id: string): Promise<{ message: string }> {
+    await this.prismaServie.hotel.delete({
       where: {
         id,
       },
     });
+    return { message: 'Hotel deleted successfully' };
   }
 }

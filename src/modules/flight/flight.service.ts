@@ -82,11 +82,12 @@ export class FlightService {
     });
   }
 
-  async deleteFlight(id: string): Promise<Flight> {
-    return this.prismaService.flight.delete({
+  async deleteFlight(id: string): Promise<{ message: string }> {
+    await this.prismaService.flight.delete({
       where: {
         id,
       },
     });
+    return { message: 'Flight deleted successfully' };
   }
 }

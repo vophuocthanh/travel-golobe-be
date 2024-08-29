@@ -81,7 +81,7 @@ export class HotelController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  delete(@Param('id') id: string): Promise<Hotel> {
+  delete(@Param('id') id: string): Promise<{ message: string }> {
     return this.hotelService.deleteHotel(id);
   }
 }

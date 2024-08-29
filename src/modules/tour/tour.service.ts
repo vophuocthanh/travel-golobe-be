@@ -93,12 +93,13 @@ export class TourService {
     });
   }
 
-  async deleteTour(id: string): Promise<Tour> {
-    return this.prismaService.tour.delete({
+  async deleteTour(id: string): Promise<{ message: string }> {
+    await this.prismaService.tour.delete({
       where: {
         id,
       },
     });
+    return { message: 'Tour deleted successfully' };
   }
 
   async findToursByLocation(startLocation: string, endLocation: string) {

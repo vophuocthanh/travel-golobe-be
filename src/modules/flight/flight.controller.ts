@@ -80,11 +80,11 @@ export class FlightController {
 
   @UseGuards(HandleAuthGuard)
   @Delete(':id')
-  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 200, description: 'Successfully deleted the flight' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  async deleteFlight(@Param('id') id: string) {
+  async deleteFlight(@Param('id') id: string): Promise<{ message: string }> {
     return this.flightService.deleteFlight(id);
   }
 }

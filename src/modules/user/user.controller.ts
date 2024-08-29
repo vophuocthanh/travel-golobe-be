@@ -68,18 +68,18 @@ export class UserController {
     return this.userService.getDetail(id);
   }
 
-  @UseGuards(HandleAuthGuard)
-  @Put(':id')
-  update(@Param('id') id: string, @Body() data: UpdateUserDto): Promise<User> {
-    return this.userService.update(id, data);
-  }
-
   @Put(':id/role')
   async updateUserRole(
     @Param('id') id: string,
     @Body('roleId') roleId: string,
   ) {
     return this.userService.updateUserRole(id, roleId);
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @Put('me')
+  async updateMe(@Req() req, @Body() data: UpdateUserDto) {
+    return this.userService.updateMeUser(data, req.user.id);
   }
 
   @Post('upload-avatar')

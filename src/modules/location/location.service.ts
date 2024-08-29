@@ -89,11 +89,12 @@ export class LocationService {
     });
   }
 
-  async deleteLocation(id: string) {
-    return this.prismaService.customLocation.delete({
+  async deleteLocation(id: string): Promise<{ message: string }> {
+    await this.prismaService.customLocation.delete({
       where: {
         id,
       },
     });
+    return { message: 'Location deleted successfully' };
   }
 }

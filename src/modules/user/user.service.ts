@@ -101,7 +101,7 @@ export class UserService {
     return userWithoutPassword;
   }
 
-  async update(id: string, data: UpdateUserDto): Promise<User> {
+  async updateMeUser(data: UpdateUserDto, id: string): Promise<User> {
     return await this.prismaService.user.update({
       where: {
         id,
@@ -109,6 +109,7 @@ export class UserService {
       data,
     });
   }
+
   async updateUserRole(userId: string, roleId: string): Promise<User> {
     const role = await this.prismaService.role.findUnique({
       where: {

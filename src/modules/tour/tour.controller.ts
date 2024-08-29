@@ -87,7 +87,7 @@ export class TourController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  async deleteTour(@Param('id') id: string) {
+  async deleteTour(@Param('id') id: string): Promise<{ message: string }> {
     return this.tourService.deleteTour(id);
   }
 }

@@ -83,7 +83,7 @@ export class LocationController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  async deleteLocation(@Param('id') id: string) {
+  async deleteLocation(@Param('id') id: string): Promise<{ message: string }> {
     return this.locationService.deleteLocation(id);
   }
 }

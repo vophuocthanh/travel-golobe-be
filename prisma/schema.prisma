@@ -19,142 +19,143 @@ model User {
   address         String?
   avatar          String?
   name            String
+  date_of_birth   String?
+  country         String?
   createAt        DateTime  @default(now())
   updateAt        DateTime? @updatedAt
   confirmPassword String?
   roleId          String?
   role            Role?     @relation(fields: [roleId], references: [id])
 
-  flights         UserOnFlight[]
-  tours           UserOnTour[]
-  hotels          UserOnHotel[]
-  hotelReviews    HotelReview[]
-  flightReviews   FlightReview[]
-  tourReviews     TourReview[]
-  transactions    Transaction[]
-  location        CustomLocation[]
-  
+  flights       UserOnFlight[]
+  tours         UserOnTour[]
+  hotels        UserOnHotel[]
+  hotelReviews  HotelReview[]
+  flightReviews FlightReview[]
+  tourReviews   TourReview[]
+  transactions  Transaction[]
+  location      CustomLocation[]
 
   @@map("users")
 }
 
 model Role {
-  id    String  @id @default(cuid())
-  name  String  @unique
+  id    String @id @default(cuid())
+  name  String @unique
   users User[]
 
   @@map("roles")
 }
 
 model Hotel {
-  id              String    @id @default(cuid())
-  name            String
-  userId     String
-  address         String
-  createAt        DateTime  @default(now())
-  updateAt        DateTime? @updatedAt
-  evaluate        String?
-  price           String 
-  description     String
-  images          String
-  image_2         String?
-  image_3         String?
-  image_4         String?
-  image_5         String?
-  locationId      String
-  location        CustomLocation @relation(fields: [locationId], references: [id])
+  id          String         @id @default(cuid())
+  name        String
+  userId      String
+  address     String
+  createAt    DateTime       @default(now())
+  updateAt    DateTime?      @updatedAt
+  evaluate    String?
+  price       String
+  description String
+  images      String
+  image_2     String?
+  image_3     String?
+  image_4     String?
+  image_5     String?
+  locationId  String
+  location    CustomLocation @relation(fields: [locationId], references: [id])
 
-  users           UserOnHotel[]
-  hotelReviews    HotelReview[]
-  transactions Transaction[]
+  users          UserOnHotel[]
+  hotelReviews   HotelReview[]
+  transactions   Transaction[]
   AmenityToHotel AmenityToHotel[]
 
   @@map("hotels")
 }
 
 model Flight {
-  id              String    @id @default(cuid())
-  name            String
-  userId          String
-  createAt        DateTime  @default(now())
-  updateAt        DateTime? @updatedAt
-  description     String
-  price           String
-  startDate       String
-  endDate         String
-  perios          String
-  images          String
+  id          String    @id @default(cuid())
+  name        String
+  userId      String
+  createAt    DateTime  @default(now())
+  updateAt    DateTime? @updatedAt
+  description String
+  price       String
+  startDate   String
+  endDate     String
+  perios      String
+  images      String
 
-  users           UserOnFlight[]
-  flightReviews   FlightReview[]
-  transactions Transaction[]
+  users         UserOnFlight[]
+  flightReviews FlightReview[]
+  transactions  Transaction[]
 
   @@map("flights")
 }
 
 model Tour {
-  id          String    @id @default(cuid())
-  name        String
-  userId     String
-  locationId  String
-  location    CustomLocation @relation(fields: [locationId], references: [id])
-  price       String
-  createAt    DateTime  @default(now())
-  updateAt    DateTime? @updatedAt
+  id             String         @id @default(cuid())
+  name           String
+  userId         String
+  locationId     String
+  location       CustomLocation @relation(fields: [locationId], references: [id])
+  price          String
+  createAt       DateTime       @default(now())
+  updateAt       DateTime?      @updatedAt
   remainingCount Int?
-  image       String
-  image_2     String?
-  image_3     String?
-  image_4     String?
-  image_5     String?
-  images      String[]
-  transport   String?
-  hotel       String?
-  startLocation   String?
-  endLocation     String?
+  image          String
+  image_2        String?
+  image_3        String?
+  image_4        String?
+  image_5        String?
+  images         String[]
+  transport      String?
+  hotel          String?
+  startLocation  String?
+  endLocation    String?
 
-  users       UserOnTour[]
-  tourReviews TourReview[]
+  users        UserOnTour[]
+  tourReviews  TourReview[]
   transactions Transaction[]
 
   @@map("tours")
 }
 
 model HotelReview {
-  id          String    @id @default(cuid())
-  message     String
-  createAt    DateTime  @default(now())
-  updateAt    DateTime? @updatedAt
-  userId      String
-  users       User      @relation(fields: [userId], references: [id])
-  hotelId     String
-  hotels      Hotel     @relation(fields: [hotelId], references: [id])
+  id       String    @id @default(cuid())
+  message  String
+  createAt DateTime  @default(now())
+  updateAt DateTime? @updatedAt
+  userId   String
+  users    User      @relation(fields: [userId], references: [id])
+  hotelId  String
+  hotels   Hotel     @relation(fields: [hotelId], references: [id])
 
   @@map("hotel_reviews")
 }
 
 model FlightReview {
-  id          String    @id @default(cuid())
-  message     String
-  createAt    DateTime  @default(now())
-  updateAt    DateTime? @updatedAt
-  userId      String
-  users       User      @relation(fields: [userId], references: [id])
-  flightId    String
-  flights     Flight    @relation(fields: [flightId], references: [id])
+  id       String    @id @default(cuid())
+  message  String
+  createAt DateTime  @default(now())
+  updateAt DateTime? @updatedAt
+  userId   String
+  users    User      @relation(fields: [userId], references: [id])
+  flightId String
+  flights  Flight    @relation(fields: [flightId], references: [id])
 
   @@map("flight_reviews")
 }
 
 model TourReview {
-  id          String    @id @default(cuid())
-  message     String
-  createAt    DateTime  @default(now())
-  updateAt    DateTime? @updatedAt
-  userId      String
-  users       User      @relation(fields: [userId], references: [id])
-  tourId      String
-  tours       Tour      @relation(fields: [tourId], references: [id])
+  id       String    @id @default(cuid())
+  message  String
+  createAt DateTime  @default(now())
+  updateAt DateTime? @updatedAt
+  userId   String
+  users    User      @relation(fields: [userId], references: [id])
+  tourId   String
+  tours    Tour      @relation(fields: [tourId], references: [id])
 
   @@map("tour_reviews")
 }
@@ -173,58 +174,56 @@ model CustomLocation {
   @@map("locations")
 }
 
-
 model Transaction {
-  id          String    @id @default(cuid())
-  amount      Float
-  date        DateTime  @default(now())
-  userId      String
-  users       User      @relation(fields: [userId], references: [id])
-  hotelId     String?
-  hotels      Hotel?    @relation(fields: [hotelId], references: [id])
-  flightId    String?
-  flights     Flight?   @relation(fields: [flightId], references: [id])
-  tourId      String?
-  tours       Tour?     @relation(fields: [tourId], references: [id])
+  id       String   @id @default(cuid())
+  amount   Float
+  date     DateTime @default(now())
+  userId   String
+  users    User     @relation(fields: [userId], references: [id])
+  hotelId  String?
+  hotels   Hotel?   @relation(fields: [hotelId], references: [id])
+  flightId String?
+  flights  Flight?  @relation(fields: [flightId], references: [id])
+  tourId   String?
+  tours    Tour?    @relation(fields: [tourId], references: [id])
 
   @@map("transactions")
 }
 
-
 model Amenity {
-  id          String    @id @default(cuid())
-  name        String
-  description String
+  id             String           @id @default(cuid())
+  name           String
+  description    String
   AmenityToHotel AmenityToHotel[]
 
   @@map("amenities")
 }
 
 model UserOnFlight {
-  userId      String
-  users       User    @relation(fields: [userId], references: [id])
-  flightId    String
-  flights     Flight  @relation(fields: [flightId], references: [id])
+  userId   String
+  users    User   @relation(fields: [userId], references: [id])
+  flightId String
+  flights  Flight @relation(fields: [flightId], references: [id])
 
   @@id([userId, flightId])
   @@map("user_on_flights")
 }
 
 model UserOnTour {
-  userId      String
-  users       User    @relation(fields: [userId], references: [id])
-  tourId      String
-  tours       Tour    @relation(fields: [tourId], references: [id])
+  userId String
+  users  User   @relation(fields: [userId], references: [id])
+  tourId String
+  tours  Tour   @relation(fields: [tourId], references: [id])
 
   @@id([userId, tourId])
   @@map("user_on_tours")
 }
 
 model UserOnHotel {
-  userId      String
-  users       User    @relation(fields: [userId], references: [id])
-  hotelId     String
-  hotels      Hotel   @relation(fields: [hotelId], references: [id])
+  userId  String
+  users   User   @relation(fields: [userId], references: [id])
+  hotelId String
+  hotels  Hotel  @relation(fields: [hotelId], references: [id])
 
   @@id([userId, hotelId])
   @@map("user_on_hotels")

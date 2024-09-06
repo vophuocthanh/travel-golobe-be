@@ -223,4 +223,67 @@ export class AuthService {
       throw new UnauthorizedException('Invalid token');
     }
   }
+
+  async changePassword(
+    user: User,
+    current_password: string,
+    newPassword: string,
+    confirmPassword: string,
+  ): Promise<any> {
+    // Step 1: Lấy mật khẩu hiện tại từ cơ sở dữ liệu
+    const userRecord = await this.prismaService.user.findUnique({
+      where: { id: user.id },
+      select: {
+        password: true,
+      },
+    });
+
+    if (!userRecord || !userRecord.password) {
+      throw new HttpException(
+        { message: 'User password is missing' },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // Step 2: Xác nhận mật khẩu hiện tại (current_password)
+    const isCurrentPasswordCorrect = await compare(
+      current_password,
+      userRecord.password,
+    );
+    if (!isCurrentPasswordCorrect) {
+      throw new HttpException(
+        { message: 'Current password is incorrect' },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // Step 3: Kiểm tra mật khẩu mới có trùng với mật khẩu hiện tại không
+    if (current_password === newPassword) {
+      throw new HttpException(
+        { message: 'New password cannot be the same as the current password' },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // Step 4: Xác nhận mật khẩu mới khớp với confirm password
+    if (newPassword !== confirmPassword) {
+      throw new HttpException(
+        { message: 'New password and confirm password do not match' },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // Step 5: Hash mật khẩu mới và cập nhật trong cơ sở dữ liệu
+    const hashedPassword = await hash(newPassword, 10);
+    await this.prismaService.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        password: hashedPassword,
+      },
+    });
+
+    return { message: 'Password changed successfully' };
+  }
 }

@@ -4,6 +4,7 @@ import { User } from '@prisma/client';
 import { AuthService } from 'src/modules/auth/auth.service';
 import { CurrentUser } from 'src/modules/auth/decorator/current-user.decorator';
 import {
+  ChangePasswordDto,
   ForgotPasswordDto,
   ResetPasswordDto,
 } from 'src/modules/auth/dto/auth.dto';
@@ -47,10 +48,29 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async resetPassword(
-    @CurrentUser() user: User, // This assumes you're using a custom decorator to extract user from request
+    @CurrentUser() user: User,
     @Body() body: ResetPasswordDto,
   ): Promise<any> {
     const { newPassword } = body;
     return this.authService.resetPassword(user, newPassword);
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @Put('change-password')
+  @ApiResponse({ status: 200, description: 'Password changed successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async changePassword(
+    @CurrentUser() user: User,
+    @Body() body: ChangePasswordDto,
+  ): Promise<any> {
+    const { current_password, password, confirm_password } = body;
+    return this.authService.changePassword(
+      user,
+      current_password,
+      password,
+      confirm_password,
+    );
   }
 }

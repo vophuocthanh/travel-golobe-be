@@ -1,8 +1,8 @@
-import { Body, Controller, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Put, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
-import { Request } from 'express';
 import { AuthService } from 'src/modules/auth/auth.service';
+import { CurrentUser } from 'src/modules/auth/decorator/current-user.decorator';
 import {
   ForgotPasswordDto,
   ResetPasswordDto,
@@ -39,13 +39,18 @@ export class AuthController {
   forgotPassword(@Body() body: ForgotPasswordDto): Promise<any> {
     return this.authService.forgotPassword(body);
   }
+
   @UseGuards(HandleAuthGuard)
   @Put('reset-password')
+  @ApiResponse({ status: 200, description: 'Password reset successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async resetPassword(
-    @Req() req: Request,
+    @CurrentUser() user: User, // This assumes you're using a custom decorator to extract user from request
     @Body() body: ResetPasswordDto,
   ): Promise<any> {
-    const user: User = req.user as User;
-    return this.authService.resetPassword(user, body.newPassword);
+    const { newPassword } = body;
+    return this.authService.resetPassword(user, newPassword);
   }
 }

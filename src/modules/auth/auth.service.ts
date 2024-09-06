@@ -13,7 +13,6 @@ import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class AuthService {
-  // static jwtService: any;
   constructor(
     private prismaService: PrismaService,
     private jwtService: JwtService,
@@ -180,15 +179,30 @@ export class AuthService {
     };
   };
   resetPassword = async (data: User, newPassword: string) => {
-    const isSamePassword = await compare(newPassword, data.password);
-    if (isSamePassword) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id: data.id },
+      select: {
+        password: true,
+      },
+    });
+
+    if (!user || !user.password) {
       throw new HttpException(
-        { message: 'New password cannot be the same as old password' },
+        { message: 'User password is missing' },
         HttpStatus.BAD_REQUEST,
       );
     }
+    const isSamePassword = await compare(newPassword, user.password);
+    if (isSamePassword) {
+      throw new HttpException(
+        { message: 'New password cannot be the same as the old password' },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const hashPassword = await hash(newPassword, 10);
-    const res = await this.prismaService.user.update({
+
+    await this.prismaService.user.update({
       where: {
         id: data.id,
       },
@@ -197,7 +211,8 @@ export class AuthService {
         confirmPassword: hashPassword,
       },
     });
-    return res;
+
+    return { message: 'Password reset successfully' };
   };
 
   async validateToken(token: string): Promise<{ userId: string }> {

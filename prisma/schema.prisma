@@ -25,6 +25,9 @@ model User {
   updateAt        DateTime? @updatedAt
   confirmPassword String?
   roleId          String?
+  verificationCode String? 
+  verificationCodeExpiresAt DateTime?
+  isVerified       Boolean  @default(false)
   role            Role?     @relation(fields: [roleId], references: [id])
 
   flights       UserOnFlight[]

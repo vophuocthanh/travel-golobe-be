@@ -30,4 +30,7 @@ export class RegisterDto {
   @IsNotEmpty()
   @MinLength(6)
   confirmPassword: string;
+
+  @IsOptional()
+  verificationCode?: string;
 }

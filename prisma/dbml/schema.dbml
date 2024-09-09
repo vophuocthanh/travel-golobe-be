@@ -16,6 +16,9 @@ Table users {
   updateAt DateTime
   confirmPassword String
   roleId String
+  verificationCode String
+  verificationCodeExpiresAt DateTime
+  isVerified Boolean [not null, default: false]
   role roles
   flights user_on_flights [not null]
   tours user_on_tours [not null]

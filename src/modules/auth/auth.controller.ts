@@ -1,5 +1,10 @@
 import { Body, Controller, Post, Put, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { AuthService } from 'src/modules/auth/auth.service';
 import { CurrentUser } from 'src/modules/auth/decorator/current-user.decorator';
@@ -10,6 +15,7 @@ import {
 } from 'src/modules/auth/dto/auth.dto';
 import { LoginDto } from 'src/modules/auth/dto/login.dto';
 import { RegisterDto } from 'src/modules/auth/dto/register.dto';
+import { VerifyEmailDto } from 'src/modules/auth/dto/verify-code';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 
 @ApiBearerAuth()
@@ -25,6 +31,16 @@ export class AuthController {
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   register(@Body() body: RegisterDto): Promise<User> {
     return this.authService.register(body);
+  }
+  @ApiOperation({ summary: 'Xác thực email' })
+  @ApiResponse({ status: 200, description: 'Xác thực thành công' })
+  @ApiResponse({ status: 400, description: 'Mã xác thực không đúng' })
+  @Post('verify-email')
+  async verifyEmail(@Body() verifyEmailDto: VerifyEmailDto) {
+    return this.authService.verifyEmail(
+      verifyEmailDto.email,
+      verifyEmailDto.verificationCode,
+    );
   }
 
   @Post('login')

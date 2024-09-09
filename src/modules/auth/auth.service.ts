@@ -98,12 +98,11 @@ export class AuthService {
           <div class="verification-code">
             ${verificationCode}
           </div>
-          <p>Mã xác thực này sẽ hết hạn sau 15 phút. Nếu bạn không thực hiện đăng ký, mã xác thực sẽ không còn giá trị.</p>
+          <p>Mã xác thực này sẽ hết hạn sau 5 phút. Nếu bạn không thực hiện đăng ký, mã xác thực sẽ không còn giá trị.</p>
           <p>Nếu bạn không thực hiện đăng ký, vui lòng bỏ qua email này.</p>
         </div>
         <div class="footer">
-          <p>Trân trọng,<br>Công ty Travel Golobe</p>
-          <p>Chúng tôi không gửi email này cho bạn? <a href="http://example.com/unsubscribe">Hủy đăng ký</a></p>
+          <p>Trân trọng,<br>Travel Golobe Team ❤️🐼🐧🚀⚡⚡</p>
         </div>
       </div>
     </body>

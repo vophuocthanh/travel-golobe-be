@@ -25,6 +25,7 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
+  @ApiOperation({ summary: 'Đăng ký tài khoản' })
   @ApiResponse({ status: 200, description: 'Register Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -44,6 +45,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @ApiOperation({ summary: 'Đăng nhập' })
   @ApiResponse({ status: 200, description: 'Login Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -53,12 +55,14 @@ export class AuthController {
   }
 
   @Post('forgot-password')
+  @ApiOperation({ summary: 'Quên mật khẩu' })
   forgotPassword(@Body() body: ForgotPasswordDto): Promise<any> {
     return this.authService.forgotPassword(body);
   }
 
   @UseGuards(HandleAuthGuard)
   @Put('reset-password')
+  @ApiOperation({ summary: 'Đặt lại mật khẩu' })
   @ApiResponse({ status: 200, description: 'Password reset successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -72,6 +76,7 @@ export class AuthController {
   }
 
   @UseGuards(HandleAuthGuard)
+  @ApiOperation({ summary: 'Thay đổi mật khẩu' })
   @Put('change-password')
   @ApiResponse({ status: 200, description: 'Password changed successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })

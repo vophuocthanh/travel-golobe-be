@@ -20,6 +20,7 @@ Table users {
   verificationCodeExpiresAt DateTime
   isVerified Boolean [not null, default: false]
   role roles
+  bookings bookings [not null]
   flights user_on_flights [not null]
   tours user_on_tours [not null]
   hotels user_on_hotels [not null]
@@ -53,6 +54,7 @@ Table hotels {
   image_5 String
   locationId String [not null]
   location locations [not null]
+  bookings bookings [not null]
   users user_on_hotels [not null]
   hotelReviews hotel_reviews [not null]
   transactions transactions [not null]
@@ -71,6 +73,7 @@ Table flights {
   endDate String [not null]
   perios String [not null]
   images String [not null]
+  bookings bookings [not null]
   users user_on_flights [not null]
   flightReviews flight_reviews [not null]
   transactions transactions [not null]
@@ -96,9 +99,23 @@ Table tours {
   hotel String
   startLocation String
   endLocation String
+  bookings bookings [not null]
   users user_on_tours [not null]
   tourReviews tour_reviews [not null]
   transactions transactions [not null]
+}
+
+Table bookings {
+  id String [pk]
+  flightId String
+  hotelId String
+  tourId String
+  userId String [not null]
+  flight flights
+  hotel hotels
+  tour tours
+  user users [not null]
+  createdAt DateTime [default: `now()`, not null]
 }
 
 Table hotel_reviews {
@@ -216,6 +233,14 @@ Ref: users.roleId > roles.id
 Ref: hotels.locationId > locations.id
 
 Ref: tours.locationId > locations.id
+
+Ref: bookings.flightId > flights.id
+
+Ref: bookings.hotelId > hotels.id
+
+Ref: bookings.tourId > tours.id
+
+Ref: bookings.userId > users.id
 
 Ref: hotel_reviews.userId > users.id
 

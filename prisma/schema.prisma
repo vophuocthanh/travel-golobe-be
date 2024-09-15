@@ -30,6 +30,7 @@ model User {
   isVerified       Boolean  @default(false)
   role            Role?     @relation(fields: [roleId], references: [id])
 
+  bookings  Booking[]
   flights       UserOnFlight[]
   tours         UserOnTour[]
   hotels        UserOnHotel[]
@@ -68,6 +69,7 @@ model Hotel {
   locationId  String
   location    CustomLocation @relation(fields: [locationId], references: [id])
 
+bookings  Booking[]
   users          UserOnHotel[]
   hotelReviews   HotelReview[]
   transactions   Transaction[]
@@ -89,6 +91,7 @@ model Flight {
   perios      String
   images      String
 
+  bookings  Booking[]
   users         UserOnFlight[]
   flightReviews FlightReview[]
   transactions  Transaction[]
@@ -117,11 +120,27 @@ model Tour {
   startLocation  String?
   endLocation    String?
 
+bookings  Booking[]
   users        UserOnTour[]
   tourReviews  TourReview[]
   transactions Transaction[]
 
   @@map("tours")
+}
+
+model Booking {
+  id        String   @id @default(uuid())
+  flightId  String?  
+  hotelId   String?  
+  tourId    String?  
+  userId    String
+  flight    Flight?  @relation(fields: [flightId], references: [id])
+  hotel     Hotel?   @relation(fields: [hotelId], references: [id])
+  tour      Tour?    @relation(fields: [tourId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@map("bookings")
 }
 
 model HotelReview {

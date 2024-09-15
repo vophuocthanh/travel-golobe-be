@@ -15,6 +15,7 @@ async function bootstrap() {
     .setDescription('The Travel-Golobe API description')
     .setVersion('1.0')
     .addTag('auth')
+    .addTag('bookings')
     .addTag('user')
     .addTag('flight')
     .addTag('hotel')
@@ -30,7 +31,12 @@ async function bootstrap() {
 
   // Configure port on Frontend access side
   const corsOptions: CorsOptions = {
-    origin: ['http://localhost:5173', 'https://travel-golobe.vercel.app'],
+    origin: [
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'http://localhost:3002',
+      'https://travel-golobe.vercel.app',
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   };

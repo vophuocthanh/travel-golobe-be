@@ -5,6 +5,7 @@ import { HotelModule } from 'src/modules/hotel/hotel.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
+import { BookingsModule } from './modules/bookings/bookings.module';
 import { FlightModule } from './modules/flight/flight.module';
 import { LocationModule } from './modules/location/location.module';
 import { RoleModule } from './modules/role/role.module';
@@ -23,6 +24,7 @@ import { UserModule } from './modules/user/user.module';
     FlightModule,
     RoleModule,
     LocationModule,
+    BookingsModule,
   ],
   controllers: [AppController],
   providers: [

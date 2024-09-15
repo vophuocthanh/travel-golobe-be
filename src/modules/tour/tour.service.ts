@@ -1,5 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { Tour } from '@prisma/client';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Tour, TourReview } from '@prisma/client';
+import { CreateTourReviewDto } from 'src/modules/tour/dto/create-tour-review.dto';
 import { CreateDtoTour } from 'src/modules/tour/dto/create.dto';
 import {
   TourDto,
@@ -109,5 +114,77 @@ export class TourService {
         endLocation,
       },
     });
+  }
+
+  // Review
+
+  async addReviewToTour(
+    tourId: string,
+    data: CreateTourReviewDto,
+    userId: string,
+  ): Promise<TourReview> {
+    return this.prismaService.tourReview.create({
+      data: {
+        content: data.content,
+        rating: data.rating,
+        tours: {
+          connect: { id: tourId },
+        },
+        users: {
+          connect: { id: userId },
+        },
+      },
+    });
+  }
+
+  async getTourReviews(tourId: string): Promise<TourReview[]> {
+    return this.prismaService.tourReview.findMany({
+      where: {
+        tourId,
+      },
+      orderBy: {
+        createAt: 'desc',
+      },
+    });
+  }
+
+  async updateTourReview(
+    reviewId: string,
+    data: CreateTourReviewDto,
+  ): Promise<TourReview> {
+    return this.prismaService.tourReview.update({
+      where: {
+        id: reviewId,
+      },
+      data: {
+        ...data,
+        updateAt: new Date(),
+      },
+    });
+  }
+
+  async deleteTourReview(
+    tourId: string,
+    reviewId: string,
+    userId: string,
+  ): Promise<{ message: string }> {
+    const tour = await this.prismaService.tour.findUnique({
+      where: { id: tourId },
+    });
+
+    if (!tour) {
+      throw new NotFoundException('Tour not found');
+    }
+
+    if (tour.userId !== userId) {
+      throw new ForbiddenException(
+        'You do not have permission to delete this review',
+      );
+    }
+
+    await this.prismaService.tourReview.delete({
+      where: { id: reviewId },
+    });
+    return { message: 'Review deleted successfully' };
   }
 }

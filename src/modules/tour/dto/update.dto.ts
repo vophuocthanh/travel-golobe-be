@@ -100,4 +100,9 @@ export class UpdateDtoTour {
   @IsOptional()
   @IsString()
   sight_seeing?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
+  rating?: number;
 }

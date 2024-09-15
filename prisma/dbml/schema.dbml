@@ -53,6 +53,7 @@ Table hotels {
   image_4 String
   image_5 String
   locationId String [not null]
+  rating Float [default: 1]
   location locations [not null]
   bookings bookings [not null]
   users user_on_hotels [not null]
@@ -73,6 +74,7 @@ Table flights {
   endDate String [not null]
   perios String [not null]
   images String [not null]
+  rating Float [default: 1]
   bookings bookings [not null]
   users user_on_flights [not null]
   flightReviews flight_reviews [not null]
@@ -99,6 +101,7 @@ Table tours {
   hotel String
   startLocation String
   endLocation String
+  rating Float [default: 1]
   bookings bookings [not null]
   users user_on_tours [not null]
   tourReviews tour_reviews [not null]
@@ -120,7 +123,8 @@ Table bookings {
 
 Table hotel_reviews {
   id String [pk]
-  message String [not null]
+  content String [not null]
+  rating Float [default: 1]
   createAt DateTime [default: `now()`, not null]
   updateAt DateTime
   userId String [not null]
@@ -131,7 +135,8 @@ Table hotel_reviews {
 
 Table flight_reviews {
   id String [pk]
-  message String [not null]
+  content String [not null]
+  rating Float [default: 1]
   createAt DateTime [default: `now()`, not null]
   updateAt DateTime
   userId String [not null]
@@ -142,7 +147,8 @@ Table flight_reviews {
 
 Table tour_reviews {
   id String [pk]
-  message String [not null]
+  content String [not null]
+  rating Float [default: 1]
   createAt DateTime [default: `now()`, not null]
   updateAt DateTime
   userId String [not null]

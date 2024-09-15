@@ -18,10 +18,13 @@ async function bootstrap() {
     .addTag('bookings')
     .addTag('user')
     .addTag('flight')
+    .addTag('flight-comment')
     .addTag('hotel')
+    .addTag('hotel-comment')
     .addTag('location')
     .addTag('role')
     .addTag('tour')
+    .addTag('tour-comment')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);

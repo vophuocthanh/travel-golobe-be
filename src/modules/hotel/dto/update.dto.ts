@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdateHotelDto {
   @ApiProperty()
@@ -60,4 +60,9 @@ export class UpdateHotelDto {
   @IsString()
   @IsOptional()
   userId?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
+  rating?: number;
 }

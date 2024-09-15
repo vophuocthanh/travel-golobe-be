@@ -1,5 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { Hotel } from '@prisma/client';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Hotel, HotelReview } from '@prisma/client';
+import { CreateHotelReviewDto } from 'src/modules/hotel/dto/create-hotel-review.dto';
 import { CreateHotelDto } from 'src/modules/hotel/dto/create.dto';
 import {
   HotelDto,
@@ -63,7 +68,7 @@ export class HotelService {
     };
   }
 
-  async getHotelById(id: string) {
+  async getHotelById(id: string): Promise<Hotel> {
     return this.prismaServie.hotel.findFirst({
       where: {
         id: id,
@@ -96,5 +101,77 @@ export class HotelService {
       },
     });
     return { message: 'Hotel deleted successfully' };
+  }
+
+  // Review
+
+  async getHotelReviews(hotelId: string): Promise<HotelReview[]> {
+    return this.prismaServie.hotelReview.findMany({
+      where: {
+        hotelId,
+      },
+      orderBy: {
+        createAt: 'desc',
+      },
+    });
+  }
+
+  async addReviewToHotel(
+    hotelId: string,
+    data: CreateHotelReviewDto,
+    userId: string,
+  ): Promise<HotelReview> {
+    return this.prismaServie.hotelReview.create({
+      data: {
+        content: data.content,
+        rating: data.rating,
+        hotels: {
+          connect: { id: hotelId },
+        },
+        users: {
+          connect: { id: userId },
+        },
+      },
+    });
+  }
+
+  async updateHotelReview(
+    reviewId: string,
+    data: CreateHotelReviewDto,
+  ): Promise<HotelReview> {
+    return this.prismaServie.hotelReview.update({
+      where: {
+        id: reviewId,
+      },
+      data: {
+        ...data,
+        updateAt: new Date(),
+      },
+    });
+  }
+
+  async deleteHotelReview(
+    hotelId: string,
+    reviewId: string,
+    userId: string,
+  ): Promise<{ message: string }> {
+    const hotel = await this.prismaServie.hotel.findUnique({
+      where: { id: hotelId },
+    });
+
+    if (!hotel) {
+      throw new NotFoundException('Hotel not found');
+    }
+
+    if (hotel.userId !== userId) {
+      throw new ForbiddenException('You are not allowed to delete this review');
+    }
+
+    await this.prismaServie.hotelReview.delete({
+      where: {
+        id: reviewId,
+      },
+    });
+    return { message: 'Review deleted successfully' };
   }
 }

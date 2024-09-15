@@ -1,10 +1,16 @@
-import { Injectable } from '@nestjs/common';
-import { Flight } from '@prisma/client';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Flight, FlightReview } from '@prisma/client';
+import { CreateFlightReviewDto } from 'src/modules/flight/dto/create-flight-review.dto';
 import { CreateFlightDto } from 'src/modules/flight/dto/create.dto';
 import {
   FlightDto,
   FlightPaginationResponseType,
 } from 'src/modules/flight/dto/flight.dto';
+import { UpdateFlightReviewDto } from 'src/modules/flight/dto/update-flight-review.dto';
 import { UpdateFlightDto } from 'src/modules/flight/dto/update.dto'; // Import UpdateFlightDto
 import { PrismaService } from 'src/prisma.service';
 
@@ -89,5 +95,72 @@ export class FlightService {
       },
     });
     return { message: 'Flight deleted successfully' };
+  }
+  // Review
+
+  async addReviewToFlight(
+    flightId: string,
+    data: CreateFlightReviewDto,
+    userId: string,
+  ): Promise<FlightReview> {
+    return this.prismaService.flightReview.create({
+      data: {
+        content: data.content,
+        rating: data.rating,
+        flights: {
+          connect: { id: flightId },
+        },
+        users: {
+          connect: { id: userId },
+        },
+      },
+    });
+  }
+
+  async getFlightReviews(flightId: string): Promise<FlightReview[]> {
+    return this.prismaService.flightReview.findMany({
+      where: { flightId },
+      orderBy: { createAt: 'desc' },
+    });
+  }
+
+  async updateFlightReview(
+    reviewId: string,
+    data: UpdateFlightReviewDto,
+  ): Promise<FlightReview> {
+    return this.prismaService.flightReview.update({
+      where: {
+        id: reviewId,
+      },
+      data: {
+        ...data,
+        updateAt: new Date(),
+      },
+    });
+  }
+
+  async deleteFlightReview(
+    flightId: string,
+    reviewId: string,
+    userId: string,
+  ): Promise<{ message: string }> {
+    const flight = await this.prismaService.flight.findUnique({
+      where: { id: flightId },
+    });
+
+    if (!flight) {
+      throw new NotFoundException('Flight not found');
+    }
+
+    if (flight.userId !== userId) {
+      throw new ForbiddenException(
+        'You do not have permission to delete this review',
+      );
+    }
+
+    await this.prismaService.flightReview.delete({
+      where: { id: reviewId },
+    });
+    return { message: 'Review deleted successfully' };
   }
 }

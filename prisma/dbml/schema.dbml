@@ -65,6 +65,16 @@ Table hotels {
   AmenityToHotel amenity_to_hotel [not null]
 }
 
+Table airlines {
+  id String [pk]
+  name String [unique, not null]
+  logo String [not null]
+  description String
+  createAt DateTime [default: `now()`, not null]
+  updateAt DateTime
+  flights flights [not null]
+}
+
 Table flights {
   id String [pk]
   name String [not null]
@@ -72,12 +82,14 @@ Table flights {
   createAt DateTime [default: `now()`, not null]
   updateAt DateTime
   description String [not null]
-  price String [not null]
+  price Float
   startDate String [not null]
   endDate String [not null]
   perios String [not null]
   images String [not null]
   rating Float [default: 1]
+  airlineId String [not null]
+  airline airlines [not null]
   bookings bookings [not null]
   users user_on_flights [not null]
   flightReviews flight_reviews [not null]
@@ -290,6 +302,8 @@ Table ReplyToParent {
 Ref: users.roleId > roles.id
 
 Ref: hotels.locationId > locations.id
+
+Ref: flights.airlineId > airlines.id
 
 Ref: tours.locationId > locations.id
 

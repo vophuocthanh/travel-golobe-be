@@ -19,8 +19,8 @@ export class CreateFlightDto {
   images: string;
 
   @ApiProperty()
-  @IsString()
-  price: string;
+  @IsNumber()
+  price: number;
 
   @ApiProperty()
   @IsString()
@@ -33,6 +33,10 @@ export class CreateFlightDto {
   @ApiProperty()
   @IsString()
   perios: string;
+
+  @ApiProperty()
+  @IsString()
+  airline: string;
 
   @IsOptional()
   @IsString()

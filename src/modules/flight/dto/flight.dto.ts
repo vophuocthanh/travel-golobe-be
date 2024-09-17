@@ -1,9 +1,12 @@
 import { Flight } from '@prisma/client';
 
-export interface FlightDto {
+export class FlightDto {
+  search?: string;
+  rating?: number;
+  airlineId?: string; // Thay vì airline name
+  price?: [number, number]; // [minPrice, maxPrice]
   items_per_page?: number;
   page?: number;
-  search?: string;
 }
 
 export interface FlightPaginationResponseType {

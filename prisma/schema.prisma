@@ -83,6 +83,18 @@ model Hotel {
   @@map("hotels")
 }
 
+model Airline {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  logo      String
+  description String?
+  createAt  DateTime @default(now())
+  updateAt  DateTime? @updatedAt
+  flights   Flight[]
+
+  @@map("airlines")
+}
+
 model Flight {
   id          String    @id @default(cuid())
   name        String
@@ -90,12 +102,14 @@ model Flight {
   createAt    DateTime  @default(now())
   updateAt    DateTime? @updatedAt
   description String
-  price       String
+  price       Float?
   startDate   String
   endDate     String
   perios      String
   images      String
   rating      Float?   @default(1)
+  airlineId String
+  airline   Airline @relation(fields: [airlineId], references: [id])
 
   bookings  Booking[]
   users         UserOnFlight[]

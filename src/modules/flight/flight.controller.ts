@@ -19,6 +19,11 @@ import {
 } from '@nestjs/swagger';
 import { Flight, FlightReview, ReviewReplyFlight } from '@prisma/client';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
+import {
+  AirlineDto,
+  AirlinePaginationResponseType,
+  AirlineTypeDto,
+} from 'src/modules/flight/dto/airline.dto';
 import { CreateFlightReviewDto } from 'src/modules/flight/dto/create-flight-review.dto';
 import { CreateFlightDto } from 'src/modules/flight/dto/create.dto';
 import {
@@ -53,6 +58,13 @@ export class FlightController {
     @Query() params: FlightDto,
   ): Promise<FlightPaginationResponseType> {
     return this.flightService.getFlights(params);
+  }
+
+  @Get('airlines')
+  async getAllAirlines(
+    @Query() params: AirlineTypeDto,
+  ): Promise<AirlinePaginationResponseType> {
+    return this.flightService.getAirlines(params);
   }
 
   @Get(':id')
@@ -225,6 +237,26 @@ export class FlightController {
       replyId,
       replyFlightDto.content,
       userId,
+    );
+  }
+
+  @Post('airlines')
+  async createAirline(@Body() data: AirlineDto) {
+    return this.flightService.createAirline(data);
+  }
+
+  @Get('filter')
+  async filterFlights(
+    @Query('airline') airline?: string,
+    @Query('minPrice') minPrice?: number,
+    @Query('maxPrice') maxPrice?: number,
+    @Query('minRating') minRating?: number,
+  ) {
+    return this.flightService.filterFlights(
+      airline,
+      minPrice,
+      maxPrice,
+      minRating,
     );
   }
 }

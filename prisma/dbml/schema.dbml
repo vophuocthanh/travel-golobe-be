@@ -29,6 +29,9 @@ Table users {
   tourReviews tour_reviews [not null]
   transactions transactions [not null]
   location locations [not null]
+  reviewReply replies_flight [not null]
+  reviewReplyTour replies_tour [not null]
+  reviewReplyHotel replies_hotel [not null]
 }
 
 Table roles {
@@ -131,6 +134,7 @@ Table hotel_reviews {
   users users [not null]
   hotelId String [not null]
   hotels hotels [not null]
+  reviewReplyHotel replies_hotel [not null]
 }
 
 Table flight_reviews {
@@ -143,6 +147,7 @@ Table flight_reviews {
   users users [not null]
   flightId String [not null]
   flights flights [not null]
+  reviewReply replies_flight [not null]
 }
 
 Table tour_reviews {
@@ -155,6 +160,49 @@ Table tour_reviews {
   users users [not null]
   tourId String [not null]
   tours tours [not null]
+  reviewReplyTour replies_tour [not null]
+}
+
+Table replies_flight {
+  id String [pk]
+  content String [not null]
+  review flight_reviews [not null]
+  reviewId String [not null]
+  user users [not null]
+  userId String [not null]
+  createAt DateTime [default: `now()`, not null]
+  updateAt DateTime [not null]
+  parentReplyId String
+  parentReply replies_flight
+  replies replies_flight [not null]
+}
+
+Table replies_tour {
+  id String [pk]
+  content String [not null]
+  review tour_reviews [not null]
+  reviewId String [not null]
+  user users [not null]
+  userId String [not null]
+  createAt DateTime [default: `now()`, not null]
+  updateAt DateTime [not null]
+  parentReplyId String
+  parentReply replies_tour
+  replies replies_tour [not null]
+}
+
+Table replies_hotel {
+  id String [pk]
+  content String [not null]
+  review hotel_reviews [not null]
+  reviewId String [not null]
+  user users [not null]
+  userId String [not null]
+  createAt DateTime [default: `now()`, not null]
+  updateAt DateTime [not null]
+  parentReplyId String
+  parentReply replies_hotel
+  replies replies_hotel [not null]
 }
 
 Table locations {
@@ -234,6 +282,11 @@ Table amenity_to_hotel {
   }
 }
 
+Table ReplyToParent {
+  repliesId String [ref: > replies_flight.id]
+  repliesId String [ref: > replies_tour.id]
+}
+
 Ref: users.roleId > roles.id
 
 Ref: hotels.locationId > locations.id
@@ -259,6 +312,24 @@ Ref: flight_reviews.flightId > flights.id
 Ref: tour_reviews.userId > users.id
 
 Ref: tour_reviews.tourId > tours.id
+
+Ref: replies_flight.reviewId > flight_reviews.id
+
+Ref: replies_flight.userId > users.id
+
+Ref: replies_flight.parentReplyId - replies_flight.id
+
+Ref: replies_tour.reviewId > tour_reviews.id
+
+Ref: replies_tour.userId > users.id
+
+Ref: replies_tour.parentReplyId - replies_tour.id
+
+Ref: replies_hotel.reviewId > hotel_reviews.id
+
+Ref: replies_hotel.userId > users.id
+
+Ref: replies_hotel.parentReplyId - replies_hotel.id
 
 Ref: locations.userId > users.id
 

@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Tour, TourReview } from '@prisma/client';
+import { ReviewReplyTour, Tour, TourReview } from '@prisma/client';
 import { CreateTourReviewDto } from 'src/modules/tour/dto/create-tour-review.dto';
 import { CreateDtoTour } from 'src/modules/tour/dto/create.dto';
 import {
@@ -186,5 +186,64 @@ export class TourService {
       where: { id: reviewId },
     });
     return { message: 'Review deleted successfully' };
+  }
+
+  // Reply review
+  async getRepliesForReview(reviewId: string): Promise<ReviewReplyTour[]> {
+    return this.prismaService.reviewReplyTour.findMany({
+      where: {
+        reviewId,
+      },
+      orderBy: {
+        createAt: 'desc',
+      },
+    });
+  }
+
+  async addReplyToReview(
+    reviewId: string,
+    content: string,
+    userId: string,
+  ): Promise<ReviewReplyTour> {
+    return this.prismaService.reviewReplyTour.create({
+      data: {
+        content,
+        review: {
+          connect: { id: reviewId },
+        },
+        user: {
+          connect: { id: userId },
+        },
+      },
+    });
+  }
+
+  async addReplyToReply(
+    parentReplyId: string,
+    content: string,
+    userId: string,
+  ): Promise<ReviewReplyTour> {
+    const parentReply = await this.prismaService.reviewReplyFlight.findUnique({
+      where: { id: parentReplyId },
+    });
+
+    if (!parentReply) {
+      throw new NotFoundException('Parent reply not found');
+    }
+
+    return this.prismaService.reviewReplyFlight.create({
+      data: {
+        content,
+        review: {
+          connect: { id: parentReply.reviewId },
+        },
+        parentReply: {
+          connect: { id: parentReplyId },
+        },
+        user: {
+          connect: { id: userId },
+        },
+      },
+    });
   }
 }

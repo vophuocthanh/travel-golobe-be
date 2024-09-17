@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Hotel, HotelReview } from '@prisma/client';
+import { Hotel, HotelReview, ReviewReplyHotel } from '@prisma/client';
 import { CreateHotelReviewDto } from 'src/modules/hotel/dto/create-hotel-review.dto';
 import { CreateHotelDto } from 'src/modules/hotel/dto/create.dto';
 import {
@@ -173,5 +173,65 @@ export class HotelService {
       },
     });
     return { message: 'Review deleted successfully' };
+  }
+
+  // Review reply
+
+  async addReplyToReview(
+    reviewId: string,
+    content: string,
+    userId: string,
+  ): Promise<ReviewReplyHotel> {
+    return this.prismaServie.reviewReplyHotel.create({
+      data: {
+        content,
+        review: {
+          connect: { id: reviewId },
+        },
+        user: {
+          connect: { id: userId },
+        },
+      },
+    });
+  }
+
+  async getRepliesForReview(reviewId: string): Promise<ReviewReplyHotel[]> {
+    return this.prismaServie.reviewReplyHotel.findMany({
+      where: {
+        reviewId,
+      },
+      orderBy: {
+        createAt: 'desc',
+      },
+    });
+  }
+
+  async addReplyToReply(
+    parentReplyId: string,
+    content: string,
+    userId: string,
+  ): Promise<ReviewReplyHotel> {
+    const parentReply = await this.prismaServie.reviewReplyHotel.findUnique({
+      where: { id: parentReplyId },
+    });
+
+    if (!parentReply) {
+      throw new NotFoundException('Parent reply not found');
+    }
+
+    return this.prismaServie.reviewReplyHotel.create({
+      data: {
+        content,
+        review: {
+          connect: { id: parentReply.reviewId },
+        },
+        parentReply: {
+          connect: { id: parentReplyId },
+        },
+        user: {
+          connect: { id: userId },
+        },
+      },
+    });
   }
 }

@@ -10,11 +10,21 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Tour, TourReview } from '@prisma/client';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { ReviewReplyTour, Tour, TourReview } from '@prisma/client';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import { CreateTourReviewDto } from 'src/modules/tour/dto/create-tour-review.dto';
 import { CreateDtoTour } from 'src/modules/tour/dto/create.dto';
+import {
+  ReplyToReplyTourDto,
+  ReplyTourDto,
+} from 'src/modules/tour/dto/reply.dto';
 import {
   TourDto,
   TourPaginationResponseType,
@@ -34,24 +44,29 @@ export class TourController {
   @ApiQuery({ name: 'items_per_page', required: false })
   @ApiQuery({ name: 'search', required: false })
   @Get()
+  @ApiOperation({ summary: 'Lấy tất cả các tour' })
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  getTours(@Query() params: TourDto): Promise<TourPaginationResponseType> {
+  async getTours(
+    @Query() params: TourDto,
+  ): Promise<TourPaginationResponseType> {
     return this.tourService.getTours(params);
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Lấy thông tin tour theo id' })
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  getTourById(@Query('id') id: string): Promise<Tour> {
+  async getTourById(@Query('id') id: string): Promise<Tour> {
     return this.tourService.getTourById(id);
   }
 
   @Get('search')
+  @ApiOperation({ summary: 'Tìm kiếm tour theo địa điểm' })
   async searchTours(
     @Query('start') startLocation: string,
     @Query('end') endLocation: string,
@@ -61,11 +76,12 @@ export class TourController {
 
   @UseGuards(HandleAuthGuard)
   @Post()
+  @ApiOperation({ summary: 'Tạo tour' })
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  createTour(
+  async createTour(
     @Body() createTour: CreateDtoTour,
     @Req() req: RequestWithUser,
   ): Promise<Tour> {
@@ -75,6 +91,7 @@ export class TourController {
 
   @UseGuards(HandleAuthGuard)
   @Put(':id')
+  @ApiOperation({ summary: 'Cập nhật thông tin tour' })
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -85,6 +102,7 @@ export class TourController {
 
   @UseGuards(HandleAuthGuard)
   @Delete(':id')
+  @ApiOperation({ summary: 'Xóa tour' })
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -92,22 +110,27 @@ export class TourController {
   async deleteTour(@Param('id') id: string): Promise<{ message: string }> {
     return this.tourService.deleteTour(id);
   }
+
   // Review
 
   @UseGuards(HandleAuthGuard)
   @Get(':id/reviews')
+  @ApiOperation({ summary: 'Lấy tất cả đánh giá của từng tour' })
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getReviews(@Param('id') itourId: string): Promise<TourReview[]> {
-    return this.tourService.getTourReviews(itourId);
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async getReviews(@Param('id') tourId: string): Promise<TourReview[]> {
+    return this.tourService.getTourReviews(tourId);
   }
 
   @UseGuards(HandleAuthGuard)
   @Post(':id/reviews')
+  @ApiOperation({ summary: 'Thêm đánh giá cho tour' })
   @ApiResponse({ status: 201, description: 'Review added successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async addReview(
     @Param('id') id: string,
     @Body() createTourReview: CreateTourReviewDto,
@@ -119,9 +142,11 @@ export class TourController {
 
   @UseGuards(HandleAuthGuard)
   @Put(':id/reviews/:reviewId')
+  @ApiOperation({ summary: 'Cập nhật đánh giá của tour' })
   @ApiResponse({ status: 200, description: 'Successfully updated review' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async updateReview(
     @Param('reviewId') reviewId: string,
     @Body() updateTourReviewDto: UpdateTourReviewDto,
@@ -131,9 +156,11 @@ export class TourController {
 
   @UseGuards(HandleAuthGuard)
   @Delete(':id/reviews/:reviewId')
+  @ApiOperation({ summary: 'Xóa đánh giá' })
   @ApiResponse({ status: 200, description: 'Successfully deleted review' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async deleteReview(
     @Param('id') id: string,
     @Param('reviewId') reviewId: string,
@@ -141,5 +168,59 @@ export class TourController {
   ): Promise<{ message: string }> {
     const userId = req.user.id;
     return this.tourService.deleteTourReview(id, reviewId, userId);
+  }
+
+  // Review reply
+
+  @UseGuards(HandleAuthGuard)
+  @Post(':id/reviews/:reviewId/replies')
+  @ApiOperation({ summary: 'Trả lời đánh giá' })
+  @ApiResponse({ status: 201, description: 'Reply added successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async addReplyToReview(
+    @Param('reviewId') reviewId: string,
+    @Body() replyTourDto: ReplyTourDto,
+    @Req() req: RequestWithUser,
+  ): Promise<ReviewReplyTour> {
+    const userId = req.user.id;
+    return this.tourService.addReplyToReview(
+      reviewId,
+      replyTourDto.content,
+      userId,
+    );
+  }
+
+  @Get(':id/reviews/:reviewId/replies')
+  @ApiOperation({ summary: 'Lấy tất cả trả lời cho đánh giá' })
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async getRepliesForReview(
+    @Param('reviewId') reviewId: string,
+  ): Promise<ReviewReplyTour[]> {
+    return this.tourService.getRepliesForReview(reviewId);
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @Post(':reviewId/replies/:reviewReplyId')
+  @ApiOperation({ summary: 'Trả lời trả lời của tour' })
+  @ApiResponse({ status: 201, description: 'Reply added successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async addReplyToReply(
+    @Param('reviewReplyId') reviewReplyId: string,
+    @Body() replyToReplyTourDto: ReplyToReplyTourDto,
+    @Req() req: RequestWithUser,
+  ): Promise<ReviewReplyTour> {
+    const userId = req.user.id;
+    return this.tourService.addReplyToReply(
+      reviewReplyId,
+      replyToReplyTourDto.content,
+      userId,
+    );
   }
 }

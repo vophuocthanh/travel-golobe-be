@@ -10,7 +10,13 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Hotel, HotelReview } from '@prisma/client';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import { CreateHotelReviewDto } from 'src/modules/hotel/dto/create-hotel-review.dto';
@@ -19,6 +25,10 @@ import {
   HotelDto,
   HotelPaginationResponseType,
 } from 'src/modules/hotel/dto/hotel.dto';
+import {
+  ReplyHotelDto,
+  ReplyToReplyHotelDto,
+} from 'src/modules/hotel/dto/reply.dto';
 import { UpdateHotelReviewDto } from 'src/modules/hotel/dto/update-hotel-revew.dto';
 import { UpdateHotelDto } from 'src/modules/hotel/dto/update.dto';
 import { HotelService } from 'src/modules/hotel/hotel.service';
@@ -34,25 +44,31 @@ export class HotelController {
   @ApiQuery({ name: 'items_per_page', required: false })
   @ApiQuery({ name: 'search', required: false })
   @Get()
+  @ApiOperation({ summary: 'Lấy tất cả khách sạn' })
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  getHotels(@Query() params: HotelDto): Promise<HotelPaginationResponseType> {
+  async getHotels(
+    @Query() params: HotelDto,
+  ): Promise<HotelPaginationResponseType> {
     return this.hotelService.getHotels(params);
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Lấy thông tin khách sạn theo id' })
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  getHotelById(@Param('id') id: string): Promise<Hotel> {
+  async getHotelById(@Param('id') id: string): Promise<Hotel> {
     return this.hotelService.getHotelById(id);
   }
 
   @UseGuards(HandleAuthGuard)
   @Post()
+  @ApiOperation({ summary: 'Tạo mới khách sạn' })
+  @ApiResponse({ status: 201, description: 'Successfully' })
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -67,11 +83,12 @@ export class HotelController {
 
   @UseGuards(HandleAuthGuard)
   @Put(':id')
+  @ApiOperation({ summary: 'Cập nhật thông tin khách sạn' })
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  update(
+  async update(
     @Param('id') id: string,
     @Body() body: UpdateHotelDto,
   ): Promise<Hotel> {
@@ -80,11 +97,12 @@ export class HotelController {
 
   @UseGuards(HandleAuthGuard)
   @Delete(':id')
+  @ApiOperation({ summary: 'Xóa khách sạn' })
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  delete(@Param('id') id: string): Promise<{ message: string }> {
+  async delete(@Param('id') id: string): Promise<{ message: string }> {
     return this.hotelService.deleteHotel(id);
   }
 
@@ -92,6 +110,7 @@ export class HotelController {
 
   @UseGuards(HandleAuthGuard)
   @Get(':id/reviews')
+  @ApiOperation({ summary: 'Lấy tất cả đánh giá của từng khách sạn' })
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -101,6 +120,7 @@ export class HotelController {
 
   @UseGuards(HandleAuthGuard)
   @Post(':id/reviews')
+  @ApiOperation({ summary: 'Thêm đánh giá cho khách sạn' })
   @ApiResponse({ status: 201, description: 'Review added successfully' })
   async addReview(
     @Param('id') id: string,
@@ -113,10 +133,11 @@ export class HotelController {
 
   @UseGuards(HandleAuthGuard)
   @Put(':id/reviews/:reviewId')
+  @ApiOperation({ summary: 'Cập nhật đánh giá của khách sạn' })
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  updateReview(
+  async updateReview(
     @Param('reviewId') reviewId: string,
     @Body() body: UpdateHotelReviewDto,
   ): Promise<HotelReview> {
@@ -125,6 +146,7 @@ export class HotelController {
 
   @UseGuards(HandleAuthGuard)
   @Delete(':hotelId/review/:reviewId')
+  @ApiOperation({ summary: 'Xóa đánh giá' })
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -135,5 +157,47 @@ export class HotelController {
   ): Promise<{ message: string }> {
     const userId = req.user.id;
     return this.hotelService.deleteHotelReview(hotelId, reviewId, userId);
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @Post(':hotelId/review/:reviewId/replies')
+  @ApiOperation({ summary: 'Trả lời đánh giá' })
+  @ApiResponse({ status: 201, description: 'Reply added successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async addReplyToReview(
+    @Param('reviewId') reviewId: string,
+    @Body() body: ReplyHotelDto,
+    @Req() req: RequestWithUser,
+  ) {
+    const userId = req.user.id;
+    return this.hotelService.addReplyToReview(reviewId, body.content, userId);
+  }
+
+  @Get(':hotelId/review/:reviewId/replies')
+  @ApiOperation({ summary: 'Lấy tất cả trả lời của đánh giá' })
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async getRepliesForReview(@Param('reviewId') reviewId: string) {
+    return this.hotelService.getRepliesForReview(reviewId);
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @Post(':reviewId/replies/:replyId')
+  @ApiOperation({ summary: 'Trả lời cho trả lời của bình luận' })
+  @ApiResponse({ status: 201, description: 'Reply added successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async addReplyToReply(
+    @Param('replyId') replyId: string,
+    @Body() body: ReplyToReplyHotelDto,
+    @Req() req: RequestWithUser,
+  ) {
+    const userId = req.user.id;
+    return this.hotelService.addReplyToReply(replyId, body.content, userId);
   }
 }

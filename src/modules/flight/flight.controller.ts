@@ -73,7 +73,7 @@ export class FlightController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  async getFlightById(@Query('id') id: string): Promise<Flight> {
+  async getFlightById(@Param('id') id: string): Promise<Flight> {
     return this.flightService.getFlightById(id);
   }
 
@@ -125,7 +125,9 @@ export class FlightController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  async getReviews(@Param('id') flightId: string): Promise<FlightReview[]> {
+  async getReviews(
+    @Param('id') flightId: string,
+  ): Promise<{ data: FlightReview[] }> {
     return this.flightService.getFlightReviews(flightId);
   }
 
@@ -214,7 +216,7 @@ export class FlightController {
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async getReplies(
     @Param('reviewId') reviewId: string,
-  ): Promise<ReviewReplyFlight[]> {
+  ): Promise<{ data: ReviewReplyFlight[] }> {
     return this.flightService.getRepliesForReview(reviewId);
   }
 

@@ -17,7 +17,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { Hotel, HotelReview } from '@prisma/client';
+import { Hotel, HotelReview, ReviewReplyHotel } from '@prisma/client';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import { CreateHotelReviewDto } from 'src/modules/hotel/dto/create-hotel-review.dto';
 import { CreateHotelDto } from 'src/modules/hotel/dto/create.dto';
@@ -108,13 +108,12 @@ export class HotelController {
 
   // Review
 
-  @UseGuards(HandleAuthGuard)
   @Get(':id/reviews')
   @ApiOperation({ summary: 'Lấy tất cả đánh giá của từng khách sạn' })
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getReviews(@Param('id') id: string): Promise<HotelReview[]> {
+  async getReviews(@Param('id') id: string): Promise<{ data: HotelReview[] }> {
     return this.hotelService.getHotelReviews(id);
   }
 
@@ -181,7 +180,9 @@ export class HotelController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  async getRepliesForReview(@Param('reviewId') reviewId: string) {
+  async getRepliesForReview(
+    @Param('reviewId') reviewId: string,
+  ): Promise<{ data: ReviewReplyHotel[] }> {
     return this.hotelService.getRepliesForReview(reviewId);
   }
 

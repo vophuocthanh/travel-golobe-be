@@ -38,30 +38,32 @@ export class FlightService {
     const priceRange = filters.price;
     const skip = page > 1 ? (page - 1) * items_per_page : 0;
 
-    const whereConditions: any = {
+    const whereConditions: Prisma.FlightWhereInput = {
       OR: [
         {
           name: {
             contains: search,
+            mode: 'insensitive',
           },
         },
       ],
     };
 
-    if (rating) {
-      whereConditions.rating = rating;
-    }
-
-    if (airline) {
-      whereConditions.airline = {
-        contains: airline,
+    if (rating && rating > 0) {
+      whereConditions.rating = {
+        gte: rating,
       };
     }
 
-    if (priceRange) {
+    if (airline) {
+      whereConditions.airlineId = airline;
+    }
+
+    if (priceRange && priceRange.length === 2) {
+      const [minPrice, maxPrice] = priceRange;
       whereConditions.price = {
-        gte: priceRange[0],
-        lte: priceRange[1],
+        gte: minPrice,
+        lte: maxPrice,
       };
     }
 
@@ -86,7 +88,7 @@ export class FlightService {
     };
   }
 
-  async getFlightById(id: string): Promise<Flight | null> {
+  async getFlightById(id: string): Promise<Flight> {
     return this.prismaService.flight.findFirst({
       where: {
         id,
@@ -146,11 +148,14 @@ export class FlightService {
     });
   }
 
-  async getFlightReviews(flightId: string): Promise<FlightReview[]> {
-    return this.prismaService.flightReview.findMany({
+  async getFlightReviews(flightId: string): Promise<{ data: FlightReview[] }> {
+    const reviews = await this.prismaService.flightReview.findMany({
       where: { flightId },
       orderBy: { createAt: 'desc' },
     });
+    return {
+      data: reviews,
+    };
   }
 
   async updateFlightReview(
@@ -214,11 +219,16 @@ export class FlightService {
   }
 
   // Function to get replies for a specific review
-  async getRepliesForReview(reviewId: string): Promise<ReviewReplyFlight[]> {
-    return this.prismaService.reviewReplyFlight.findMany({
+  async getRepliesForReview(
+    reviewId: string,
+  ): Promise<{ data: ReviewReplyFlight[] }> {
+    const replyReview = await this.prismaService.reviewReplyFlight.findMany({
       where: { reviewId },
       orderBy: { createAt: 'desc' },
     });
+    return {
+      data: replyReview,
+    };
   }
 
   // Function to add reply to a reply
@@ -260,7 +270,6 @@ export class FlightService {
     const search = filters.search || '';
     const skip = (page - 1) * itemsPerPage;
 
-    // Define filter conditions
     const whereConditions: Prisma.AirlineWhereInput = {
       OR: [
         {
@@ -269,7 +278,6 @@ export class FlightService {
             mode: 'insensitive', // Optional: case-insensitive search
           },
         },
-        // Add other fields to search if needed
       ],
     };
 
@@ -310,17 +318,27 @@ export class FlightService {
     maxPrice?: number,
     minRating?: number,
   ): Promise<Flight[]> {
+    const whereConditions: Prisma.FlightWhereInput = {};
+
+    if (airlineId) {
+      whereConditions.airlineId = airlineId;
+    }
+
+    if (minPrice !== undefined && maxPrice !== undefined) {
+      whereConditions.price = {
+        gte: minPrice,
+        lte: maxPrice,
+      };
+    }
+
+    if (minRating !== undefined && minRating > 0) {
+      whereConditions.rating = {
+        gte: minRating,
+      };
+    }
+
     return this.prismaService.flight.findMany({
-      where: {
-        airlineId: airlineId ? { equals: airlineId } : undefined,
-        price: {
-          gte: minPrice,
-          lte: maxPrice,
-        },
-        rating: {
-          gte: minRating,
-        },
-      },
+      where: whereConditions,
     });
   }
 }

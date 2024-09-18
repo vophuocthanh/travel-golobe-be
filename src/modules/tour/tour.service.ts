@@ -137,8 +137,8 @@ export class TourService {
     });
   }
 
-  async getTourReviews(tourId: string): Promise<TourReview[]> {
-    return this.prismaService.tourReview.findMany({
+  async getTourReviews(tourId: string): Promise<{ data: TourReview[] }> {
+    const reviews = await this.prismaService.tourReview.findMany({
       where: {
         tourId,
       },
@@ -146,6 +146,9 @@ export class TourService {
         createAt: 'desc',
       },
     });
+    return {
+      data: reviews,
+    };
   }
 
   async updateTourReview(
@@ -189,8 +192,10 @@ export class TourService {
   }
 
   // Reply review
-  async getRepliesForReview(reviewId: string): Promise<ReviewReplyTour[]> {
-    return this.prismaService.reviewReplyTour.findMany({
+  async getRepliesForReview(
+    reviewId: string,
+  ): Promise<{ data: ReviewReplyTour[] }> {
+    const replyReview = await this.prismaService.reviewReplyTour.findMany({
       where: {
         reviewId,
       },
@@ -198,6 +203,9 @@ export class TourService {
         createAt: 'desc',
       },
     });
+    return {
+      data: replyReview,
+    };
   }
 
   async addReplyToReview(

@@ -120,7 +120,9 @@ export class TourController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  async getReviews(@Param('id') tourId: string): Promise<TourReview[]> {
+  async getReviews(
+    @Param('id') tourId: string,
+  ): Promise<{ data: TourReview[] }> {
     return this.tourService.getTourReviews(tourId);
   }
 
@@ -200,7 +202,7 @@ export class TourController {
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async getRepliesForReview(
     @Param('reviewId') reviewId: string,
-  ): Promise<ReviewReplyTour[]> {
+  ): Promise<{ data: ReviewReplyTour[] }> {
     return this.tourService.getRepliesForReview(reviewId);
   }
 

@@ -105,8 +105,8 @@ export class HotelService {
 
   // Review
 
-  async getHotelReviews(hotelId: string): Promise<HotelReview[]> {
-    return this.prismaServie.hotelReview.findMany({
+  async getHotelReviews(hotelId: string): Promise<{ data: HotelReview[] }> {
+    const reviews = await this.prismaServie.hotelReview.findMany({
       where: {
         hotelId,
       },
@@ -114,6 +114,10 @@ export class HotelService {
         createAt: 'desc',
       },
     });
+
+    return {
+      data: reviews,
+    };
   }
 
   async addReviewToHotel(
@@ -195,8 +199,10 @@ export class HotelService {
     });
   }
 
-  async getRepliesForReview(reviewId: string): Promise<ReviewReplyHotel[]> {
-    return this.prismaServie.reviewReplyHotel.findMany({
+  async getRepliesForReview(
+    reviewId: string,
+  ): Promise<{ data: ReviewReplyHotel[] }> {
+    const replyRview = await this.prismaServie.reviewReplyHotel.findMany({
       where: {
         reviewId,
       },
@@ -204,6 +210,9 @@ export class HotelService {
         createAt: 'desc',
       },
     });
+    return {
+      data: replyRview,
+    };
   }
 
   async addReplyToReply(

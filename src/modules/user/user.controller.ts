@@ -17,6 +17,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiConsumes,
+  ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -40,6 +41,11 @@ export class UserController {
 
   @UseGuards(HandleAuthGuard)
   @Get('me')
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @ApiOperation({ summary: 'Lấy ra thông tin user đang đăng nhập' })
   async getCurrentUser(
     @Req() req,
   ): Promise<Omit<User, 'password' | 'confirmPassword'>> {
@@ -50,18 +56,29 @@ export class UserController {
 
   @UseGuards(HandleAuthGuard)
   @Post('add')
+  @ApiOperation({ summary: 'Api này không được dùng' })
   create(@Body() body: CreateUserDto): Promise<User> {
     return this.userService.create(body);
   }
 
   @UseGuards(HandleAuthGuard)
   @Get()
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @ApiOperation({ summary: 'Lấy ra danh sách user' })
   getAll(@Query() params: UserFilterType): Promise<UserPaginationResponseType> {
     return this.userService.getAll(params);
   }
 
   @UseGuards(HandleAuthGuard)
   @Get(':id')
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @ApiOperation({ summary: 'Lấy ra thông tin chi tiết user' })
   getDetail(
     @Param('id') id: string,
   ): Promise<Omit<User, 'password' | 'confirmPassword'>> {
@@ -69,6 +86,11 @@ export class UserController {
   }
 
   @Put(':id/role')
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @ApiOperation({ summary: 'Cập nhật role cho user' })
   async updateUserRole(
     @Param('id') id: string,
     @Body('roleId') roleId: string,
@@ -78,12 +100,22 @@ export class UserController {
 
   @UseGuards(HandleAuthGuard)
   @Put('me')
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @ApiOperation({ summary: 'Cập nhật thông tin user đang đăng nhập' })
   async updateMe(@Req() req, @Body() data: UpdateUserDto) {
     return this.userService.updateMeUser(data, req.user.id);
   }
 
-  @Post('upload-avatar')
   @UseGuards(HandleAuthGuard)
+  @Post('upload-avatar')
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @ApiOperation({ summary: 'Upload avatar' })
   @UseInterceptors(
     FileInterceptor('avatar', {
       storage: storageConfig('avatar'),

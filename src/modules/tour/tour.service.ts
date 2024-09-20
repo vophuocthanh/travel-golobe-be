@@ -73,7 +73,7 @@ export class TourService {
       data: {
         ...data,
         userId,
-        price: data.price.toString(),
+        price: data.price,
         location: {
           connect: { id: data.location },
         },
@@ -89,7 +89,7 @@ export class TourService {
       },
       data: {
         ...data,
-        price: data.price.toString(),
+        price: data.price,
         location: {
           connect: { id: data.location },
         },

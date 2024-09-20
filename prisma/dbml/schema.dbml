@@ -32,6 +32,7 @@ Table users {
   reviewReply replies_flight [not null]
   reviewReplyTour replies_tour [not null]
   reviewReplyHotel replies_hotel [not null]
+  UserFlightFavorite user_flight_favorites [not null]
 }
 
 Table roles {
@@ -90,19 +91,52 @@ Table flights {
   rating Float [default: 1]
   airlineId String [not null]
   airline airlines [not null]
+  departureLocation String
+  destinationLocation String
+  isFavorite Boolean [default: false]
   bookings bookings [not null]
   users user_on_flights [not null]
   flightReviews flight_reviews [not null]
   transactions transactions [not null]
+  UserFlightFavorite user_flight_favorites [not null]
+}
+
+Table FlightCrawl {
+  id String [pk]
+  flightNumber String [not null]
+  departureTime String [not null]
+  departureDate DateTime [not null]
+  arrivalTime String [not null]
+  departureLocation String [not null]
+  arrivalLocation String [not null]
+  price Decimal [not null]
+  airlineName String [not null]
+  status String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table user_flight_favorites {
+  id String [pk]
+  userId String [not null]
+  flightId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  user users [not null]
+  flight flights [not null]
+
+  indexes {
+    (userId, flightId) [unique]
+  }
 }
 
 Table tours {
   id String [pk]
   name String [not null]
   userId String [not null]
+  description String
   locationId String [not null]
   location locations [not null]
-  price String [not null]
+  price Float
   createAt DateTime [default: `now()`, not null]
   updateAt DateTime
   remainingCount Int
@@ -304,6 +338,10 @@ Ref: users.roleId > roles.id
 Ref: hotels.locationId > locations.id
 
 Ref: flights.airlineId > airlines.id
+
+Ref: user_flight_favorites.userId > users.id
+
+Ref: user_flight_favorites.flightId > flights.id
 
 Ref: tours.locationId > locations.id
 

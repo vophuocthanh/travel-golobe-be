@@ -42,6 +42,7 @@ model User {
   reviewReply ReviewReplyFlight[]
   reviewReplyTour ReviewReplyTour[]
   reviewReplyHotel ReviewReplyHotel[]
+  UserFlightFavorite UserFlightFavorite[]
 
   @@map("users")
 }
@@ -111,21 +112,62 @@ model Flight {
   airlineId String
   airline   Airline @relation(fields: [airlineId], references: [id])
 
+  departureLocation String? 
+  destinationLocation String? 
+  
+  isFavorite   Boolean?  @default(false)
+
   bookings  Booking[]
   users         UserOnFlight[]
   flightReviews FlightReview[]
   transactions  Transaction[]
+  UserFlightFavorite UserFlightFavorite[]
 
   @@map("flights")
 }
+
+model FlightCrawl {
+  id                String   @id @default(uuid()) // Mã định danh duy nhất cho mỗi chuyến bay cào
+  flightNumber      String   // Mã chuyến bay (ví dụ: VN123)
+  departureTime     String   // Thời gian khởi hành
+  departureDate     DateTime // Ngày khởi hành
+  arrivalTime       String   // Thời gian đến nơi
+  departureLocation String   // Nơi khởi hành (sân bay)
+  arrivalLocation   String   // Điểm đến (sân bay)
+  price             Decimal  // Giá vé
+  airlineName       String   // Tên hãng hàng không (ví dụ: Vietnam Airlines)
+  status            String   // Trạng thái chuyến bay (ví dụ: đang hoạt động, hủy chuyến)
+  createdAt         DateTime @default(now()) // Ngày cào dữ liệu
+  updatedAt         DateTime @updatedAt // Ngày cập nhật bản ghi
+
+  @@index([flightNumber])
+}
+
+
+
+model UserFlightFavorite {
+  id        String  @id @default(uuid())
+  userId    String
+  flightId  String
+  createdAt DateTime @default(now())
+  
+  user   User   @relation(fields: [userId], references: [id])
+  flight Flight @relation(fields: [flightId], references: [id])
+  
+  @@unique([userId, flightId])
+
+  @@map("user_flight_favorites") 
+}
+
 
 model Tour {
   id             String         @id @default(cuid())
   name           String
   userId         String
+  description   String?
   locationId     String
   location       CustomLocation @relation(fields: [locationId], references: [id])
-  price          String
+  price          Float?
   createAt       DateTime       @default(now())
   updateAt       DateTime?      @updatedAt
   remainingCount Int?

@@ -8,16 +8,24 @@ import {
   Put,
   Query,
   Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
   ApiOperation,
   ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { Flight, FlightReview, ReviewReplyFlight } from '@prisma/client';
+import { existsSync, mkdirSync } from 'fs';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import {
   AirlineDto,
@@ -38,6 +46,12 @@ import { UpdateFlightReviewDto } from 'src/modules/flight/dto/update-flight-revi
 import { UpdateFlightDto } from 'src/modules/flight/dto/update.dto';
 import { FlightService } from 'src/modules/flight/flight.service';
 import { RequestWithUser } from 'src/types/users';
+
+const uploadDir = './uploads';
+
+if (!existsSync(uploadDir)) {
+  mkdirSync(uploadDir, { recursive: true });
+}
 
 @ApiBearerAuth()
 @ApiTags('flight')
@@ -90,6 +104,41 @@ export class FlightController {
   ): Promise<Flight> {
     const userId = req.user.id;
     return this.flightService.createFlight(createFlightDto, userId);
+  }
+
+  @Post('import-csv')
+  @ApiConsumes('multipart/form-data') // Cho Swagger biết đây là multipart/form-data request
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          cb(null, `${randomName}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
+  async uploadFile(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      return { message: 'No file uploaded' };
+    }
+    await this.flightService.importFlightsFromCSV(file.path);
+    return { message: 'File uploaded and flights imported successfully' };
   }
 
   @UseGuards(HandleAuthGuard)
@@ -260,5 +309,31 @@ export class FlightController {
       maxPrice,
       minRating,
     );
+  }
+
+  // Yeut thich
+  @UseGuards(HandleAuthGuard)
+  @Post(':id/favorite')
+  @ApiOperation({ summary: 'Tym hoặc bỏ tym chuyến bay' })
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async toggleFavorite(
+    @Param('id') flightId: string,
+    @Req() req: RequestWithUser,
+  ): Promise<string> {
+    const userId = req.user.id;
+    return this.flightService.toggleFavorite(flightId, userId);
+  }
+
+  @Get(':id/favorites/count')
+  @ApiOperation({ summary: 'Lấy số lượng tym cho chuyến bay' })
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async countFavorites(@Param('id') flightId: string): Promise<number> {
+    return this.flightService.countFavorites(flightId);
   }
 }

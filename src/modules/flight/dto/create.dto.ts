@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateFlightDto {
   @IsString()
@@ -61,4 +61,16 @@ export class CreateFlightDto {
   @IsOptional()
   @IsString()
   sightSeeing?: string;
+
+  @IsOptional()
+  @IsString()
+  departureLocation?: string;
+
+  @IsOptional()
+  @IsString()
+  destinationLocation?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isFavorite?: boolean;
 }

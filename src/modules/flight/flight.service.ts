@@ -10,6 +10,8 @@ import {
   Prisma,
   ReviewReplyFlight,
 } from '@prisma/client';
+import * as csv from 'csv-parser';
+import * as fs from 'fs';
 import {
   AirlineDto,
   AirlinePaginationResponseType,
@@ -28,6 +30,11 @@ import { PrismaService } from 'src/prisma.service';
 @Injectable()
 export class FlightService {
   constructor(private prismaService: PrismaService) {}
+
+  private formatDate(dateStr: string): string {
+    const [day, month, year] = dateStr.split('-');
+    return `${year}-${month}-${day}`; // Chuyển đổi thành ISO-8601
+  }
 
   async getFlights(filters: FlightDto): Promise<FlightPaginationResponseType> {
     const items_per_page = Number(filters.items_per_page) || 10;
@@ -339,6 +346,86 @@ export class FlightService {
 
     return this.prismaService.flight.findMany({
       where: whereConditions,
+    });
+  }
+
+  async toggleFavorite(flightId: string, userId: string): Promise<string> {
+    // Kiểm tra xem người dùng đã tym chuyến bay này chưa
+    const favorite = await this.prismaService.userFlightFavorite.findUnique({
+      where: {
+        userId_flightId: {
+          userId,
+          flightId,
+        },
+      },
+    });
+
+    if (favorite) {
+      // Nếu đã tym, thì xóa tym (bỏ tym)
+      await this.prismaService.userFlightFavorite.delete({
+        where: {
+          id: favorite.id,
+        },
+      });
+      return 'Bỏ tym chuyến bay thành công';
+    } else {
+      // Nếu chưa tym, thì thêm mới
+      await this.prismaService.userFlightFavorite.create({
+        data: {
+          userId,
+          flightId,
+        },
+      });
+      return 'Tym chuyến bay thành công';
+    }
+  }
+
+  async countFavorites(flightId: string): Promise<number> {
+    return this.prismaService.userFlightFavorite.count({
+      where: {
+        flightId,
+      },
+    });
+  }
+
+  async importFlightsFromCSV(filePath: string): Promise<void> {
+    const flights = [];
+
+    return new Promise((resolve, reject) => {
+      fs.createReadStream(filePath)
+        .pipe(csv())
+        .on('data', (row) => {
+          const flight1 = {
+            brand: row.brand || '',
+            price: parseFloat(row.price || '0'),
+            start_time: row.start_time || '',
+            start_day: new Date(this.formatDate(row.start_day)),
+            end_day: new Date(this.formatDate(row.end_day)),
+            end_time: row.end_time || '',
+            trip_time: row.trip_time || '',
+            take_place: row.take_place || '',
+            destination: row.destination || '',
+            trip_to: row.trip_to || '',
+          };
+
+          flights.push(flight1);
+        })
+        .on('end', async () => {
+          try {
+            // Insert each flight into the Flight table
+            for (const flight1 of flights) {
+              await this.prismaService.flightCrawl.create({
+                data: flight1,
+              });
+            }
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        })
+        .on('error', (error) => {
+          reject(error);
+        });
     });
   }
 }

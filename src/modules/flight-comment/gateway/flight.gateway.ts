@@ -6,16 +6,16 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { CreateFlightReviewDto } from 'src/modules/flight/dto/create-flight-review.dto';
-import { UpdateFlightReviewDto } from 'src/modules/flight/dto/update-flight-review.dto';
-import { FlightService } from 'src/modules/flight/flight.service';
+import { CreateFlightReviewDto } from 'src/modules/flight-comment/dto/create-flight-review.dto';
+import { UpdateFlightReviewDto } from 'src/modules/flight-comment/dto/update-flight-review.dto';
+import { FlightCommentService } from 'src/modules/flight-comment/flight-comment.service';
 
 @WebSocketGateway({ cors: true })
 export class FlightGateway {
   @WebSocketServer()
   server: Server;
 
-  constructor(private readonly flightService: FlightService) {}
+  constructor(private readonly flightService: FlightCommentService) {}
 
   @SubscribeMessage('addReview')
   async handleAddReview(

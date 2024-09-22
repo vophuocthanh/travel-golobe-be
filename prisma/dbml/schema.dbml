@@ -66,6 +66,21 @@ Table hotels {
   AmenityToHotel amenity_to_hotel [not null]
 }
 
+Table hotel-crawl {
+  id String [pk]
+  hotel_names String [not null]
+  location String [not null]
+  price String
+  score_hotels String
+  number_rating String
+  star_number String
+  received_time String [not null]
+  giveback_time String [not null]
+  description String [not null]
+  hotel_link String [not null]
+  place String [not null]
+}
+
 Table airlines {
   id String [pk]
   name String [unique, not null]

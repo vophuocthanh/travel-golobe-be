@@ -8,15 +8,10 @@ import {
   Put,
   Query,
   Req,
-  UploadedFile,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
-  ApiBody,
-  ApiConsumes,
   ApiOperation,
   ApiQuery,
   ApiResponse,
@@ -24,8 +19,6 @@ import {
 } from '@nestjs/swagger';
 import { Flight } from '@prisma/client';
 import { existsSync, mkdirSync } from 'fs';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import { CreateFlightDto } from 'src/modules/flight/dto/create.dto';
 import {
@@ -55,7 +48,6 @@ export class FlightController {
   @Get()
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 200, description: 'Successfully' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async getFlights(
     @Query() params: FlightDto,
@@ -67,7 +59,6 @@ export class FlightController {
   @ApiOperation({ summary: 'Lấy thông tin chuyến bay theo id' })
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async getFlightById(@Param('id') id: string): Promise<Flight> {
     return this.flightService.getFlightById(id);
@@ -86,41 +77,6 @@ export class FlightController {
   ): Promise<Flight> {
     const userId = req.user.id;
     return this.flightService.createFlight(createFlightDto, userId);
-  }
-
-  @Post('import-csv')
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        file: {
-          type: 'string',
-          format: 'binary',
-        },
-      },
-    },
-  })
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, cb) => {
-          const randomName = Array(32)
-            .fill(null)
-            .map(() => Math.round(Math.random() * 16).toString(16))
-            .join('');
-          cb(null, `${randomName}${extname(file.originalname)}`);
-        },
-      }),
-    }),
-  )
-  async uploadFile(@UploadedFile() file: Express.Multer.File) {
-    if (!file) {
-      return { message: 'No file uploaded' };
-    }
-    await this.flightService.importFlightsFromCSV(file.path);
-    return { message: 'File uploaded and flights imported successfully' };
   }
 
   @UseGuards(HandleAuthGuard)

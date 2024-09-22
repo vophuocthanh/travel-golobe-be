@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { Flight, Prisma } from '@prisma/client';
-import * as csv from 'csv-parser';
-import * as fs from 'fs';
 import { CreateFlightDto } from 'src/modules/flight/dto/create.dto';
 import {
   FlightDto,
@@ -156,47 +154,6 @@ export class FlightService {
       where: {
         flightId,
       },
-    });
-  }
-
-  async importFlightsFromCSV(filePath: string): Promise<void> {
-    const flights = [];
-
-    return new Promise((resolve, reject) => {
-      fs.createReadStream(filePath)
-        .pipe(csv())
-        .on('data', (row) => {
-          const flight1 = {
-            brand: row.brand || '',
-            price: parseFloat(row.price || '0'),
-            start_time: row.start_time || '',
-            start_day: new Date(this.formatDate(row.start_day)),
-            end_day: new Date(this.formatDate(row.end_day)),
-            end_time: row.end_time || '',
-            trip_time: row.trip_time || '',
-            take_place: row.take_place || '',
-            destination: row.destination || '',
-            trip_to: row.trip_to || '',
-          };
-
-          flights.push(flight1);
-        })
-        .on('end', async () => {
-          try {
-            // Insert each flight into the Flight table
-            for (const flight1 of flights) {
-              await this.prismaService.flightCrawl.create({
-                data: flight1,
-              });
-            }
-            resolve();
-          } catch (error) {
-            reject(error);
-          }
-        })
-        .on('error', (error) => {
-          reject(error);
-        });
     });
   }
 }

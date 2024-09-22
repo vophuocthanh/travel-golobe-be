@@ -84,6 +84,25 @@ model Hotel {
   @@map("hotels")
 }
 
+
+model HotelCrawl {
+  id         String   @id @default(uuid())
+  hotel_names String
+  location   String
+  price      String?
+  score_hotels String?
+  number_rating String?
+  star_number String?
+  received_time String
+  giveback_time String
+  description String
+  hotel_link String
+  place String
+
+  @@map("hotel-crawl")
+}
+
+
 model Airline {
   id        String   @id @default(uuid())
   name      String   @unique
@@ -143,8 +162,6 @@ model FlightCrawl {
 
   @@map("FlightCrawl")
 }
-
-
 
 
 model UserFlightFavorite {

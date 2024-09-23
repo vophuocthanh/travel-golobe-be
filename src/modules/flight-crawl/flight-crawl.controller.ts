@@ -42,6 +42,24 @@ export class FlightCrawlController {
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'items_per_page', required: false })
   @ApiQuery({ name: 'search', required: false })
+  @ApiQuery({
+    name: 'sort_by_price',
+    required: false,
+    enum: ['asc', 'desc'],
+    description: 'Sort flights by price',
+  })
+  @ApiQuery({
+    name: 'min_price',
+    required: false,
+    type: Number,
+    description: 'Minimum price filter',
+  })
+  @ApiQuery({
+    name: 'max_price',
+    required: false,
+    type: Number,
+    description: 'Maximum price filter',
+  })
   @ApiOperation({ summary: 'Lấy thông tin chuyến bay từ các trang web khác' })
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })

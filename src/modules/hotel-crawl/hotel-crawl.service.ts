@@ -54,7 +54,7 @@ export class HotelCrawlService {
     });
   }
 
-  async getFlightsCrawl(
+  async getHotelCrawl(
     filters: HotelCrawlDto,
   ): Promise<HotelCrawlPaginationResponseType> {
     const items_per_page = Number(filters.items_per_page) || 10;
@@ -62,11 +62,24 @@ export class HotelCrawlService {
     const search = filters.search || '';
     const skip = page > 1 ? (page - 1) * items_per_page : 0;
 
+    const sort_by_price = filters.sort_by_price === 'desc' ? 'desc' : 'asc';
+
+    const min_price = filters.min_price ? filters.min_price.toString() : '0';
+    const max_price = filters.max_price
+      ? filters.max_price.toString()
+      : Number.MAX_SAFE_INTEGER.toString();
+
     const hotelCrawl = await this.prismaService.hotelCrawl.findMany({
       take: items_per_page,
       skip,
       where: {
-        OR: [
+        AND: [
+          {
+            price: {
+              gte: min_price,
+              lte: max_price,
+            },
+          },
           {
             hotel_names: {
               contains: search,
@@ -74,10 +87,20 @@ export class HotelCrawlService {
           },
         ],
       },
+      orderBy: {
+        price: sort_by_price,
+      },
     });
+
     const total = await this.prismaService.hotelCrawl.count({
       where: {
-        OR: [
+        AND: [
+          {
+            price: {
+              gte: min_price,
+              lte: max_price,
+            },
+          },
           {
             hotel_names: {
               contains: search,
@@ -86,6 +109,7 @@ export class HotelCrawlService {
         ],
       },
     });
+
     return {
       data: hotelCrawl,
       total,
@@ -93,7 +117,8 @@ export class HotelCrawlService {
       itemsPerPage: items_per_page,
     };
   }
-  async getFlightCrawlById(id: string): Promise<HotelCrawl> {
+
+  async getHotelCrawlById(id: string): Promise<HotelCrawl> {
     return this.prismaService.hotelCrawl.findFirst({
       where: {
         id,
@@ -101,7 +126,7 @@ export class HotelCrawlService {
     });
   }
 
-  async putFlightCrawl(
+  async putHotelCrawl(
     id: string,
     data: UpdateHotelCrawlDto,
   ): Promise<HotelCrawl> {
@@ -113,7 +138,7 @@ export class HotelCrawlService {
     });
   }
 
-  async deleteFlightCrawl(id: string): Promise<{ message: string }> {
+  async deleteHotelCrawl(id: string): Promise<{ message: string }> {
     await this.prismaService.hotelCrawl.delete({
       where: {
         id,

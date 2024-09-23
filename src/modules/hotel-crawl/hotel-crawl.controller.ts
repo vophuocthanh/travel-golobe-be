@@ -46,10 +46,28 @@ export class HotelCrawlController {
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @ApiQuery({
+    name: 'sort_by_price',
+    required: false,
+    enum: ['asc', 'desc'],
+    description: 'Sort flights by price',
+  })
+  @ApiQuery({
+    name: 'min_price',
+    required: false,
+    type: String,
+    description: 'Minimum price filter',
+  })
+  @ApiQuery({
+    name: 'max_price',
+    required: false,
+    type: String,
+    description: 'Maximum price filter',
+  })
   async crawlFlights(
     @Query() params: HotelCrawlDto,
   ): Promise<HotelCrawlPaginationResponseType> {
-    return this.hotelCrawlService.getFlightsCrawl(params);
+    return this.hotelCrawlService.getHotelCrawl(params);
   }
 
   @Get('crawl/:id')
@@ -58,7 +76,7 @@ export class HotelCrawlController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async getFlightCrawlById(@Param('id') id: string): Promise<HotelCrawl> {
-    return this.hotelCrawlService.getFlightCrawlById(id);
+    return this.hotelCrawlService.getHotelCrawlById(id);
   }
 
   @UseGuards(HandleAuthGuard)
@@ -109,7 +127,7 @@ export class HotelCrawlController {
     @Param('id') id: string,
     @Body() updateHotelCrawlDto: UpdateHotelCrawlDto,
   ) {
-    return this.hotelCrawlService.putFlightCrawl(id, updateHotelCrawlDto);
+    return this.hotelCrawlService.putHotelCrawl(id, updateHotelCrawlDto);
   }
 
   @UseGuards(HandleAuthGuard)
@@ -120,6 +138,6 @@ export class HotelCrawlController {
   @ApiOperation({ summary: 'Xóa thông tin khách sạn' })
   @Delete('crawl/:id')
   async deleteFlightCrawl(id: string): Promise<{ message: string }> {
-    return this.hotelCrawlService.deleteFlightCrawl(id);
+    return this.hotelCrawlService.deleteHotelCrawl(id);
   }
 }

@@ -1,8 +1,11 @@
 import {
+  Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
+  Put,
   Query,
   UploadedFile,
   UseGuards,
@@ -26,6 +29,7 @@ import {
   HotelCrawlDto,
   HotelCrawlPaginationResponseType,
 } from 'src/modules/hotel-crawl/dto/hotel-crawl.dto';
+import { UpdateHotelCrawlDto } from 'src/modules/hotel-crawl/dto/update.dto';
 import { HotelCrawlService } from 'src/modules/hotel-crawl/hotel-crawl.service';
 
 @ApiBearerAuth()
@@ -59,6 +63,7 @@ export class HotelCrawlController {
 
   @UseGuards(HandleAuthGuard)
   @Post('import-csv')
+  @ApiOperation({ summary: 'Import danh sách khách sạn từ file csv' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -91,5 +96,30 @@ export class HotelCrawlController {
     }
     await this.hotelCrawlService.importHotelsFromCSV(file.path);
     return { message: 'File uploaded and hotels imported successfully' };
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @ApiResponse({ status: 200, description: 'Update successfully the hotel' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @ApiOperation({ summary: 'Cập nhật thông tin khách sạn' })
+  @Put('crawl/:id')
+  async updateHotelCrawl(
+    @Param('id') id: string,
+    @Body() updateHotelCrawlDto: UpdateHotelCrawlDto,
+  ) {
+    return this.hotelCrawlService.putFlightCrawl(id, updateHotelCrawlDto);
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @ApiResponse({ status: 200, description: 'Delete successfully the hotel' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @ApiOperation({ summary: 'Xóa thông tin khách sạn' })
+  @Delete('crawl/:id')
+  async deleteFlightCrawl(id: string): Promise<{ message: string }> {
+    return this.hotelCrawlService.deleteFlightCrawl(id);
   }
 }

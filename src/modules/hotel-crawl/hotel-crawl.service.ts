@@ -6,6 +6,7 @@ import {
   HotelCrawlDto,
   HotelCrawlPaginationResponseType,
 } from 'src/modules/hotel-crawl/dto/hotel-crawl.dto';
+import { UpdateHotelCrawlDto } from 'src/modules/hotel-crawl/dto/update.dto';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
@@ -98,5 +99,26 @@ export class HotelCrawlService {
         id,
       },
     });
+  }
+
+  async putFlightCrawl(
+    id: string,
+    data: UpdateHotelCrawlDto,
+  ): Promise<HotelCrawl> {
+    return this.prismaService.hotelCrawl.update({
+      where: {
+        id,
+      },
+      data,
+    });
+  }
+
+  async deleteFlightCrawl(id: string): Promise<{ message: string }> {
+    await this.prismaService.hotelCrawl.delete({
+      where: {
+        id,
+      },
+    });
+    return { message: 'Delete hotel crawl successfully' };
   }
 }

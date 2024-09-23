@@ -6,6 +6,7 @@ import {
   FlightCrawlDto,
   FlightCrawlPaginationResponseType,
 } from 'src/modules/flight-crawl/dto/flight.dto';
+import { UpdateFlightCrawlDto } from 'src/modules/flight-crawl/dto/update.dto';
 
 import { PrismaService } from 'src/prisma.service';
 
@@ -107,5 +108,28 @@ export class FlightCrawlService {
         id,
       },
     });
+  }
+
+  async putFlightCrawl(
+    id: string,
+    flightCrawl: UpdateFlightCrawlDto,
+  ): Promise<FlightCrawl> {
+    return this.prismaService.flightCrawl.update({
+      where: {
+        id,
+      },
+      data: flightCrawl,
+    });
+  }
+
+  async deleteFlightCrawl(id: string): Promise<{ message: string }> {
+    await this.prismaService.flightCrawl.delete({
+      where: {
+        id,
+      },
+    });
+    return {
+      message: 'Successfully deleted the flight',
+    };
   }
 }

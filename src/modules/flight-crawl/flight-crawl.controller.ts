@@ -1,8 +1,11 @@
 import {
+  Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
+  Put,
   Query,
   UploadedFile,
   UseGuards,
@@ -26,6 +29,7 @@ import {
   FlightCrawlDto,
   FlightCrawlPaginationResponseType,
 } from 'src/modules/flight-crawl/dto/flight.dto';
+import { UpdateFlightCrawlDto } from 'src/modules/flight-crawl/dto/update.dto';
 import { FlightCrawlService } from 'src/modules/flight-crawl/flight-crawl.service';
 
 @ApiBearerAuth()
@@ -59,6 +63,7 @@ export class FlightCrawlController {
 
   @UseGuards(HandleAuthGuard)
   @Post('import-csv')
+  @ApiOperation({ summary: 'Import chuyến bay từ file CSV' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -91,5 +96,32 @@ export class FlightCrawlController {
     }
     await this.flightCrawlService.importFlightsFromCSV(file.path);
     return { message: 'File uploaded and flights imported successfully' };
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @Put('crawl/:id')
+  @ApiOperation({ summary: 'Cập nhật thông tin chuyến bay crawl' })
+  async updateFlightCrawl(
+    @Param('id') id: string,
+    @Body() updateFlightDto: UpdateFlightCrawlDto,
+  ) {
+    return this.flightCrawlService.putFlightCrawl(id, updateFlightDto);
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @Delete('crawl/:id')
+  @ApiOperation({ summary: 'Xóa chuyến bay crawl' })
+  @ApiResponse({ status: 200, description: 'Successfully deleted the flight' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async deleteFlightCrawl(
+    @Param('id') id: string,
+  ): Promise<{ message: string }> {
+    return this.flightCrawlService.deleteFlightCrawl(id);
   }
 }

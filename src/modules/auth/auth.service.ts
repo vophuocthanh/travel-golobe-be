@@ -273,7 +273,7 @@ export class AuthService {
     };
     const access_token = await this.jwtService.signAsync(payload, {
       secret: process.env.ACCESS_TOKEN_KEY,
-      expiresIn: '1h',
+      expiresIn: '1d',
     });
 
     const refresh_token = await this.jwtService.signAsync(payload, {

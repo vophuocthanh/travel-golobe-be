@@ -12,36 +12,37 @@ datasource db {
 }
 
 model User {
-  id              String    @id @default(cuid())
-  email           String    @unique
-  password        String
-  phone           String?
-  address         String?
-  avatar          String?
-  name            String
-  date_of_birth   String?
-  country         String?
-  createAt        DateTime  @default(now())
-  updateAt        DateTime? @updatedAt
-  confirmPassword String?
-  roleId          String?
-  verificationCode String? 
+  id                        String    @id @default(cuid())
+  email                     String    @unique
+  password                  String
+  phone                     String?
+  address                   String?
+  avatar                    String?
+  name                      String
+  date_of_birth             String?
+  country                   String?
+  createAt                  DateTime  @default(now())
+  updateAt                  DateTime? @updatedAt
+  confirmPassword           String?
+  roleId                    String?
+  verificationCode          String?
   verificationCodeExpiresAt DateTime?
-  isVerified       Boolean  @default(false)
-  role            Role?     @relation(fields: [roleId], references: [id])
+  isVerified                Boolean   @default(false)
+  role                      Role?     @relation(fields: [roleId], references: [id])
 
-  bookings  Booking[]
-  flights       UserOnFlight[]
-  tours         UserOnTour[]
-  hotels        UserOnHotel[]
-  hotelReviews  HotelReview[]
-  flightReviews FlightReview[]
-  tourReviews   TourReview[]
-  transactions  Transaction[]
-  location      CustomLocation[]
-  reviewReply ReviewReplyFlight[]
-  reviewReplyTour ReviewReplyTour[]
-  reviewReplyHotel ReviewReplyHotel[]
+  flightCrawls       UserOnFlightCrawl[]
+  flightCrawlReviews FlightCrawlReview[]
+  hotelCrawlReviews  HotelCrawlReview[]
+  hotelCrawls        UserOnHotelCrawl[]
+  bookings           Booking[]
+  flights            UserOnFlight[]
+  tours              UserOnTour[]
+  hotels             UserOnHotel[]
+  tourReviews        TourReview[]
+  location           CustomLocation[]
+  reviewReply        ReviewReplyFlight[]
+  reviewReplyTour    ReviewReplyTour[]
+  reviewReplyHotel   ReviewReplyHotel[]
   UserFlightFavorite UserFlightFavorite[]
 
   @@map("users")
@@ -56,12 +57,12 @@ model Role {
 }
 
 model Hotel {
-  id          String         @id @default(cuid())
+  id          String    @id @default(cuid())
   name        String
   userId      String
   address     String
-  createAt    DateTime       @default(now())
-  updateAt    DateTime?      @updatedAt
+  createAt    DateTime  @default(now())
+  updateAt    DateTime? @updatedAt
   evaluate    String?
   price       String
   description String
@@ -71,75 +72,63 @@ model Hotel {
   image_4     String?
   image_5     String?
   locationId  String
-  rating      Float?          @default(1)
+  rating      Float?    @default(1)
 
-  location    CustomLocation @relation(fields: [locationId], references: [id])
+  location CustomLocation @relation(fields: [locationId], references: [id])
 
-  bookings  Booking[]
-  users          UserOnHotel[]
-  hotelReviews   HotelReview[]
-  transactions   Transaction[]
-  AmenityToHotel AmenityToHotel[]
+  bookings Booking[]
+  users    UserOnHotel[]
 
   @@map("hotels")
 }
 
-
 model HotelCrawl {
-  id         String   @id @default(uuid())
-  hotel_names String
-  location   String
-  price      String?
-  score_hotels String?
+  id            String  @id @default(uuid())
+  hotel_names   String
+  location      String
+  price         String?
+  score_hotels  String?
   number_rating String?
-  star_number String?
+  star_number   String?
   received_time String
   giveback_time String
-  description String
-  hotel_link String
-  place String
+  description   String
+  hotel_link    String
+  place         String
+  image         String?
+  image_2       String?
+  image_3       String?
+  image_4       String?
+  image_5       String?
 
-  @@map("hotel-crawl")
-}
+  users             UserOnHotelCrawl[]
+  hotelCrawlReviewa HotelCrawlReview[]
+  bookings          Booking[]
 
-
-model Airline {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  logo      String
-  description String?
-  createAt  DateTime @default(now())
-  updateAt  DateTime? @updatedAt
-  flights   Flight[]
-
-  @@map("airlines")
+  @@map("hotel_crawl")
 }
 
 model Flight {
-  id          String    @id @default(cuid())
-  name        String
-  userId      String
-  createAt    DateTime  @default(now())
-  updateAt    DateTime? @updatedAt
-  description String
-  price       Float?
-  startDate   String
-  endDate     String
-  perios      String
-  images      String
-  rating      Float?   @default(1)
-  airlineId String
-  airline   Airline @relation(fields: [airlineId], references: [id])
+  id                  String    @id @default(cuid())
+  name                String
+  userId              String
+  createAt            DateTime  @default(now())
+  updateAt            DateTime? @updatedAt
+  description         String
+  price               Float?
+  startDate           String
+  endDate             String
+  perios              String
+  images              String
+  rating              Float?    @default(1)
+  airlineId           String
+  departureLocation   String?
+  destinationLocation String?
+  isFavorite          Boolean?  @default(false)
 
-  departureLocation String? 
-  destinationLocation String? 
-  
-  isFavorite   Boolean?  @default(false)
-
-  bookings  Booking[]
-  users         UserOnFlight[]
-  flightReviews FlightReview[]
-  transactions  Transaction[]
+  airline            Airline              @relation(fields: [airlineId], references: [id])
+  bookings           Booking[]
+  users              UserOnFlight[]
   UserFlightFavorite UserFlightFavorite[]
 
   @@map("flights")
@@ -159,31 +148,21 @@ model FlightCrawl {
   trip_to     String
   createAt    DateTime @default(now())
   updateAt    DateTime @updatedAt
+  userId      String?
+  image       String?
 
-  @@map("FlightCrawl")
+  users         UserOnFlightCrawl[]
+  flightReviews FlightCrawlReview[]
+  bookings      Booking[]
+
+  @@map("flight_crawl")
 }
-
-
-model UserFlightFavorite {
-  id        String  @id @default(uuid())
-  userId    String
-  flightId  String
-  createdAt DateTime @default(now())
-  
-  user   User   @relation(fields: [userId], references: [id])
-  flight Flight @relation(fields: [flightId], references: [id])
-  
-  @@unique([userId, flightId])
-
-  @@map("user_flight_favorites") 
-}
-
 
 model Tour {
   id             String         @id @default(cuid())
   name           String
   userId         String
-  description   String?
+  description    String?
   locationId     String
   location       CustomLocation @relation(fields: [locationId], references: [id])
   price          Float?
@@ -200,130 +179,176 @@ model Tour {
   hotel          String?
   startLocation  String?
   endLocation    String?
-  rating         Float?        @default(1)
+  rating         Float?         @default(1)
 
-
-  bookings  Booking[]
-  users        UserOnTour[]
-  tourReviews  TourReview[]
-  transactions Transaction[]
+  bookings    Booking[]
+  users       UserOnTour[]
+  tourReviews TourReview[]
 
   @@map("tours")
 }
 
-model Booking {
+// Road vehicles (phương tiện đường bộ)
+
+model RoadVehicle {
+  id             String   @id @default(cuid())
+  brand          String // Hãng xe
+  price          Float // Giá vé hoặc chi phí di chuyển
+  number_of_seat String // Số ghế
+  start_time     String // Thời gian khởi hành
+  start_day      DateTime // Ngày khởi hành
+  end_day        DateTime // Ngày kết thúc
+  end_time       String // Thời gian kết thúc
+  trip_time      String // Thời gian hành trình
+  take_place     String // Điểm xuất phát
+  destination    String // Điểm đến
+  location       String
+
+  @@map("road_vehicles")
+}
+
+model Airline {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  logo        String
+  description String?
+  createAt    DateTime  @default(now())
+  updateAt    DateTime? @updatedAt
+  flights     Flight[]
+
+  @@map("airlines")
+}
+
+model UserFlightFavorite {
   id        String   @id @default(uuid())
-  flightId  String?  
-  hotelId   String?  
-  tourId    String?  
   userId    String
-  flight    Flight?  @relation(fields: [flightId], references: [id])
-  hotel     Hotel?   @relation(fields: [hotelId], references: [id])
-  tour      Tour?    @relation(fields: [tourId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
+  flightId  String
   createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id])
+  flight Flight @relation(fields: [flightId], references: [id])
+
+  @@unique([userId, flightId])
+  @@map("user_flight_favorites")
+}
+
+//  Booking in system
+
+model Booking {
+  id       String  @id @default(uuid())
+  flightId String?
+  hotelId  String?
+
+  tourId        String?
+  userId        String
+  flightCrawlId String?
+  flightCrawls  FlightCrawl? @relation(fields: [flightCrawlId], references: [id])
+  hotelCrawlId  String?
+  hotelCrawls   HotelCrawl?  @relation(fields: [hotelCrawlId], references: [id])
+  flight        Flight?      @relation(fields: [flightId], references: [id])
+  hotel         Hotel?       @relation(fields: [hotelId], references: [id])
+  tour          Tour?        @relation(fields: [tourId], references: [id])
+  user          User         @relation(fields: [userId], references: [id])
+  createdAt     DateTime     @default(now())
 
   @@map("bookings")
 }
 
-model HotelReview {
-  id       String    @id @default(cuid())
-  content  String
-  rating   Float?      @default(1)
-  createAt DateTime  @default(now())
-  updateAt DateTime? @updatedAt
-  userId   String
-  users    User      @relation(fields: [userId], references: [id])
-  hotelId  String
-  hotels   Hotel     @relation(fields: [hotelId], references: [id])
-  reviewReplyHotel ReviewReplyHotel[]
-
-  @@map("hotel_reviews")
-}
-
-model FlightReview {
-  id       String    @id @default(cuid())
-  content  String
-  rating   Float?      @default(1)
-  createAt DateTime  @default(now())
-  updateAt DateTime? @updatedAt
-  userId   String
-  users    User      @relation(fields: [userId], references: [id])
-  flightId String
-  flights  Flight    @relation(fields: [flightId], references: [id])
-
-  reviewReply ReviewReplyFlight[]
-  
-  @@map("flight_reviews")
-}
-
+//  Review
 
 model TourReview {
   id       String    @id @default(cuid())
   content  String
-  rating   Float?      @default(1)
+  rating   Float?    @default(1)
   createAt DateTime  @default(now())
   updateAt DateTime? @updatedAt
   userId   String
   users    User      @relation(fields: [userId], references: [id])
   tourId   String
   tours    Tour      @relation(fields: [tourId], references: [id])
-  
+
   reviewReplyTour ReviewReplyTour[]
 
   @@map("tour_reviews")
 }
 
+model FlightCrawlReview {
+  id                String              @id @default(cuid())
+  content           String
+  rating            Float?              @default(1)
+  createAt          DateTime            @default(now())
+  updateAt          DateTime?           @updatedAt
+  userId            String
+  users             User                @relation(fields: [userId], references: [id])
+  flightCrawlId     String
+  flightCrawls      FlightCrawl         @relation(fields: [flightCrawlId], references: [id])
+  ReviewReplyFlight ReviewReplyFlight[]
+
+  @@map("flight_crawl_reviews")
+}
+
+model HotelCrawlReview {
+  id               String             @id @default(cuid())
+  content          String
+  rating           Float?             @default(1)
+  createAt         DateTime           @default(now())
+  updateAt         DateTime?          @updatedAt
+  userId           String
+  users            User               @relation(fields: [userId], references: [id])
+  hotelCrawlId     String
+  hotelCrawls      HotelCrawl         @relation(fields: [hotelCrawlId], references: [id])
+  ReviewReplyHotel ReviewReplyHotel[]
+
+  @@map("hotel_crawl_reviews")
+}
+
 model ReviewReplyFlight {
-  id        String          @id @default(cuid())
-  content   String
-  review    FlightReview    @relation(fields: [reviewId], references: [id])
-  reviewId  String
-  user      User            @relation(fields: [userId], references: [id])
-  userId    String
-  createAt  DateTime        @default(now())
-  updateAt  DateTime        @updatedAt
-  parentReplyId String?     
-  parentReply   ReviewReplyFlight? @relation("ReplyToParent", fields: [parentReplyId], references: [id])
-  replies   ReviewReplyFlight[]   @relation("ReplyToParent")
+  id            String              @id @default(cuid())
+  content       String
+  review        FlightCrawlReview   @relation(fields: [reviewId], references: [id])
+  reviewId      String
+  user          User                @relation(fields: [userId], references: [id])
+  userId        String
+  createAt      DateTime            @default(now())
+  updateAt      DateTime            @updatedAt
+  parentReplyId String?
+  parentReply   ReviewReplyFlight?  @relation("ReplyToParent", fields: [parentReplyId], references: [id])
+  replies       ReviewReplyFlight[] @relation("ReplyToParent")
 
   @@map("replies_flight")
 }
 
-
-model ReviewReplyTour {
-  id        String          @id @default(cuid())
-  content   String
-  review    TourReview    @relation(fields: [reviewId], references: [id])
-  reviewId  String
-  user      User            @relation(fields: [userId], references: [id])
-  userId    String
-  createAt  DateTime        @default(now())
-  updateAt  DateTime        @updatedAt
-  parentReplyId String?     
-  parentReply   ReviewReplyTour? @relation("ReplyToParent", fields: [parentReplyId], references: [id])
-  replies   ReviewReplyTour[]   @relation("ReplyToParent")
-
-  @@map("replies_tour")
-}
-
-
 model ReviewReplyHotel {
-  id        String          @id @default(cuid())
-  content   String
-  review    HotelReview    @relation(fields: [reviewId], references: [id])
-  reviewId  String
-  user      User            @relation(fields: [userId], references: [id])
-  userId    String
-  createAt  DateTime        @default(now())
-  updateAt  DateTime        @updatedAt
-  parentReplyId String?     
-  parentReply   ReviewReplyHotel? @relation("ReplyToParent", fields: [parentReplyId], references: [id])
-  replies   ReviewReplyHotel[]   @relation("ReplyToParent")
+  id            String             @id @default(cuid())
+  content       String
+  review        HotelCrawlReview   @relation(fields: [reviewId], references: [id])
+  reviewId      String
+  user          User               @relation(fields: [userId], references: [id])
+  userId        String
+  createAt      DateTime           @default(now())
+  updateAt      DateTime           @updatedAt
+  parentReplyId String?
+  parentReply   ReviewReplyHotel?  @relation("ReplyToParent", fields: [parentReplyId], references: [id])
+  replies       ReviewReplyHotel[] @relation("ReplyToParent")
 
   @@map("replies_hotel")
 }
 
+model ReviewReplyTour {
+  id            String            @id @default(cuid())
+  content       String
+  review        TourReview        @relation(fields: [reviewId], references: [id])
+  reviewId      String
+  user          User              @relation(fields: [userId], references: [id])
+  userId        String
+  createAt      DateTime          @default(now())
+  updateAt      DateTime          @updatedAt
+  parentReplyId String?
+  parentReply   ReviewReplyTour?  @relation("ReplyToParent", fields: [parentReplyId], references: [id])
+  replies       ReviewReplyTour[] @relation("ReplyToParent")
+
+  @@map("replies_tour")
+}
 
 model CustomLocation {
   id          String    @id @default(cuid())
@@ -337,31 +362,6 @@ model CustomLocation {
   user        User?     @relation(fields: [userId], references: [id])
 
   @@map("locations")
-}
-
-model Transaction {
-  id       String   @id @default(cuid())
-  amount   Float
-  date     DateTime @default(now())
-  userId   String
-  users    User     @relation(fields: [userId], references: [id])
-  hotelId  String?
-  hotels   Hotel?   @relation(fields: [hotelId], references: [id])
-  flightId String?
-  flights  Flight?  @relation(fields: [flightId], references: [id])
-  tourId   String?
-  tours    Tour?    @relation(fields: [tourId], references: [id])
-
-  @@map("transactions")
-}
-
-model Amenity {
-  id             String           @id @default(cuid())
-  name           String
-  description    String
-  AmenityToHotel AmenityToHotel[]
-
-  @@map("amenities")
 }
 
 model UserOnFlight {
@@ -394,12 +394,22 @@ model UserOnHotel {
   @@map("user_on_hotels")
 }
 
-model AmenityToHotel {
-  amenityId String
-  hotelId   String
-  amenity   Amenity @relation(fields: [amenityId], references: [id])
-  hotel     Hotel   @relation(fields: [hotelId], references: [id])
+model UserOnFlightCrawl {
+  userId        String
+  users         User        @relation(fields: [userId], references: [id])
+  flightCrawlId String
+  flightCrawls  FlightCrawl @relation(fields: [flightCrawlId], references: [id])
 
-  @@id([amenityId, hotelId])
-  @@map("amenity_to_hotel")
+  @@id([userId, flightCrawlId])
+  @@map("user_on_flight_crawls")
+}
+
+model UserOnHotelCrawl {
+  userId       String
+  users        User       @relation(fields: [userId], references: [id])
+  hotelCrawlId String
+  hotelCrawls  HotelCrawl @relation(fields: [hotelCrawlId], references: [id])
+
+  @@id([userId, hotelCrawlId])
+  @@map("user_on_hotel_crawls")
 }

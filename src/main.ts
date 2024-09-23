@@ -25,6 +25,7 @@ async function bootstrap() {
     .addTag('hotel-comment')
     .addTag('location')
     .addTag('role')
+    .addTag('road-vehicle')
     .addTag('tour')
     .addTag('tour-comment')
     .addBearerAuth()

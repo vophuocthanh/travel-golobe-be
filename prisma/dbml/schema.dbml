@@ -20,14 +20,15 @@ Table users {
   verificationCodeExpiresAt DateTime
   isVerified Boolean [not null, default: false]
   role roles
+  flightCrawls user_on_flight_crawls [not null]
+  flightCrawlReviews flight_crawl_reviews [not null]
+  hotelCrawlReviews hotel_crawl_reviews [not null]
+  hotelCrawls user_on_hotel_crawls [not null]
   bookings bookings [not null]
   flights user_on_flights [not null]
   tours user_on_tours [not null]
   hotels user_on_hotels [not null]
-  hotelReviews hotel_reviews [not null]
-  flightReviews flight_reviews [not null]
   tourReviews tour_reviews [not null]
-  transactions transactions [not null]
   location locations [not null]
   reviewReply replies_flight [not null]
   reviewReplyTour replies_tour [not null]
@@ -61,12 +62,9 @@ Table hotels {
   location locations [not null]
   bookings bookings [not null]
   users user_on_hotels [not null]
-  hotelReviews hotel_reviews [not null]
-  transactions transactions [not null]
-  AmenityToHotel amenity_to_hotel [not null]
 }
 
-Table hotel-crawl {
+Table hotel_crawl {
   id String [pk]
   hotel_names String [not null]
   location String [not null]
@@ -79,16 +77,14 @@ Table hotel-crawl {
   description String [not null]
   hotel_link String [not null]
   place String [not null]
-}
-
-Table airlines {
-  id String [pk]
-  name String [unique, not null]
-  logo String [not null]
-  description String
-  createAt DateTime [default: `now()`, not null]
-  updateAt DateTime
-  flights flights [not null]
+  image String
+  image_2 String
+  image_3 String
+  image_4 String
+  image_5 String
+  users user_on_hotel_crawls [not null]
+  hotelCrawlReviewa hotel_crawl_reviews [not null]
+  bookings bookings [not null]
 }
 
 Table flights {
@@ -105,18 +101,16 @@ Table flights {
   images String [not null]
   rating Float [default: 1]
   airlineId String [not null]
-  airline airlines [not null]
   departureLocation String
   destinationLocation String
   isFavorite Boolean [default: false]
+  airline airlines [not null]
   bookings bookings [not null]
   users user_on_flights [not null]
-  flightReviews flight_reviews [not null]
-  transactions transactions [not null]
   UserFlightFavorite user_flight_favorites [not null]
 }
 
-Table FlightCrawl {
+Table flight_crawl {
   id String [pk]
   brand String [not null]
   price Float [not null]
@@ -130,19 +124,11 @@ Table FlightCrawl {
   trip_to String [not null]
   createAt DateTime [default: `now()`, not null]
   updateAt DateTime [not null]
-}
-
-Table user_flight_favorites {
-  id String [pk]
-  userId String [not null]
-  flightId String [not null]
-  createdAt DateTime [default: `now()`, not null]
-  user users [not null]
-  flight flights [not null]
-
-  indexes {
-    (userId, flightId) [unique]
-  }
+  userId String
+  image String
+  users user_on_flight_crawls [not null]
+  flightReviews flight_crawl_reviews [not null]
+  bookings bookings [not null]
 }
 
 Table tours {
@@ -170,7 +156,44 @@ Table tours {
   bookings bookings [not null]
   users user_on_tours [not null]
   tourReviews tour_reviews [not null]
-  transactions transactions [not null]
+}
+
+Table road_vehicles {
+  id String [pk]
+  brand String [not null]
+  price Float [not null]
+  number_of_seat String [not null]
+  start_time String [not null]
+  start_day DateTime [not null]
+  end_day DateTime [not null]
+  end_time String [not null]
+  trip_time String [not null]
+  take_place String [not null]
+  destination String [not null]
+  location String [not null]
+}
+
+Table airlines {
+  id String [pk]
+  name String [unique, not null]
+  logo String [not null]
+  description String
+  createAt DateTime [default: `now()`, not null]
+  updateAt DateTime
+  flights flights [not null]
+}
+
+Table user_flight_favorites {
+  id String [pk]
+  userId String [not null]
+  flightId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  user users [not null]
+  flight flights [not null]
+
+  indexes {
+    (userId, flightId) [unique]
+  }
 }
 
 Table bookings {
@@ -179,37 +202,15 @@ Table bookings {
   hotelId String
   tourId String
   userId String [not null]
+  flightCrawlId String
+  flightCrawls flight_crawl
+  hotelCrawlId String
+  hotelCrawls hotel_crawl
   flight flights
   hotel hotels
   tour tours
   user users [not null]
   createdAt DateTime [default: `now()`, not null]
-}
-
-Table hotel_reviews {
-  id String [pk]
-  content String [not null]
-  rating Float [default: 1]
-  createAt DateTime [default: `now()`, not null]
-  updateAt DateTime
-  userId String [not null]
-  users users [not null]
-  hotelId String [not null]
-  hotels hotels [not null]
-  reviewReplyHotel replies_hotel [not null]
-}
-
-Table flight_reviews {
-  id String [pk]
-  content String [not null]
-  rating Float [default: 1]
-  createAt DateTime [default: `now()`, not null]
-  updateAt DateTime
-  userId String [not null]
-  users users [not null]
-  flightId String [not null]
-  flights flights [not null]
-  reviewReply replies_flight [not null]
 }
 
 Table tour_reviews {
@@ -225,10 +226,36 @@ Table tour_reviews {
   reviewReplyTour replies_tour [not null]
 }
 
+Table flight_crawl_reviews {
+  id String [pk]
+  content String [not null]
+  rating Float [default: 1]
+  createAt DateTime [default: `now()`, not null]
+  updateAt DateTime
+  userId String [not null]
+  users users [not null]
+  flightCrawlId String [not null]
+  flightCrawls flight_crawl [not null]
+  ReviewReplyFlight replies_flight [not null]
+}
+
+Table hotel_crawl_reviews {
+  id String [pk]
+  content String [not null]
+  rating Float [default: 1]
+  createAt DateTime [default: `now()`, not null]
+  updateAt DateTime
+  userId String [not null]
+  users users [not null]
+  hotelCrawlId String [not null]
+  hotelCrawls hotel_crawl [not null]
+  ReviewReplyHotel replies_hotel [not null]
+}
+
 Table replies_flight {
   id String [pk]
   content String [not null]
-  review flight_reviews [not null]
+  review flight_crawl_reviews [not null]
   reviewId String [not null]
   user users [not null]
   userId String [not null]
@@ -237,6 +264,20 @@ Table replies_flight {
   parentReplyId String
   parentReply replies_flight
   replies replies_flight [not null]
+}
+
+Table replies_hotel {
+  id String [pk]
+  content String [not null]
+  review hotel_crawl_reviews [not null]
+  reviewId String [not null]
+  user users [not null]
+  userId String [not null]
+  createAt DateTime [default: `now()`, not null]
+  updateAt DateTime [not null]
+  parentReplyId String
+  parentReply replies_hotel
+  replies replies_hotel [not null]
 }
 
 Table replies_tour {
@@ -253,20 +294,6 @@ Table replies_tour {
   replies replies_tour [not null]
 }
 
-Table replies_hotel {
-  id String [pk]
-  content String [not null]
-  review hotel_reviews [not null]
-  reviewId String [not null]
-  user users [not null]
-  userId String [not null]
-  createAt DateTime [default: `now()`, not null]
-  updateAt DateTime [not null]
-  parentReplyId String
-  parentReply replies_hotel
-  replies replies_hotel [not null]
-}
-
 Table locations {
   id String [pk]
   name String [not null]
@@ -277,27 +304,6 @@ Table locations {
   tours tours [not null]
   userId String [not null]
   user users
-}
-
-Table transactions {
-  id String [pk]
-  amount Float [not null]
-  date DateTime [default: `now()`, not null]
-  userId String [not null]
-  users users [not null]
-  hotelId String
-  hotels hotels
-  flightId String
-  flights flights
-  tourId String
-  tours tours
-}
-
-Table amenities {
-  id String [pk]
-  name String [not null]
-  description String [not null]
-  AmenityToHotel amenity_to_hotel [not null]
 }
 
 Table user_on_flights {
@@ -333,20 +339,31 @@ Table user_on_hotels {
   }
 }
 
-Table amenity_to_hotel {
-  amenityId String [not null]
-  hotelId String [not null]
-  amenity amenities [not null]
-  hotel hotels [not null]
+Table user_on_flight_crawls {
+  userId String [not null]
+  users users [not null]
+  flightCrawlId String [not null]
+  flightCrawls flight_crawl [not null]
 
   indexes {
-    (amenityId, hotelId) [pk]
+    (userId, flightCrawlId) [pk]
+  }
+}
+
+Table user_on_hotel_crawls {
+  userId String [not null]
+  users users [not null]
+  hotelCrawlId String [not null]
+  hotelCrawls hotel_crawl [not null]
+
+  indexes {
+    (userId, hotelCrawlId) [pk]
   }
 }
 
 Table ReplyToParent {
   repliesId String [ref: > replies_flight.id]
-  repliesId String [ref: > replies_tour.id]
+  repliesId String [ref: > replies_hotel.id]
 }
 
 Ref: users.roleId > roles.id
@@ -355,11 +372,15 @@ Ref: hotels.locationId > locations.id
 
 Ref: flights.airlineId > airlines.id
 
+Ref: tours.locationId > locations.id
+
 Ref: user_flight_favorites.userId > users.id
 
 Ref: user_flight_favorites.flightId > flights.id
 
-Ref: tours.locationId > locations.id
+Ref: bookings.flightCrawlId > flight_crawl.id
+
+Ref: bookings.hotelCrawlId > hotel_crawl.id
 
 Ref: bookings.flightId > flights.id
 
@@ -369,23 +390,29 @@ Ref: bookings.tourId > tours.id
 
 Ref: bookings.userId > users.id
 
-Ref: hotel_reviews.userId > users.id
-
-Ref: hotel_reviews.hotelId > hotels.id
-
-Ref: flight_reviews.userId > users.id
-
-Ref: flight_reviews.flightId > flights.id
-
 Ref: tour_reviews.userId > users.id
 
 Ref: tour_reviews.tourId > tours.id
 
-Ref: replies_flight.reviewId > flight_reviews.id
+Ref: flight_crawl_reviews.userId > users.id
+
+Ref: flight_crawl_reviews.flightCrawlId > flight_crawl.id
+
+Ref: hotel_crawl_reviews.userId > users.id
+
+Ref: hotel_crawl_reviews.hotelCrawlId > hotel_crawl.id
+
+Ref: replies_flight.reviewId > flight_crawl_reviews.id
 
 Ref: replies_flight.userId > users.id
 
 Ref: replies_flight.parentReplyId - replies_flight.id
+
+Ref: replies_hotel.reviewId > hotel_crawl_reviews.id
+
+Ref: replies_hotel.userId > users.id
+
+Ref: replies_hotel.parentReplyId - replies_hotel.id
 
 Ref: replies_tour.reviewId > tour_reviews.id
 
@@ -393,21 +420,7 @@ Ref: replies_tour.userId > users.id
 
 Ref: replies_tour.parentReplyId - replies_tour.id
 
-Ref: replies_hotel.reviewId > hotel_reviews.id
-
-Ref: replies_hotel.userId > users.id
-
-Ref: replies_hotel.parentReplyId - replies_hotel.id
-
 Ref: locations.userId > users.id
-
-Ref: transactions.userId > users.id
-
-Ref: transactions.hotelId > hotels.id
-
-Ref: transactions.flightId > flights.id
-
-Ref: transactions.tourId > tours.id
 
 Ref: user_on_flights.userId > users.id
 
@@ -421,6 +434,10 @@ Ref: user_on_hotels.userId > users.id
 
 Ref: user_on_hotels.hotelId > hotels.id
 
-Ref: amenity_to_hotel.amenityId > amenities.id
+Ref: user_on_flight_crawls.userId > users.id
 
-Ref: amenity_to_hotel.hotelId > hotels.id
+Ref: user_on_flight_crawls.flightCrawlId > flight_crawl.id
+
+Ref: user_on_hotel_crawls.userId > users.id
+
+Ref: user_on_hotel_crawls.hotelCrawlId > hotel_crawl.id

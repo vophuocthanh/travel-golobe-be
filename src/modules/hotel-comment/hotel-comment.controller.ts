@@ -15,10 +15,11 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { HotelReview, ReviewReplyHotel } from '@prisma/client';
+import { HotelCrawlReview, ReviewReplyHotel } from '@prisma/client';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import { CreateHotelReviewDto } from 'src/modules/hotel-comment/dto/create-hotel-review.dto';
 import {
+  HotelReviewWithUserDto,
   ReplyHotelDto,
   ReplyToReplyHotelDto,
 } from 'src/modules/hotel-comment/dto/reply.dto';
@@ -37,7 +38,9 @@ export class HotelCommentController {
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getReviews(@Param('id') id: string): Promise<{ data: HotelReview[] }> {
+  async getReviews(
+    @Param('id') id: string,
+  ): Promise<{ data: HotelReviewWithUserDto[] }> {
     return this.hotelCommentService.getHotelReviews(id);
   }
 
@@ -49,7 +52,7 @@ export class HotelCommentController {
     @Param('id') id: string,
     @Body() body: CreateHotelReviewDto,
     @Req() req: RequestWithUser,
-  ): Promise<HotelReview> {
+  ): Promise<HotelCrawlReview> {
     const userId = req.user.id;
     return this.hotelCommentService.addReviewToHotel(id, body, userId);
   }
@@ -63,7 +66,7 @@ export class HotelCommentController {
   async updateReview(
     @Param('reviewId') reviewId: string,
     @Body() body: UpdateHotelReviewDto,
-  ): Promise<HotelReview> {
+  ): Promise<HotelCrawlReview> {
     return this.hotelCommentService.updateHotelReview(reviewId, body);
   }
 

@@ -3,40 +3,58 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { HotelReview, ReviewReplyHotel } from '@prisma/client';
+import { HotelCrawlReview, ReviewReplyHotel } from '@prisma/client';
 import { CreateHotelReviewDto } from 'src/modules/hotel-comment/dto/create-hotel-review.dto';
+import { HotelReviewWithUserDto } from 'src/modules/hotel-comment/dto/reply.dto';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class HotelCommentService {
   constructor(private prismaService: PrismaService) {}
 
-  async getHotelReviews(hotelId: string): Promise<{ data: HotelReview[] }> {
-    const reviews = await this.prismaService.hotelReview.findMany({
+  async getHotelReviews(
+    hotelCrawlId: string,
+  ): Promise<{ data: HotelReviewWithUserDto[] }> {
+    const reviews = await this.prismaService.hotelCrawlReview.findMany({
       where: {
-        hotelId,
+        hotelCrawlId,
       },
-      orderBy: {
-        createAt: 'desc',
+      orderBy: { createAt: 'desc' },
+      include: {
+        users: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
       },
     });
 
+    const reviewWithUser = reviews.map((review) => ({
+      id: review.id,
+      content: review.content,
+      rating: review.rating,
+      createdAt: review.createAt,
+      user: review.users,
+    }));
+
     return {
-      data: reviews,
+      data: reviewWithUser,
     };
   }
 
   async addReviewToHotel(
-    hotelId: string,
+    hotelCrawlId: string,
     data: CreateHotelReviewDto,
     userId: string,
-  ): Promise<HotelReview> {
-    return this.prismaService.hotelReview.create({
+  ): Promise<HotelCrawlReview> {
+    return this.prismaService.hotelCrawlReview.create({
       data: {
         content: data.content,
         rating: data.rating,
-        hotels: {
-          connect: { id: hotelId },
+        hotelCrawls: {
+          connect: { id: hotelCrawlId },
         },
         users: {
           connect: { id: userId },
@@ -48,8 +66,8 @@ export class HotelCommentService {
   async updateHotelReview(
     reviewId: string,
     data: CreateHotelReviewDto,
-  ): Promise<HotelReview> {
-    return this.prismaService.hotelReview.update({
+  ): Promise<HotelCrawlReview> {
+    return this.prismaService.hotelCrawlReview.update({
       where: {
         id: reviewId,
       },
@@ -61,12 +79,12 @@ export class HotelCommentService {
   }
 
   async deleteHotelReview(
-    hotelId: string,
+    hotelCrawlId: string,
     reviewId: string,
     userId: string,
   ): Promise<{ message: string }> {
     const hotel = await this.prismaService.hotel.findUnique({
-      where: { id: hotelId },
+      where: { id: hotelCrawlId },
     });
 
     if (!hotel) {
@@ -77,7 +95,7 @@ export class HotelCommentService {
       throw new ForbiddenException('You are not allowed to delete this review');
     }
 
-    await this.prismaService.hotelReview.delete({
+    await this.prismaService.hotelCrawlReview.delete({
       where: {
         id: reviewId,
       },
@@ -114,6 +132,15 @@ export class HotelCommentService {
       },
       orderBy: {
         createAt: 'desc',
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
       },
     });
     return {

@@ -16,10 +16,11 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { FlightReview, ReviewReplyFlight } from '@prisma/client';
+import { FlightCrawlReview, ReviewReplyFlight } from '@prisma/client';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import { CreateFlightReviewDto } from 'src/modules/flight-comment/dto/create-flight-review.dto';
 import {
+  FlightReviewWithUserDto,
   ReplyFlightDto,
   ReplyToReplyFlightDto,
 } from 'src/modules/flight-comment/dto/reply.dto';
@@ -42,7 +43,7 @@ export class FlightCommentController {
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async getReviews(
     @Param('id') flightId: string,
-  ): Promise<{ data: FlightReview[] }> {
+  ): Promise<{ data: FlightReviewWithUserDto[] }> {
     return this.flightComemntService.getFlightReviews(flightId);
   }
 
@@ -57,7 +58,7 @@ export class FlightCommentController {
     @Param('id') flightId: string,
     @Body() createFlightReviewDto: CreateFlightReviewDto,
     @Req() req: RequestWithUser,
-  ): Promise<FlightReview> {
+  ): Promise<FlightReviewWithUserDto> {
     const userId = req.user.id;
     return this.flightComemntService.addReviewToFlight(
       flightId,
@@ -76,7 +77,7 @@ export class FlightCommentController {
   async updateReview(
     @Param('reviewId') reviewId: string,
     @Body() updateFlightReviewDto: UpdateFlightReviewDto,
-  ): Promise<FlightReview> {
+  ): Promise<FlightCrawlReview> {
     return this.flightComemntService.updateFlightReview(
       reviewId,
       updateFlightReviewDto,

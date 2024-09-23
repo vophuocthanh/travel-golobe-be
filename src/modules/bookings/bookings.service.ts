@@ -27,12 +27,12 @@ export class BookingsService {
       where: {
         OR: [
           {
-            hotelId: {
+            hotelCrawlId: {
               contains: search,
             },
           },
           {
-            flightId: {
+            flightCrawlId: {
               contains: search,
             },
           },
@@ -48,12 +48,12 @@ export class BookingsService {
       where: {
         OR: [
           {
-            hotelId: {
+            hotelCrawlId: {
               contains: search,
             },
           },
           {
-            flightId: {
+            flightCrawlId: {
               contains: search,
             },
           },
@@ -73,41 +73,44 @@ export class BookingsService {
     };
   }
 
-  async getBookedFlights(userId: string): Promise<Booking[]> {
-    return this.prismaService.booking.findMany({
-      where: { userId, flightId: { not: null } },
+  async getBookedFlights(userId: string): Promise<{ data: Booking[] }> {
+    const getFlightBooking = await this.prismaService.booking.findMany({
+      where: { userId, flightCrawlId: { not: null } },
       include: {
         flight: true,
       },
     });
+    return { data: getFlightBooking };
   }
 
-  async getBookedHotels(userId: string): Promise<Booking[]> {
-    return this.prismaService.booking.findMany({
-      where: { userId, hotelId: { not: null } },
+  async getBookedHotels(userId: string): Promise<{ data: Booking[] }> {
+    const getHotelBooking = await this.prismaService.booking.findMany({
+      where: { userId, hotelCrawlId: { not: null } },
       include: {
         hotel: true,
       },
     });
+    return { data: getHotelBooking };
   }
 
-  async getBookedTours(userId: string): Promise<Booking[]> {
-    return this.prismaService.booking.findMany({
+  async getBookedTours(userId: string): Promise<{ data: Booking[] }> {
+    const getTourBooking = await this.prismaService.booking.findMany({
       where: { userId, tourId: { not: null } },
       include: {
         tour: true,
       },
     });
+    return { data: getTourBooking };
   }
 
   async bookFlight(
     createFlightBookingDto: CreateFlightBookingDto,
     userId: string,
   ): Promise<Booking> {
-    const { flightId } = createFlightBookingDto;
+    const { flightCrawlId } = createFlightBookingDto;
 
-    const flight = await this.prismaService.flight.findUnique({
-      where: { id: flightId },
+    const flight = await this.prismaService.flightCrawl.findUnique({
+      where: { id: flightCrawlId },
     });
 
     if (!flight) {
@@ -116,7 +119,7 @@ export class BookingsService {
 
     return this.prismaService.booking.create({
       data: {
-        flightId,
+        flightCrawlId,
         userId,
       },
     });
@@ -126,10 +129,10 @@ export class BookingsService {
     createHotelBookingDto: CreateHotelBookingDto,
     userId: string,
   ) {
-    const { hotelId } = createHotelBookingDto;
+    const { hotelCrawlId } = createHotelBookingDto;
 
-    const hotel = await this.prismaService.hotel.findUnique({
-      where: { id: hotelId },
+    const hotel = await this.prismaService.hotelCrawl.findUnique({
+      where: { id: hotelCrawlId },
     });
 
     if (!hotel) {
@@ -138,7 +141,7 @@ export class BookingsService {
 
     return this.prismaService.booking.create({
       data: {
-        hotelId,
+        hotelCrawlId,
         userId,
       },
     });

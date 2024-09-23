@@ -1,33 +1,32 @@
 import { Injectable } from '@nestjs/common';
-import { FlightCrawl } from '@prisma/client';
+import { RoadVehicle } from '@prisma/client';
 import * as csv from 'csv-parser';
 import * as fs from 'fs';
 import {
-  FlightCrawlDto,
-  FlightCrawlPaginationResponseType,
-} from 'src/modules/flight-crawl/dto/flight.dto';
-
+  RoadVehicleCrawlDto,
+  RoadVehicleCrawlPaginationResponseType,
+} from 'src/modules/road-vehicle/dto/road-vehicle.dto';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
-export class FlightCrawlService {
+export class RoadVehicleService {
   constructor(private prismaService: PrismaService) {}
-
   private formatDate(dateStr: string): string {
     const [day, month, year] = dateStr.split('-');
     return `${year}-${month}-${day}`;
   }
 
-  async importFlightsFromCSV(filePath: string): Promise<void> {
-    const flights = [];
+  async importRoadVehicleFromCSV(filePath: string): Promise<void> {
+    const roadVehicles = [];
 
     return new Promise((resolve, reject) => {
       fs.createReadStream(filePath)
         .pipe(csv())
         .on('data', (row) => {
-          const flight1 = {
+          const roadVehicle = {
             brand: row.brand || '',
             price: parseFloat(row.price || '0'),
+            number_of_seat: row.number_of_seat || '0',
             start_time: row.start_time || '',
             start_day: new Date(this.formatDate(row.start_day)),
             end_day: new Date(this.formatDate(row.end_day)),
@@ -35,17 +34,16 @@ export class FlightCrawlService {
             trip_time: row.trip_time || '',
             take_place: row.take_place || '',
             destination: row.destination || '',
-            trip_to: row.trip_to || '',
+            location: row.location || '',
           };
 
-          flights.push(flight1);
+          roadVehicles.push(roadVehicle);
         })
         .on('end', async () => {
           try {
-            // Insert each flight into the Flight table
-            for (const flight1 of flights) {
-              await this.prismaService.flightCrawl.create({
-                data: flight1,
+            for (const roadVehicle of roadVehicles) {
+              await this.prismaService.roadVehicle.create({
+                data: roadVehicle,
               });
             }
             resolve();
@@ -60,14 +58,14 @@ export class FlightCrawlService {
   }
 
   async getFlightsCrawl(
-    filters: FlightCrawlDto,
-  ): Promise<FlightCrawlPaginationResponseType> {
+    filters: RoadVehicleCrawlDto,
+  ): Promise<RoadVehicleCrawlPaginationResponseType> {
     const items_per_page = Number(filters.items_per_page) || 10;
     const page = Number(filters.page) || 1;
     const search = filters.search || '';
     const skip = page > 1 ? (page - 1) * items_per_page : 0;
 
-    const flightCrawl = await this.prismaService.flightCrawl.findMany({
+    const roadVehicleCraw = await this.prismaService.roadVehicle.findMany({
       take: items_per_page,
       skip,
       where: {
@@ -79,11 +77,8 @@ export class FlightCrawlService {
           },
         ],
       },
-      orderBy: {
-        createAt: 'desc',
-      },
     });
-    const total = await this.prismaService.flightCrawl.count({
+    const total = await this.prismaService.roadVehicle.count({
       where: {
         OR: [
           {
@@ -95,14 +90,14 @@ export class FlightCrawlService {
       },
     });
     return {
-      data: flightCrawl,
+      data: roadVehicleCraw,
       total,
       currentPage: page,
       itemsPerPage: items_per_page,
     };
   }
-  async getFlightCrawlById(id: string): Promise<FlightCrawl> {
-    return this.prismaService.flightCrawl.findFirst({
+  async getFlightCrawlById(id: string): Promise<RoadVehicle> {
+    return this.prismaService.roadVehicle.findFirst({
       where: {
         id,
       },

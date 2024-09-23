@@ -14,3 +14,15 @@ export class ReplyToReplyHotelDto {
   @IsNotEmpty()
   content: string;
 }
+
+export class HotelReviewWithUserDto {
+  id: string;
+  content: string;
+  rating: number;
+  createdAt: Date;
+  user: {
+    id: string;
+    name: string;
+    avatar: string;
+  };
+}

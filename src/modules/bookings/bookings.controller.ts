@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Booking } from '@prisma/client';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import { BookingsService } from 'src/modules/bookings/bookings.service';
 import {
@@ -37,7 +38,9 @@ export class BookingsController {
 
   @UseGuards(HandleAuthGuard)
   @Get('book/flight')
-  async getBookedFlights(@Req() req: RequestWithUser) {
+  async getBookedFlights(
+    @Req() req: RequestWithUser,
+  ): Promise<{ data: Booking[] }> {
     const userId = req.user.id;
     return this.bookingService.getBookedFlights(userId);
   }
@@ -64,7 +67,9 @@ export class BookingsController {
 
   @UseGuards(HandleAuthGuard)
   @Get('book/hotel')
-  async getBookedHotels(@Req() req: RequestWithUser) {
+  async getBookedHotels(
+    @Req() req: RequestWithUser,
+  ): Promise<{ data: Booking[] }> {
     const userId = req.user.id;
     return this.bookingService.getBookedHotels(userId);
   }
@@ -91,7 +96,9 @@ export class BookingsController {
 
   @UseGuards(HandleAuthGuard)
   @Get('book/tour')
-  async getBookedTours(@Req() req: RequestWithUser) {
+  async getBookedTours(
+    @Req() req: RequestWithUser,
+  ): Promise<{ data: Booking[] }> {
     const userId = req.user.id;
     return this.bookingService.getBookedTours(userId);
   }

@@ -14,3 +14,15 @@ export class ReplyToReplyFlightDto {
   @IsNotEmpty()
   content: string;
 }
+
+export class FlightReviewWithUserDto {
+  id: string;
+  content: string;
+  rating: number;
+  createdAt: Date;
+  user: {
+    id: string;
+    name: string;
+    avatar: string;
+  };
+}

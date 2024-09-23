@@ -4,5 +4,5 @@ import { IsString } from 'class-validator';
 export class CreateHotelBookingDto {
   @ApiProperty()
   @IsString()
-  hotelId: string;
+  hotelCrawlId: string;
 }

@@ -6,11 +6,12 @@ import {
 import {
   Airline,
   Flight,
-  FlightReview,
+  FlightCrawlReview,
   Prisma,
   ReviewReplyFlight,
 } from '@prisma/client';
 import { CreateFlightReviewDto } from 'src/modules/flight-comment/dto/create-flight-review.dto';
+import { FlightReviewWithUserDto } from 'src/modules/flight-comment/dto/reply.dto';
 import { UpdateFlightReviewDto } from 'src/modules/flight-comment/dto/update-flight-review.dto';
 import {
   AirlineDto,
@@ -24,39 +25,71 @@ export class FlightCommentService {
   constructor(private prismaService: PrismaService) {}
 
   async addReviewToFlight(
-    flightId: string,
-    data: CreateFlightReviewDto,
+    flightCrawlId: string,
+    createFlightReviewDto: CreateFlightReviewDto,
     userId: string,
-  ): Promise<FlightReview> {
-    return this.prismaService.flightReview.create({
+  ): Promise<FlightReviewWithUserDto> {
+    const review = await this.prismaService.flightCrawlReview.create({
       data: {
-        content: data.content,
-        rating: data.rating,
-        flights: {
-          connect: { id: flightId },
-        },
+        ...createFlightReviewDto,
+        flightCrawlId,
+        userId,
+      },
+      include: {
         users: {
-          connect: { id: userId },
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
         },
       },
     });
+
+    return {
+      id: review.id,
+      content: review.content,
+      rating: review.rating,
+      createdAt: review.createAt,
+      user: review.users,
+    };
   }
 
-  async getFlightReviews(flightId: string): Promise<{ data: FlightReview[] }> {
-    const reviews = await this.prismaService.flightReview.findMany({
-      where: { flightId },
+  async getFlightReviews(
+    flightCrawlId: string,
+  ): Promise<{ data: FlightReviewWithUserDto[] }> {
+    const reviews = await this.prismaService.flightCrawlReview.findMany({
+      where: { flightCrawlId },
       orderBy: { createAt: 'desc' },
+      include: {
+        users: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
+      },
     });
+
+    const reviewWithUser = reviews.map((review) => ({
+      id: review.id,
+      content: review.content,
+      rating: review.rating,
+      createdAt: review.createAt,
+      user: review.users,
+    }));
+
     return {
-      data: reviews,
+      data: reviewWithUser,
     };
   }
 
   async updateFlightReview(
     reviewId: string,
     data: UpdateFlightReviewDto,
-  ): Promise<FlightReview> {
-    return this.prismaService.flightReview.update({
+  ): Promise<FlightCrawlReview> {
+    return this.prismaService.flightCrawlReview.update({
       where: {
         id: reviewId,
       },
@@ -68,12 +101,12 @@ export class FlightCommentService {
   }
 
   async deleteFlightReview(
-    flightId: string,
+    flightCrawlId: string,
     reviewId: string,
     userId: string,
   ): Promise<{ message: string }> {
-    const flight = await this.prismaService.flight.findUnique({
-      where: { id: flightId },
+    const flight = await this.prismaService.flightCrawl.findUnique({
+      where: { id: flightCrawlId },
     });
 
     if (!flight) {
@@ -86,7 +119,7 @@ export class FlightCommentService {
       );
     }
 
-    await this.prismaService.flightReview.delete({
+    await this.prismaService.flightCrawlReview.delete({
       where: { id: reviewId },
     });
     return { message: 'Review deleted successfully' };
@@ -119,6 +152,15 @@ export class FlightCommentService {
     const replyReview = await this.prismaService.reviewReplyFlight.findMany({
       where: { reviewId },
       orderBy: { createAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
+      },
     });
     return {
       data: replyReview,

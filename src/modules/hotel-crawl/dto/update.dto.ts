@@ -12,19 +12,19 @@ export class UpdateHotelCrawlDto {
 
   @ApiProperty()
   @IsOptional()
-  star_number?: string;
+  star_number?: number;
 
   @ApiProperty()
   @IsOptional()
-  price?: string;
+  price?: number;
 
   @ApiProperty()
   @IsOptional()
-  score_hotels?: string;
+  score_hotels?: number;
 
   @ApiProperty()
   @IsOptional()
-  number_rating?: string;
+  number_rating?: number;
 
   @ApiProperty()
   @IsOptional()

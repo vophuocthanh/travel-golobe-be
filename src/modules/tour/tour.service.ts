@@ -18,6 +18,10 @@ export class TourService {
     const search = filters.search || '';
     const skip = page > 1 ? (page - 1) * items_per_page : 0;
 
+    // Fetch flightCrawl and hotelCrawl data
+    const flightCrawls = await this.prismaService.flightCrawl.findMany();
+    const hotelCrawls = await this.prismaService.hotelCrawl.findMany();
+
     const tours = await this.prismaService.tour.findMany({
       take: items_per_page,
       skip,
@@ -35,6 +39,21 @@ export class TourService {
       },
     });
 
+    const getRandomItem = (items: any[]) => {
+      return items[Math.floor(Math.random() * items.length)];
+    };
+
+    const toursWithRandomData = tours.map((tour) => {
+      const randomFlight = getRandomItem(flightCrawls);
+      const randomHotel = getRandomItem(hotelCrawls);
+
+      return {
+        ...tour,
+        randomFlightCrawl: randomFlight || null,
+        randomHotelCrawl: randomHotel || null,
+      };
+    });
+
     const total = await this.prismaService.tour.count({
       where: {
         OR: [
@@ -48,7 +67,7 @@ export class TourService {
     });
 
     return {
-      data: tours,
+      data: toursWithRandomData,
       total,
       currentPage: page,
       itemsPerPage: items_per_page,
@@ -56,11 +75,29 @@ export class TourService {
   }
 
   async getTourById(id: string) {
-    return this.prismaService.tour.findUnique({
+    const tourId = await this.prismaService.tour.findUnique({
       where: {
         id,
       },
     });
+    if (!tourId) {
+      throw new Error('Tour not found');
+    }
+
+    const flightCrawls = await this.prismaService.flightCrawl.findMany();
+    const hotelCrawls = await this.prismaService.hotelCrawl.findMany();
+
+    const getRandomItem = (items: any[]) => {
+      return items[Math.floor(Math.random() * items.length)];
+    };
+
+    const randomFlight = getRandomItem(flightCrawls);
+    const randomHotel = getRandomItem(hotelCrawls);
+    return {
+      ...tourId,
+      randomFlightCrawl: randomFlight || null,
+      randomHotelCrawl: randomHotel || null,
+    };
   }
 
   async createTours(data: CreateDtoTour, userId: string): Promise<Tour> {

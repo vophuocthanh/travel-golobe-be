@@ -21,17 +21,30 @@ export class HotelCrawlService {
         .pipe(csv())
         .on('data', (row) => {
           const hotel = {
-            hotel_names: row.hotel_names || '',
-            location: row.location || '',
-            star_number: row.star_number || '',
-            price: row.price || '0',
-            score_hotels: row.score_hotels || '0',
-            number_rating: row.number_rating || '0',
-            received_time: row.received_time || '',
-            giveback_time: row.giveback_time || '',
-            description: row.description || '',
-            hotel_link: row.hotel_link || '',
-            place: row.place || '',
+            hotel_names:
+              row.hotel_names !== 'No value' ? row.hotel_names : null,
+            location: row.location !== 'No value' ? row.location : null,
+            star_number:
+              row.star_number !== 'No value'
+                ? parseFloat(row.star_number) || 0
+                : null,
+            price: row.price !== 'No value' ? parseFloat(row.price) || 0 : 0,
+            score_hotels:
+              row.score_hotels !== 'No value'
+                ? parseFloat(row.score_hotels) || 0
+                : 0,
+            number_rating:
+              row.number_rating !== 'No value'
+                ? parseFloat(row.number_rating) || 0
+                : 0,
+            received_time:
+              row.received_time !== 'No value' ? row.received_time : null,
+            giveback_time:
+              row.giveback_time !== 'No value' ? row.giveback_time : null,
+            description:
+              row.description !== 'No value' ? row.description : null,
+            hotel_link: row.hotel_link !== 'No value' ? row.hotel_link : null,
+            place: row.place !== 'No value' ? row.place : null,
           };
 
           hotels.push(hotel);
@@ -64,10 +77,10 @@ export class HotelCrawlService {
 
     const sort_by_price = filters.sort_by_price === 'desc' ? 'desc' : 'asc';
 
-    const min_price = filters.min_price ? filters.min_price.toString() : '0';
-    const max_price = filters.max_price
-      ? filters.max_price.toString()
-      : Number.MAX_SAFE_INTEGER.toString();
+    const min_price = parseFloat(filters.min_price?.toString() || '0');
+    const max_price = parseFloat(
+      filters.max_price?.toString() || `${Number.MAX_SAFE_INTEGER}`,
+    );
 
     const hotelCrawl = await this.prismaService.hotelCrawl.findMany({
       take: items_per_page,

@@ -35,9 +35,7 @@ model User {
   hotelCrawlReviews  HotelCrawlReview[]
   hotelCrawls        UserOnHotelCrawl[]
   bookings           Booking[]
-  flights            UserOnFlight[]
   tours              UserOnTour[]
-  hotels             UserOnHotel[]
   tourReviews        TourReview[]
   location           CustomLocation[]
   reviewReply        ReviewReplyFlight[]
@@ -56,40 +54,16 @@ model Role {
   @@map("roles")
 }
 
-model Hotel {
-  id          String    @id @default(cuid())
-  name        String
-  userId      String
-  address     String
-  createAt    DateTime  @default(now())
-  updateAt    DateTime? @updatedAt
-  evaluate    String?
-  price       String
-  description String
-  images      String
-  image_2     String?
-  image_3     String?
-  image_4     String?
-  image_5     String?
-  locationId  String
-  rating      Float?    @default(1)
 
-  location CustomLocation @relation(fields: [locationId], references: [id])
-
-  bookings Booking[]
-  users    UserOnHotel[]
-
-  @@map("hotels")
-}
 
 model HotelCrawl {
   id            String  @id @default(uuid())
   hotel_names   String
   location      String
-  price         String?
-  score_hotels  String?
-  number_rating String?
-  star_number   String?
+  price         Float?
+  score_hotels  Float?
+  number_rating Float?
+  star_number   Float?
   received_time String
   giveback_time String
   description   String
@@ -100,6 +74,7 @@ model HotelCrawl {
   image_3       String?
   image_4       String?
   image_5       String?
+  userId        String?
 
   users             UserOnHotelCrawl[]
   hotelCrawlReviewa HotelCrawlReview[]
@@ -108,31 +83,6 @@ model HotelCrawl {
   @@map("hotel_crawl")
 }
 
-model Flight {
-  id                  String    @id @default(cuid())
-  name                String
-  userId              String
-  createAt            DateTime  @default(now())
-  updateAt            DateTime? @updatedAt
-  description         String
-  price               Float?
-  startDate           String
-  endDate             String
-  perios              String
-  images              String
-  rating              Float?    @default(1)
-  airlineId           String
-  departureLocation   String?
-  destinationLocation String?
-  isFavorite          Boolean?  @default(false)
-
-  airline            Airline              @relation(fields: [airlineId], references: [id])
-  bookings           Booking[]
-  users              UserOnFlight[]
-  UserFlightFavorite UserFlightFavorite[]
-
-  @@map("flights")
-}
 
 model FlightCrawl {
   id          String   @id @default(uuid())
@@ -214,7 +164,6 @@ model Airline {
   description String?
   createAt    DateTime  @default(now())
   updateAt    DateTime? @updatedAt
-  flights     Flight[]
 
   @@map("airlines")
 }
@@ -226,7 +175,6 @@ model UserFlightFavorite {
   createdAt DateTime @default(now())
 
   user   User   @relation(fields: [userId], references: [id])
-  flight Flight @relation(fields: [flightId], references: [id])
 
   @@unique([userId, flightId])
   @@map("user_flight_favorites")
@@ -236,20 +184,17 @@ model UserFlightFavorite {
 
 model Booking {
   id       String  @id @default(uuid())
-  flightId String?
-  hotelId  String?
-
   tourId        String?
   userId        String
   flightCrawlId String?
   flightCrawls  FlightCrawl? @relation(fields: [flightCrawlId], references: [id])
   hotelCrawlId  String?
   hotelCrawls   HotelCrawl?  @relation(fields: [hotelCrawlId], references: [id])
-  flight        Flight?      @relation(fields: [flightId], references: [id])
-  hotel         Hotel?       @relation(fields: [hotelId], references: [id])
   tour          Tour?        @relation(fields: [tourId], references: [id])
   user          User         @relation(fields: [userId], references: [id])
   createdAt     DateTime     @default(now())
+
+  totalAmount    Float?
 
   @@map("bookings")
 }
@@ -356,22 +301,11 @@ model CustomLocation {
   description String
   createAt    DateTime  @default(now())
   updateAt    DateTime? @updatedAt
-  hotels      Hotel[]
   tours       Tour[]
   userId      String
   user        User?     @relation(fields: [userId], references: [id])
 
   @@map("locations")
-}
-
-model UserOnFlight {
-  userId   String
-  users    User   @relation(fields: [userId], references: [id])
-  flightId String
-  flights  Flight @relation(fields: [flightId], references: [id])
-
-  @@id([userId, flightId])
-  @@map("user_on_flights")
 }
 
 model UserOnTour {
@@ -382,16 +316,6 @@ model UserOnTour {
 
   @@id([userId, tourId])
   @@map("user_on_tours")
-}
-
-model UserOnHotel {
-  userId  String
-  users   User   @relation(fields: [userId], references: [id])
-  hotelId String
-  hotels  Hotel  @relation(fields: [hotelId], references: [id])
-
-  @@id([userId, hotelId])
-  @@map("user_on_hotels")
 }
 
 model UserOnFlightCrawl {

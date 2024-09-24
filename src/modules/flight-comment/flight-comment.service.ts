@@ -3,21 +3,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  Airline,
-  Flight,
-  FlightCrawlReview,
-  Prisma,
-  ReviewReplyFlight,
-} from '@prisma/client';
+import { FlightCrawlReview, ReviewReplyFlight } from '@prisma/client';
 import { CreateFlightReviewDto } from 'src/modules/flight-comment/dto/create-flight-review.dto';
 import { FlightReviewWithUserDto } from 'src/modules/flight-comment/dto/reply.dto';
 import { UpdateFlightReviewDto } from 'src/modules/flight-comment/dto/update-flight-review.dto';
-import {
-  AirlineDto,
-  AirlinePaginationResponseType,
-  AirlineTypeDto,
-} from 'src/modules/flight/dto/airline.dto';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
@@ -194,87 +183,6 @@ export class FlightCommentService {
           connect: { id: userId },
         },
       },
-    });
-  }
-
-  // Airline
-  async getAirlines(
-    filters: AirlineTypeDto,
-  ): Promise<AirlinePaginationResponseType> {
-    const itemsPerPage = Number(filters.items_per_page) || 10;
-    const page = Number(filters.page) || 1;
-    const search = filters.search || '';
-    const skip = (page - 1) * itemsPerPage;
-
-    const whereConditions: Prisma.AirlineWhereInput = {
-      OR: [
-        {
-          name: {
-            contains: search,
-            mode: 'insensitive', // Optional: case-insensitive search
-          },
-        },
-      ],
-    };
-
-    // Fetch airlines with pagination and filtering
-    const airlines = await this.prismaService.airline.findMany({
-      take: itemsPerPage,
-      skip,
-      where: whereConditions,
-      orderBy: {
-        createAt: 'desc', // Sort by creation date in descending order
-      },
-    });
-
-    // Get total count of airlines matching the filter conditions
-    const total = await this.prismaService.airline.count({
-      where: whereConditions,
-    });
-
-    return {
-      data: airlines,
-      total,
-      currentPage: page,
-      itemsPerPage,
-    };
-  }
-
-  async createAirline(data: AirlineDto): Promise<Airline> {
-    return this.prismaService.airline.create({
-      data: {
-        ...data,
-      },
-    });
-  }
-
-  async filterFlights(
-    airlineId?: string,
-    minPrice?: number,
-    maxPrice?: number,
-    minRating?: number,
-  ): Promise<Flight[]> {
-    const whereConditions: Prisma.FlightWhereInput = {};
-
-    if (airlineId) {
-      whereConditions.airlineId = airlineId;
-    }
-
-    if (minPrice !== undefined && maxPrice !== undefined) {
-      whereConditions.price = {
-        gte: minPrice,
-        lte: maxPrice,
-      };
-    }
-
-    if (minRating !== undefined && minRating > 0) {
-      whereConditions.rating = {
-        gte: minRating,
-      };
-    }
-
-    return this.prismaService.flight.findMany({
-      where: whereConditions,
     });
   }
 }

@@ -25,9 +25,7 @@ Table users {
   hotelCrawlReviews hotel_crawl_reviews [not null]
   hotelCrawls user_on_hotel_crawls [not null]
   bookings bookings [not null]
-  flights user_on_flights [not null]
   tours user_on_tours [not null]
-  hotels user_on_hotels [not null]
   tourReviews tour_reviews [not null]
   location locations [not null]
   reviewReply replies_flight [not null]
@@ -42,36 +40,14 @@ Table roles {
   users users [not null]
 }
 
-Table hotels {
-  id String [pk]
-  name String [not null]
-  userId String [not null]
-  address String [not null]
-  createAt DateTime [default: `now()`, not null]
-  updateAt DateTime
-  evaluate String
-  price String [not null]
-  description String [not null]
-  images String [not null]
-  image_2 String
-  image_3 String
-  image_4 String
-  image_5 String
-  locationId String [not null]
-  rating Float [default: 1]
-  location locations [not null]
-  bookings bookings [not null]
-  users user_on_hotels [not null]
-}
-
 Table hotel_crawl {
   id String [pk]
   hotel_names String [not null]
   location String [not null]
-  price String
-  score_hotels String
-  number_rating String
-  star_number String
+  price Float
+  score_hotels Float
+  number_rating Float
+  star_number Float
   received_time String [not null]
   giveback_time String [not null]
   description String [not null]
@@ -82,32 +58,10 @@ Table hotel_crawl {
   image_3 String
   image_4 String
   image_5 String
+  userId String
   users user_on_hotel_crawls [not null]
   hotelCrawlReviewa hotel_crawl_reviews [not null]
   bookings bookings [not null]
-}
-
-Table flights {
-  id String [pk]
-  name String [not null]
-  userId String [not null]
-  createAt DateTime [default: `now()`, not null]
-  updateAt DateTime
-  description String [not null]
-  price Float
-  startDate String [not null]
-  endDate String [not null]
-  perios String [not null]
-  images String [not null]
-  rating Float [default: 1]
-  airlineId String [not null]
-  departureLocation String
-  destinationLocation String
-  isFavorite Boolean [default: false]
-  airline airlines [not null]
-  bookings bookings [not null]
-  users user_on_flights [not null]
-  UserFlightFavorite user_flight_favorites [not null]
 }
 
 Table flight_crawl {
@@ -180,7 +134,6 @@ Table airlines {
   description String
   createAt DateTime [default: `now()`, not null]
   updateAt DateTime
-  flights flights [not null]
 }
 
 Table user_flight_favorites {
@@ -189,7 +142,6 @@ Table user_flight_favorites {
   flightId String [not null]
   createdAt DateTime [default: `now()`, not null]
   user users [not null]
-  flight flights [not null]
 
   indexes {
     (userId, flightId) [unique]
@@ -198,19 +150,16 @@ Table user_flight_favorites {
 
 Table bookings {
   id String [pk]
-  flightId String
-  hotelId String
   tourId String
   userId String [not null]
   flightCrawlId String
   flightCrawls flight_crawl
   hotelCrawlId String
   hotelCrawls hotel_crawl
-  flight flights
-  hotel hotels
   tour tours
   user users [not null]
   createdAt DateTime [default: `now()`, not null]
+  totalAmount Float
 }
 
 Table tour_reviews {
@@ -300,21 +249,9 @@ Table locations {
   description String [not null]
   createAt DateTime [default: `now()`, not null]
   updateAt DateTime
-  hotels hotels [not null]
   tours tours [not null]
   userId String [not null]
   user users
-}
-
-Table user_on_flights {
-  userId String [not null]
-  users users [not null]
-  flightId String [not null]
-  flights flights [not null]
-
-  indexes {
-    (userId, flightId) [pk]
-  }
 }
 
 Table user_on_tours {
@@ -325,17 +262,6 @@ Table user_on_tours {
 
   indexes {
     (userId, tourId) [pk]
-  }
-}
-
-Table user_on_hotels {
-  userId String [not null]
-  users users [not null]
-  hotelId String [not null]
-  hotels hotels [not null]
-
-  indexes {
-    (userId, hotelId) [pk]
   }
 }
 
@@ -368,23 +294,13 @@ Table ReplyToParent {
 
 Ref: users.roleId > roles.id
 
-Ref: hotels.locationId > locations.id
-
-Ref: flights.airlineId > airlines.id
-
 Ref: tours.locationId > locations.id
 
 Ref: user_flight_favorites.userId > users.id
 
-Ref: user_flight_favorites.flightId > flights.id
-
 Ref: bookings.flightCrawlId > flight_crawl.id
 
 Ref: bookings.hotelCrawlId > hotel_crawl.id
-
-Ref: bookings.flightId > flights.id
-
-Ref: bookings.hotelId > hotels.id
 
 Ref: bookings.tourId > tours.id
 
@@ -422,17 +338,9 @@ Ref: replies_tour.parentReplyId - replies_tour.id
 
 Ref: locations.userId > users.id
 
-Ref: user_on_flights.userId > users.id
-
-Ref: user_on_flights.flightId > flights.id
-
 Ref: user_on_tours.userId > users.id
 
 Ref: user_on_tours.tourId > tours.id
-
-Ref: user_on_hotels.userId > users.id
-
-Ref: user_on_hotels.hotelId > hotels.id
 
 Ref: user_on_flight_crawls.userId > users.id
 

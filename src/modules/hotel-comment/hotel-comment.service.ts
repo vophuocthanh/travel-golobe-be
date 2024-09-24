@@ -83,7 +83,7 @@ export class HotelCommentService {
     reviewId: string,
     userId: string,
   ): Promise<{ message: string }> {
-    const hotel = await this.prismaService.hotel.findUnique({
+    const hotel = await this.prismaService.hotelCrawl.findUnique({
       where: { id: hotelCrawlId },
     });
 

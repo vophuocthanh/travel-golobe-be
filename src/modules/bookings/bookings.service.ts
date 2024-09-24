@@ -77,7 +77,7 @@ export class BookingsService {
     const getFlightBooking = await this.prismaService.booking.findMany({
       where: { userId, flightCrawlId: { not: null } },
       include: {
-        flight: true,
+        flightCrawls: true,
       },
     });
     return { data: getFlightBooking };
@@ -87,7 +87,7 @@ export class BookingsService {
     const getHotelBooking = await this.prismaService.booking.findMany({
       where: { userId, hotelCrawlId: { not: null } },
       include: {
-        hotel: true,
+        hotelCrawls: true,
       },
     });
     return { data: getHotelBooking };
@@ -148,20 +148,38 @@ export class BookingsService {
   }
 
   async bookTour(createTourBookingDto: CreateTourBookingDto, userId: string) {
-    const { tourId } = createTourBookingDto;
+    const { tourId, flightCrawlId, hotelCrawlId } = createTourBookingDto;
 
     const tour = await this.prismaService.tour.findUnique({
       where: { id: tourId },
+    });
+
+    const fligtCrawl = await this.prismaService.flightCrawl.findUnique({
+      where: { id: flightCrawlId },
+    });
+
+    const hotel = await this.prismaService.hotelCrawl.findUnique({
+      where: { id: hotelCrawlId },
     });
 
     if (!tour) {
       throw new Error('Tour not found');
     }
 
+    if (!fligtCrawl) {
+      throw new Error('Flight not found');
+    }
+
+    if (!hotel) {
+      throw new Error('Hotel not found');
+    }
+
     return this.prismaService.booking.create({
       data: {
         tourId,
         userId,
+        flightCrawlId: flightCrawlId || null,
+        hotelCrawlId: hotelCrawlId || null,
       },
     });
   }

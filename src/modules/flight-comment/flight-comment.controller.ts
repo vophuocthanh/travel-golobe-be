@@ -6,7 +6,6 @@ import {
   Param,
   Post,
   Put,
-  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -26,7 +25,6 @@ import {
 } from 'src/modules/flight-comment/dto/reply.dto';
 import { UpdateFlightReviewDto } from 'src/modules/flight-comment/dto/update-flight-review.dto';
 import { FlightCommentService } from 'src/modules/flight-comment/flight-comment.service';
-import { AirlineDto } from 'src/modules/flight/dto/airline.dto';
 import { RequestWithUser } from 'src/types/users';
 
 @ApiBearerAuth()
@@ -159,26 +157,6 @@ export class FlightCommentController {
       replyId,
       replyFlightDto.content,
       userId,
-    );
-  }
-
-  @Post('airlines')
-  async createAirline(@Body() data: AirlineDto) {
-    return this.flightComemntService.createAirline(data);
-  }
-
-  @Get('filter')
-  async filterFlights(
-    @Query('airline') airline?: string,
-    @Query('minPrice') minPrice?: number,
-    @Query('maxPrice') maxPrice?: number,
-    @Query('minRating') minRating?: number,
-  ) {
-    return this.flightComemntService.filterFlights(
-      airline,
-      minPrice,
-      maxPrice,
-      minRating,
     );
   }
 }

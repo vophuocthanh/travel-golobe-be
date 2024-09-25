@@ -59,6 +59,7 @@ Table hotel_crawl {
   image_4 String
   image_5 String
   userId String
+  number_of_seats_remaining Int
   users user_on_hotel_crawls [not null]
   hotelCrawlReviewa hotel_crawl_reviews [not null]
   bookings bookings [not null]
@@ -80,6 +81,7 @@ Table flight_crawl {
   updateAt DateTime [not null]
   userId String
   image String
+  number_of_seats_remaining Int
   users user_on_flight_crawls [not null]
   flightReviews flight_crawl_reviews [not null]
   bookings bookings [not null]
@@ -107,6 +109,7 @@ Table tours {
   startLocation String
   endLocation String
   rating Float [default: 1]
+  number_of_seats_remaining Int
   bookings bookings [not null]
   users user_on_tours [not null]
   tourReviews tour_reviews [not null]

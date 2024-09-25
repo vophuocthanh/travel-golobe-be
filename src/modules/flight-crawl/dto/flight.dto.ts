@@ -1,4 +1,5 @@
 import { FlightCrawl } from '@prisma/client';
+import { IsOptional, IsString } from 'class-validator';
 
 export class FlightCrawlDto {
   search?: string;
@@ -7,6 +8,15 @@ export class FlightCrawlDto {
   sort_by_price?: 'asc' | 'desc';
   min_price?: number;
   max_price?: number;
+  @IsOptional()
+  @IsString()
+  start_day?: string;
+
+  @IsOptional()
+  @IsString()
+  end_day?: string;
+  month?: number;
+  year?: number;
 }
 
 export interface FlightCrawlPaginationResponseType {

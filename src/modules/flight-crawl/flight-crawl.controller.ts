@@ -60,6 +60,18 @@ export class FlightCrawlController {
     type: Number,
     description: 'Maximum price filter',
   })
+  @ApiQuery({
+    name: 'start_day',
+    required: false,
+    type: String,
+    description: 'Start day in format dd-mm-yyyy',
+  })
+  @ApiQuery({
+    name: 'end_day',
+    required: false,
+    type: String,
+    description: 'End day in format dd-mm-yyyy',
+  })
   @ApiOperation({ summary: 'Lấy thông tin chuyến bay từ các trang web khác' })
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })

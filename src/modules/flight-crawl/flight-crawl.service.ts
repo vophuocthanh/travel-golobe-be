@@ -14,9 +14,10 @@ import { PrismaService } from 'src/prisma.service';
 export class FlightCrawlService {
   constructor(private prismaService: PrismaService) {}
 
-  private formatDate(dateStr: string): string {
-    const [day, month, year] = dateStr.split('-');
-    return `${year}-${month}-${day}`;
+  private parseDateString(dateString: string): Date | undefined {
+    if (!dateString) return undefined;
+    const [day, month, year] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day);
   }
 
   async importFlightsFromCSV(filePath: string): Promise<void> {
@@ -30,8 +31,8 @@ export class FlightCrawlService {
             brand: row.brand || '',
             price: parseFloat(row.price || '0'),
             start_time: row.start_time || '',
-            start_day: new Date(this.formatDate(row.start_day)),
-            end_day: new Date(this.formatDate(row.end_day)),
+            start_day: this.parseDateString(row.start_day),
+            end_day: this.parseDateString(row.end_day),
             end_time: row.end_time || '',
             trip_time: row.trip_time || '',
             take_place: row.take_place || '',
@@ -65,11 +66,15 @@ export class FlightCrawlService {
     const items_per_page = Number(filters.items_per_page) || 10;
     const page = Number(filters.page) || 1;
     const search = filters.search || '';
-    const sort_by_price = filters.sort_by_price || 'asc'; // sort up and down
+    const sort_by_price = filters.sort_by_price || 'asc';
     const min_price = parseFloat(filters.min_price?.toString() || '0');
     const max_price = parseFloat(
       filters.max_price?.toString() || `${Number.MAX_SAFE_INTEGER}`,
     );
+
+    const startDate = this.parseDateString(filters.start_day);
+    const endDate = this.parseDateString(filters.end_day);
+
     const skip = page > 1 ? (page - 1) * items_per_page : 0;
 
     const flightCrawl = await this.prismaService.flightCrawl.findMany({
@@ -92,6 +97,16 @@ export class FlightCrawlService {
               },
             ],
           },
+          ...(startDate || endDate
+            ? [
+                {
+                  start_day: {
+                    gte: startDate || new Date('1970-01-01'),
+                    lte: endDate || new Date(),
+                  },
+                },
+              ]
+            : []),
         ],
       },
       orderBy: {
@@ -117,6 +132,16 @@ export class FlightCrawlService {
               },
             ],
           },
+          ...(startDate || endDate
+            ? [
+                {
+                  start_day: {
+                    gte: startDate || new Date('1970-01-01'),
+                    lte: endDate || new Date(),
+                  },
+                },
+              ]
+            : []),
         ],
       },
     });

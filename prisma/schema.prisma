@@ -54,27 +54,26 @@ model Role {
   @@map("roles")
 }
 
-
-
 model HotelCrawl {
-  id            String  @id @default(uuid())
-  hotel_names   String
-  location      String
-  price         Float?
-  score_hotels  Float?
-  number_rating Float?
-  star_number   Float?
-  received_time String
-  giveback_time String
-  description   String
-  hotel_link    String
-  place         String
-  image         String?
-  image_2       String?
-  image_3       String?
-  image_4       String?
-  image_5       String?
-  userId        String?
+  id                        String  @id @default(uuid())
+  hotel_names               String
+  location                  String
+  price                     Float?
+  score_hotels              Float?
+  number_rating             Float?
+  star_number               Float?
+  received_time             String
+  giveback_time             String
+  description               String
+  hotel_link                String
+  place                     String
+  image                     String?
+  image_2                   String?
+  image_3                   String?
+  image_4                   String?
+  image_5                   String?
+  userId                    String?
+  number_of_seats_remaining Int?
 
   users             UserOnHotelCrawl[]
   hotelCrawlReviewa HotelCrawlReview[]
@@ -83,23 +82,23 @@ model HotelCrawl {
   @@map("hotel_crawl")
 }
 
-
 model FlightCrawl {
-  id          String   @id @default(uuid())
-  brand       String
-  price       Float
-  start_time  String
-  start_day   DateTime
-  end_day     DateTime
-  end_time    String
-  trip_time   String
-  take_place  String
-  destination String
-  trip_to     String
-  createAt    DateTime @default(now())
-  updateAt    DateTime @updatedAt
-  userId      String?
-  image       String?
+  id                        String   @id @default(uuid())
+  brand                     String
+  price                     Float
+  start_time                String
+  start_day                 DateTime
+  end_day                   DateTime
+  end_time                  String
+  trip_time                 String
+  take_place                String
+  destination               String
+  trip_to                   String
+  createAt                  DateTime @default(now())
+  updateAt                  DateTime @updatedAt
+  userId                    String?
+  image                     String?
+  number_of_seats_remaining Int?
 
   users         UserOnFlightCrawl[]
   flightReviews FlightCrawlReview[]
@@ -109,27 +108,28 @@ model FlightCrawl {
 }
 
 model Tour {
-  id             String         @id @default(cuid())
-  name           String
-  userId         String
-  description    String?
-  locationId     String
-  location       CustomLocation @relation(fields: [locationId], references: [id])
-  price          Float?
-  createAt       DateTime       @default(now())
-  updateAt       DateTime?      @updatedAt
-  remainingCount Int?
-  image          String
-  image_2        String?
-  image_3        String?
-  image_4        String?
-  image_5        String?
-  images         String[]
-  transport      String?
-  hotel          String?
-  startLocation  String?
-  endLocation    String?
-  rating         Float?         @default(1)
+  id                        String         @id @default(cuid())
+  name                      String
+  userId                    String
+  description               String?
+  locationId                String
+  location                  CustomLocation @relation(fields: [locationId], references: [id])
+  price                     Float?
+  createAt                  DateTime       @default(now())
+  updateAt                  DateTime?      @updatedAt
+  remainingCount            Int?
+  image                     String
+  image_2                   String?
+  image_3                   String?
+  image_4                   String?
+  image_5                   String?
+  images                    String[]
+  transport                 String?
+  hotel                     String?
+  startLocation             String?
+  endLocation               String?
+  rating                    Float?         @default(1)
+  number_of_seats_remaining Int?
 
   bookings    Booking[]
   users       UserOnTour[]
@@ -174,7 +174,7 @@ model UserFlightFavorite {
   flightId  String
   createdAt DateTime @default(now())
 
-  user   User   @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
   @@unique([userId, flightId])
   @@map("user_flight_favorites")
@@ -183,7 +183,7 @@ model UserFlightFavorite {
 //  Booking in system
 
 model Booking {
-  id       String  @id @default(uuid())
+  id            String       @id @default(uuid())
   tourId        String?
   userId        String
   flightCrawlId String?
@@ -194,7 +194,7 @@ model Booking {
   user          User         @relation(fields: [userId], references: [id])
   createdAt     DateTime     @default(now())
 
-  totalAmount    Float?
+  totalAmount Float?
 
   @@map("bookings")
 }

@@ -1,8 +1,11 @@
 import {
+  Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
+  Put,
   Query,
   UploadedFile,
   UseGuards,
@@ -26,6 +29,7 @@ import {
   RoadVehicleCrawlDto,
   RoadVehicleCrawlPaginationResponseType,
 } from 'src/modules/road-vehicle/dto/road-vehicle.dto';
+import { UpdateRoadVehicleCrawlDto } from 'src/modules/road-vehicle/dto/update.dto';
 import { RoadVehicleService } from 'src/modules/road-vehicle/road-vehicle.service';
 
 @ApiBearerAuth()
@@ -47,7 +51,7 @@ export class RoadVehicleController {
   async crawlFlights(
     @Query() params: RoadVehicleCrawlDto,
   ): Promise<RoadVehicleCrawlPaginationResponseType> {
-    return this.roadVehicleService.getFlightsCrawl(params);
+    return this.roadVehicleService.getRoadVehicleCrawl(params);
   }
 
   @Get('crawl/:id')
@@ -56,11 +60,18 @@ export class RoadVehicleController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async getFlightCrawlById(@Param('id') id: string): Promise<RoadVehicle> {
-    return this.roadVehicleService.getFlightCrawlById(id);
+    return this.roadVehicleService.getRoadVehicleCrawlById(id);
   }
 
   @UseGuards(HandleAuthGuard)
   @Post('import-csv')
+  @ApiOperation({
+    summary: 'Import thông tin phương tiện đường bộ từ file CSV',
+  })
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -93,5 +104,30 @@ export class RoadVehicleController {
     }
     await this.roadVehicleService.importRoadVehicleFromCSV(file.path);
     return { message: 'File uploaded and road vehicle imported successfully' };
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @ApiOperation({ summary: 'Cập nhật thông tin phương tiện đường bộ' })
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @Put('crawl/:id')
+  async putRoadVehicleCrawl(
+    @Param('id') id: string,
+    @Body() updateRoadVehicle: UpdateRoadVehicleCrawlDto,
+  ): Promise<RoadVehicle> {
+    return this.roadVehicleService.putRoadVehicleCrawl(id, updateRoadVehicle);
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @Delete('crawl/:id')
+  @ApiOperation({ summary: 'Xóa thông tin phương tiện đường bộ' })
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async deleteRoadVehicleCrawl(id: string): Promise<{ message: string }> {
+    return this.roadVehicleService.deleteRoadVehicleCrawl(id);
   }
 }

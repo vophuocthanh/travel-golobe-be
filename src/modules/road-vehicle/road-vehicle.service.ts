@@ -6,6 +6,7 @@ import {
   RoadVehicleCrawlDto,
   RoadVehicleCrawlPaginationResponseType,
 } from 'src/modules/road-vehicle/dto/road-vehicle.dto';
+import { UpdateRoadVehicleCrawlDto } from 'src/modules/road-vehicle/dto/update.dto';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
@@ -57,7 +58,7 @@ export class RoadVehicleService {
     });
   }
 
-  async getFlightsCrawl(
+  async getRoadVehicleCrawl(
     filters: RoadVehicleCrawlDto,
   ): Promise<RoadVehicleCrawlPaginationResponseType> {
     const items_per_page = Number(filters.items_per_page) || 10;
@@ -96,11 +97,34 @@ export class RoadVehicleService {
       itemsPerPage: items_per_page,
     };
   }
-  async getFlightCrawlById(id: string): Promise<RoadVehicle> {
+  async getRoadVehicleCrawlById(id: string): Promise<RoadVehicle> {
     return this.prismaService.roadVehicle.findFirst({
       where: {
         id,
       },
     });
+  }
+
+  async putRoadVehicleCrawl(
+    id: string,
+    roadVehicle: UpdateRoadVehicleCrawlDto,
+  ): Promise<RoadVehicle> {
+    return this.prismaService.roadVehicle.update({
+      where: {
+        id,
+      },
+      data: roadVehicle,
+    });
+  }
+
+  async deleteRoadVehicleCrawl(id: string): Promise<{ message: string }> {
+    await this.prismaService.roadVehicle.delete({
+      where: {
+        id,
+      },
+    });
+    return {
+      message: 'Delete successfully',
+    };
   }
 }

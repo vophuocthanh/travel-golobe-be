@@ -1,38 +1,50 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { CreateRoleDto } from 'src/modules/role/dto/create.dto';
+import { RoleDto, RoleResponseType } from 'src/modules/role/dto/role.dto';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class RoleService {
   constructor(private prisma: PrismaService) {}
 
-  async createRole(data: Prisma.RoleCreateInput) {
+  async createRole(data: CreateRoleDto) {
     return this.prisma.role.create({ data });
   }
 
-  async getRoles() {
-    return this.prisma.role.findMany();
-  }
+  async getRoles(filter: RoleDto): Promise<RoleResponseType> {
+    const search = filter.search || '';
 
-  async getRoleById(id: string) {
-    return this.prisma.role.findFirst({ where: { id } });
-  }
-
-  async updateRole(id: string, data: Prisma.RoleUpdateInput) {
-    return this.prisma.role.update({
-      where: { id },
-      data,
+    const role = await this.prisma.role.findMany({
+      where: {
+        OR: [
+          {
+            name: {
+              contains: search,
+            },
+          },
+        ],
+      },
     });
+
+    const total = await this.prisma.role.count({
+      where: {
+        OR: [
+          {
+            name: {
+              contains: search,
+            },
+          },
+        ],
+      },
+    });
+
+    return {
+      data: role,
+      total,
+    };
   }
 
   async deleteRole(id: string) {
     return this.prisma.role.delete({ where: { id } });
-  }
-
-  async assignRoleToUser(userId: string, roleId: string) {
-    return this.prisma.user.update({
-      where: { id: userId },
-      data: { roleId },
-    });
   }
 }

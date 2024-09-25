@@ -40,6 +40,7 @@ async function bootstrap() {
       'http://localhost:3000',
       'http://localhost:3002',
       'https://travel-golobe.vercel.app',
+      'https://travel-golobe.s3.amazonaws.com',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,

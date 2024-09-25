@@ -1,11 +1,20 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
+import { FileUploadService } from 'src/lib/file-upload.service';
 import { UpdateUserDto, UserFilterType } from 'src/modules/user/dto/user.dto';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class UserService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private fileUploadService: FileUploadService,
+  ) {}
 
   async getAll(filters: UserFilterType): Promise<any> {
     const { items_per_page = 10, page = 1, search } = filters;
@@ -98,14 +107,36 @@ export class UserService {
       },
     });
   }
-  async updateAvatar(userId: string, avatar: string): Promise<User> {
+
+  async updateMeUserS3(data: UpdateUserDto, id: string): Promise<User> {
     return await this.prismaService.user.update({
       where: {
-        id: userId,
+        id,
       },
-      data: {
-        avatar,
-      },
+      data,
+    });
+  }
+
+  async updateAvatarS3(
+    userId: string,
+    file: Express.Multer.File,
+  ): Promise<User> {
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    const avatarUrl = await this.fileUploadService.uploadImageToS3(
+      file,
+      'avatars',
+    );
+
+    return await this.prismaService.user.update({
+      where: { id: userId },
+      data: { avatar: avatarUrl },
     });
   }
 }

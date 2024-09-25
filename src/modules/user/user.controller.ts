@@ -22,8 +22,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { User } from '@prisma/client';
-import { extname } from 'path';
-import { storageConfig } from 'src/helpers/config';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import {
   UpdateUserDto,
@@ -103,58 +101,24 @@ export class UserController {
 
   @UseGuards(HandleAuthGuard)
   @Post('upload-avatar')
-  @ApiResponse({ status: 200, description: 'Successfully' })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  @ApiOperation({ summary: 'Upload avatar' })
-  @UseInterceptors(
-    FileInterceptor('avatar', {
-      storage: storageConfig('avatar'),
-      fileFilter: (req, file, cb) => {
-        const ext = extname(file.originalname);
-        const allowedExtArr = ['.jpg', '.jpeg', '.png', '.webp'];
-        if (!allowedExtArr.includes(ext)) {
-          req.fileValidationError = `Wrong extension type. Accept file ext are: ${allowedExtArr.toString()}`;
-          cb(null, false);
-        } else {
-          const fileSize = parseInt(req.headers['content-length']);
-          if (fileSize > 1024 * 1024 * 5) {
-            req.fileValidationError = 'File size must be less than 5MB';
-            cb(null, false);
-          } else {
-            cb(null, true);
-          }
-        }
-      },
-    }),
-  )
-  @ApiResponse({ status: 200, description: 'Successfully' })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @ApiOperation({ summary: 'Upload user avatar' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
       type: 'object',
       properties: {
-        avatar: {
+        file: {
           type: 'string',
           format: 'binary',
         },
       },
     },
   })
-  uploadAvatar(@Req() req, @UploadedFile() file: Express.Multer.File) {
-    if (req.fileValidationError) {
-      throw new BadRequestException(req.fileValidationError);
-    }
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadAvatarS3(@Req() req, @UploadedFile() file: Express.Multer.File) {
     if (!file) {
-      throw new BadRequestException('File not found');
+      throw new BadRequestException('No file provided');
     }
-    return this.userService.updateAvatar(
-      req.user.id,
-      file.fieldname + '/' + file.filename,
-    );
+    return await this.userService.updateAvatarS3(req.user.id, file);
   }
 }

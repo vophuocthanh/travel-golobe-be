@@ -26,7 +26,6 @@ import { extname } from 'path';
 import { storageConfig } from 'src/helpers/config';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import {
-  CreateUserDto,
   UpdateUserDto,
   UserFilterType,
   UserPaginationResponseType,
@@ -52,13 +51,6 @@ export class UserController {
     const userId = req.user.id;
     const user = await this.userService.getDetail(userId);
     return user;
-  }
-
-  @UseGuards(HandleAuthGuard)
-  @Post('add')
-  @ApiOperation({ summary: 'Api này không được dùng' })
-  create(@Body() body: CreateUserDto): Promise<User> {
-    return this.userService.create(body);
   }
 
   @UseGuards(HandleAuthGuard)

@@ -64,15 +64,36 @@ export class UserService {
     };
   }
 
-  async getDetail(
-    id: string,
-  ): Promise<Omit<User, 'password' | 'confirmPassword'>> {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, confirmPassword, ...userWithoutPassword } =
-      await this.prismaService.user.findFirst({
-        where: { id },
-      });
-    return userWithoutPassword;
+  async getDetail(id: string): Promise<any> {
+    const user = await this.prismaService.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        phone: true,
+        address: true,
+        avatar: true,
+        name: true,
+        date_of_birth: true,
+        country: true,
+        createAt: true,
+        updateAt: true,
+        verificationCode: true,
+        verificationCodeExpiresAt: true,
+        isVerified: true,
+        role: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    return user;
   }
 
   async updateMeUser(data: UpdateUserDto, id: string): Promise<User> {

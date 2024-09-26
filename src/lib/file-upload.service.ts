@@ -29,23 +29,18 @@ export class FileUploadService {
     }
 
     try {
-      // Generate unique file name with UUID and preserve original file extension
       const fileExtension = extname(file.originalname);
       const fileKey = `${folder}/${uuidv4()}${fileExtension}`;
 
-      // Prepare the parameters for uploading to S3
       const uploadParams = {
         Bucket: process.env.AWS_S3_BUCKET_NAME,
         Key: fileKey,
         Body: file.buffer,
         ContentType: file.mimetype,
-        // Remove the ACL property
       };
 
-      // Upload the file to S3
       await this.s3.send(new PutObjectCommand(uploadParams));
 
-      // Return the URL of the uploaded file
       return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
     } catch (error) {
       console.error('Error uploading file to S3:', error);

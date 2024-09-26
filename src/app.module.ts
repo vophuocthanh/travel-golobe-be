@@ -5,7 +5,6 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AirlineModule } from './modules/airline/airline.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BookingsModule } from './modules/bookings/bookings.module';
 import { FlightCommentModule } from './modules/flight-comment/flight-comment.module';
@@ -37,7 +36,6 @@ import { UserModule } from './modules/user/user.module';
     FlightCommentModule,
     HotelCommentModule,
     TourCommentModule,
-    AirlineModule,
     FlightCrawlModule,
     HotelCrawlModule,
     RoadVehicleModule,

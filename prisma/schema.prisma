@@ -187,7 +187,7 @@ model Booking {
   hotelCrawlId  String?
   hotelCrawls   HotelCrawl?   @relation(fields: [hotelCrawlId], references: [id])
   roadVehicleId String?
-  roadVehicles  RoadVehicle[]
+  roadVehicles  RoadVehicle?  @relation(fields: [roadVehicleId], references: [id])
   tour          Tour?         @relation(fields: [tourId], references: [id])
   user          User          @relation(fields: [userId], references: [id])
   createdAt     DateTime      @default(now())

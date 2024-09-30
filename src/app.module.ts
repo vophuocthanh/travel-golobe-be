@@ -11,7 +11,6 @@ import { FlightCommentModule } from './modules/flight-comment/flight-comment.mod
 import { FlightCrawlModule } from './modules/flight-crawl/flight-crawl.module';
 import { HotelCommentModule } from './modules/hotel-comment/hotel-comment.module';
 import { HotelCrawlModule } from './modules/hotel-crawl/hotel-crawl.module';
-import { LocationModule } from './modules/location/location.module';
 import { RoadVehicleModule } from './modules/road-vehicle/road-vehicle.module';
 import { RoleModule } from './modules/role/role.module';
 import { TourCommentModule } from './modules/tour-comment/tour-comment.module';
@@ -31,7 +30,6 @@ import { UserModule } from './modules/user/user.module';
     UserModule,
     TourModule,
     RoleModule,
-    LocationModule,
     BookingsModule,
     FlightCommentModule,
     HotelCommentModule,

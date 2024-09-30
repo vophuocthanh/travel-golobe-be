@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { HotelCrawl } from '@prisma/client';
+import { HotelCrawl, RoomType } from '@prisma/client';
 import * as csv from 'csv-parser';
 import * as fs from 'fs';
 import {
@@ -52,9 +52,33 @@ export class HotelCrawlService {
         .on('end', async () => {
           try {
             for (const hotel of hotels) {
-              await this.prismaService.hotelCrawl.create({
+              const createdHotel = await this.prismaService.hotelCrawl.create({
                 data: hotel,
               });
+
+              // Lấy giá mặc định từ trường price
+              const defaultPrice = hotel.price; // Giá mặc định từ CSV
+
+              // Danh sách các loại phòng với giá tăng dần
+              const roomTypes = [
+                { type: RoomType.SINGLE, priceMultiplier: 1.0 }, // Giá không đổi
+                { type: RoomType.DOUBLE, priceMultiplier: 1.2 }, // Giá tăng 20%
+                { type: RoomType.SUITE, priceMultiplier: 1.4 }, // Giá tăng 40%s
+                { type: RoomType.DELUXE, priceMultiplier: 1.8 }, // Giá tăng 80%
+              ];
+
+              for (const roomType of roomTypes) {
+                // Tính toán giá cho từng loại phòng
+                const pricePerDay = defaultPrice * roomType.priceMultiplier;
+
+                await this.prismaService.room.create({
+                  data: {
+                    type: roomType.type,
+                    hotelId: createdHotel.id,
+                    pricePerDay: pricePerDay, // Giá cho từng loại phòng
+                  },
+                });
+              }
             }
             resolve();
           } catch (error) {
@@ -82,6 +106,11 @@ export class HotelCrawlService {
       filters.max_price?.toString() || `${Number.MAX_SAFE_INTEGER}`,
     );
 
+    // Lọc theo star_number nếu có
+    const starNumber = filters.star_number
+      ? Number(filters.star_number)
+      : undefined;
+
     const hotelCrawl = await this.prismaService.hotelCrawl.findMany({
       take: items_per_page,
       skip,
@@ -98,6 +127,12 @@ export class HotelCrawlService {
               contains: search,
             },
           },
+          // Thêm điều kiện lọc star_number
+          starNumber !== undefined
+            ? {
+                star_number: starNumber,
+              }
+            : {},
         ],
       },
       orderBy: {
@@ -119,6 +154,11 @@ export class HotelCrawlService {
               contains: search,
             },
           },
+          starNumber !== undefined
+            ? {
+                star_number: starNumber,
+              }
+            : {},
         ],
       },
     });
@@ -135,6 +175,9 @@ export class HotelCrawlService {
     return this.prismaService.hotelCrawl.findFirst({
       where: {
         id,
+      },
+      include: {
+        rooms: true,
       },
     });
   }

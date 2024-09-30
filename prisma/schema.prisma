@@ -37,7 +37,6 @@ model User {
   bookings               Booking[]
   tours                  UserOnTour[]
   tourReviews            TourReview[]
-  location               CustomLocation[]
   reviewReply            ReviewReplyFlight[]
   reviewReplyTour        ReviewReplyTour[]
   reviewReplyHotel       ReviewReplyHotel[]
@@ -45,6 +44,10 @@ model User {
   roadVehicles           UserOnRoadVehicle[]
   roadVehicleReview      RoadVehicleReview[]
   reviewReplyRoadVehicle ReviewReplyRoadVehicle[]
+  hotelFavorites         HotelFavorite[]
+  flightFavorites        FlightFavorite[]
+  tourFavorites          TourFavorite[]
+  roadVehicleFavorites   RoadVehicleFavorite[]
 
   @@map("users")
 }
@@ -58,7 +61,7 @@ model Role {
 }
 
 model HotelCrawl {
-  id                        String  @id @default(uuid())
+  id                        String   @id @default(uuid())
   hotel_names               String
   location                  String
   price                     Float?
@@ -77,12 +80,51 @@ model HotelCrawl {
   image_5                   String?
   userId                    String?
   number_of_seats_remaining Int?
+  isFavorite                Boolean? @default(false)
+
+  rooms Room[]
 
   users             UserOnHotelCrawl[]
   hotelCrawlReviewa HotelCrawlReview[]
   bookings          Booking[]
+  hotelFavorites    HotelFavorite[]
 
   @@map("hotel_crawl")
+}
+
+model Room {
+  id          String    @id @default(uuid())
+  hotelId     String
+  type        RoomType
+  pricePerDay Float
+  available   Boolean   @default(true)
+  hotel       HotelCrawl @relation(fields: [hotelId], references: [id])
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("rooms")
+}
+
+enum RoomType {
+  SINGLE
+  DOUBLE
+  SUITE
+  DELUXE
+}
+
+
+model HotelFavorite {
+  id        String   @id @default(uuid())
+  userId    String
+  hotelId   String
+  createdAt DateTime @default(now())
+
+  hotelCrawl HotelCrawl @relation(fields: [hotelId], references: [id])
+  user       User       @relation(fields: [userId], references: [id])
+
+  @@unique([userId, hotelId])
+  @@map("hotel_favorites")
 }
 
 model FlightCrawl {
@@ -102,43 +144,112 @@ model FlightCrawl {
   userId                    String?
   image                     String?
   number_of_seats_remaining Int?
+  isFavorite                Boolean? @default(false)
+  type_ticket               TicketType
+  baggage_weight  BaggageWeight 
 
-  users         UserOnFlightCrawl[]
-  flightReviews FlightCrawlReview[]
-  bookings      Booking[]
+  users           UserOnFlightCrawl[]
+  flightReviews   FlightCrawlReview[]
+  bookings        Booking[]
+  flightFavorites FlightFavorite[]
+  Ticket Ticket[]
 
   @@map("flight_crawl")
 }
 
+enum BaggageWeight {
+  FREE_7KG
+  WEIGHT_15KG
+  WEIGHT_25KG
+  WEIGHT_32KG
+}
+
+
+model Ticket {
+  id             String         @id @default(uuid())
+  type_ticket    TicketType
+  price          Float
+  baggage_weight BaggageWeight
+  baggage_price  Float
+  flightId       String
+  flight         FlightCrawl    @relation(fields: [flightId], references: [id])
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+
+enum TicketType {
+  ECONOMY
+  BUSINESS
+  FIRST_CLASS
+}
+
+model FlightFavorite {
+  id        String   @id @default(uuid())
+  userId    String
+  flightId  String
+  createdAt DateTime @default(now())
+
+  flightCrawl FlightCrawl @relation(fields: [flightId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
+
+  @@unique([userId, flightId])
+  @@map("flight_favorites")
+}
+
 model Tour {
-  id                        String         @id @default(cuid())
+  id                        String    @id @default(cuid())
   name                      String
   userId                    String
   description               String?
-  locationId                String
-  location                  CustomLocation @relation(fields: [locationId], references: [id])
-  price                     Float?
-  createAt                  DateTime       @default(now())
-  updateAt                  DateTime?      @updatedAt
-  remainingCount            Int?
+  price                     Float? // Giá tour
+  original_price            Float? // Giá gốc
+  createAt                  DateTime  @default(now())
+  updateAt                  DateTime? @updatedAt
+  start_date                DateTime? // Ngày khởi hành
+  end_date                  DateTime? // Ngày kết thúc
+  starting_gate             String? // Nơi khởi hành
+  sightseeing               String? // Điểm tham quan
+  cuisine                   String? // Ẩm thực
+  suitable                  String? // Phù hợp
+  ideal_time                String? // Thời gian lý tưởng
+  road_vehicle              String? // Phương tiện
+  voucher                   String? // Voucher
+  time_trip                 String? // Thời gian hành trình
+  baby_price                Float? // Giá em bé (dưới 2 tuổi)
+  child_price               Float? // Giá trẻ em (2-12 tuổi)
+  adult_price               Float? // Giá người lớn (từ 12 tuổi trở lên)
   image                     String
   image_2                   String?
   image_3                   String?
   image_4                   String?
   image_5                   String?
-  images                    String[]
   transport                 String?
-  hotel                     String?
   startLocation             String?
   endLocation               String?
-  rating                    Float?         @default(1)
-  number_of_seats_remaining Int?
+  rating                    Float?    @default(1)
+  number_of_seats_remaining Int? // Số ghế còn lại
+  isFavorite                Boolean?  @default(false)
 
-  bookings    Booking[]
-  users       UserOnTour[]
-  tourReviews TourReview[]
+  bookings      Booking[]
+  users         UserOnTour[]
+  tourReviews   TourReview[]
+  tourFavorites TourFavorite[]
 
   @@map("tours")
+}
+
+model TourFavorite {
+  id        String   @id @default(uuid())
+  userId    String
+  tourId    String
+  createdAt DateTime @default(now())
+
+  tour Tour @relation(fields: [tourId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, tourId])
+  @@map("tour_favorites")
 }
 
 // Road vehicles (phương tiện đường bộ)
@@ -156,12 +267,27 @@ model RoadVehicle {
   take_place     String // Điểm xuất phát
   destination    String // Điểm đến
   location       String
+  isFavorite     Boolean? @default(false)
 
-  users             UserOnRoadVehicle[]
-  bookings          Booking[]
-  roadVehicleReview RoadVehicleReview[]
+  users               UserOnRoadVehicle[]
+  bookings            Booking[]
+  roadVehicleReview   RoadVehicleReview[]
+  roadVehicleFavorite RoadVehicleFavorite[]
 
   @@map("road_vehicles")
+}
+
+model RoadVehicleFavorite {
+  id            String   @id @default(uuid())
+  userId        String
+  roadVehicleId String
+  createdAt     DateTime @default(now())
+
+  roadVehicle RoadVehicle @relation(fields: [roadVehicleId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
+
+  @@unique([userId, roadVehicleId])
+  @@map("road_vehicle_favorites")
 }
 
 model UserFlightFavorite {
@@ -179,18 +305,18 @@ model UserFlightFavorite {
 //  Booking in system
 
 model Booking {
-  id            String        @id @default(uuid())
+  id            String       @id @default(uuid())
   tourId        String?
   userId        String
   flightCrawlId String?
-  flightCrawls  FlightCrawl?  @relation(fields: [flightCrawlId], references: [id])
+  flightCrawls  FlightCrawl? @relation(fields: [flightCrawlId], references: [id])
   hotelCrawlId  String?
-  hotelCrawls   HotelCrawl?   @relation(fields: [hotelCrawlId], references: [id])
+  hotelCrawls   HotelCrawl?  @relation(fields: [hotelCrawlId], references: [id])
   roadVehicleId String?
-  roadVehicles  RoadVehicle?  @relation(fields: [roadVehicleId], references: [id])
-  tour          Tour?         @relation(fields: [tourId], references: [id])
-  user          User          @relation(fields: [userId], references: [id])
-  createdAt     DateTime      @default(now())
+  roadVehicles  RoadVehicle? @relation(fields: [roadVehicleId], references: [id])
+  tour          Tour?        @relation(fields: [tourId], references: [id])
+  user          User         @relation(fields: [userId], references: [id])
+  createdAt     DateTime     @default(now())
 
   totalAmount Float?
 
@@ -322,19 +448,6 @@ model ReviewReplyRoadVehicle {
   replies       ReviewReplyRoadVehicle[] @relation("ReplyToParent")
 
   @@map("replies_road_vehicle")
-}
-
-model CustomLocation {
-  id          String    @id @default(cuid())
-  name        String
-  description String
-  createAt    DateTime  @default(now())
-  updateAt    DateTime? @updatedAt
-  tours       Tour[]
-  userId      String
-  user        User?     @relation(fields: [userId], references: [id])
-
-  @@map("locations")
 }
 
 model UserOnTour {

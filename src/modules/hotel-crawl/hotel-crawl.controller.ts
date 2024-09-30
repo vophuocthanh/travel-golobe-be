@@ -64,6 +64,12 @@ export class HotelCrawlController {
     type: String,
     description: 'Maximum price filter',
   })
+  @ApiQuery({
+    name: 'star_number',
+    required: false,
+    type: Number,
+    description: 'Filter hotels by star number',
+  })
   async crawlFlights(
     @Query() params: HotelCrawlDto,
   ): Promise<HotelCrawlPaginationResponseType> {

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { FlightCrawl } from '@prisma/client';
+import { BaggageWeight, FlightCrawl, TicketType } from '@prisma/client';
 import * as csv from 'csv-parser';
 import * as fs from 'fs';
 import {
@@ -20,6 +20,21 @@ export class FlightCrawlService {
     return new Date(year, month - 1, day);
   }
 
+  private getBaggagePrice(weight: BaggageWeight): number {
+    switch (weight) {
+      case BaggageWeight.FREE_7KG:
+        return 0;
+      case BaggageWeight.WEIGHT_15KG:
+        return 200000;
+      case BaggageWeight.WEIGHT_25KG:
+        return 400000;
+      case BaggageWeight.WEIGHT_32KG:
+        return 500000;
+      default:
+        return 0;
+    }
+  }
+
   async importFlightsFromCSV(filePath: string): Promise<void> {
     const flights = [];
 
@@ -27,9 +42,10 @@ export class FlightCrawlService {
       fs.createReadStream(filePath)
         .pipe(csv())
         .on('data', (row) => {
-          const flight1 = {
+          const basePrice = parseFloat(row.price || '0');
+
+          const flightEntry = {
             brand: row.brand || '',
-            price: parseFloat(row.price || '0'),
             start_time: row.start_time || '',
             start_day: this.parseDateString(row.start_day),
             end_day: this.parseDateString(row.end_day),
@@ -37,17 +53,65 @@ export class FlightCrawlService {
             trip_time: row.trip_time || '',
             take_place: row.take_place || '',
             destination: row.destination || '',
-            trip_to: row.trip_to || '',
+            trip_to: row.trip_to,
+            tickets: [],
           };
 
-          flights.push(flight1);
+          const ticketTypes = [
+            { type: TicketType.ECONOMY, multiplier: 1 },
+            { type: TicketType.BUSINESS, multiplier: 1.5 },
+            { type: TicketType.FIRST_CLASS, multiplier: 2 },
+          ];
+
+          for (const ticket of ticketTypes) {
+            const baggageWeight = BaggageWeight.FREE_7KG;
+            const baggagePrice = this.getBaggagePrice(baggageWeight);
+            const calculatedPrice =
+              basePrice * ticket.multiplier + baggagePrice;
+
+            flightEntry.tickets.push({
+              type_ticket: ticket.type,
+              price: calculatedPrice,
+              baggage_weight: baggageWeight,
+              baggage_price: baggagePrice,
+            });
+          }
+
+          flights.push(flightEntry);
         })
         .on('end', async () => {
           try {
-            for (const flight1 of flights) {
-              await this.prismaService.flightCrawl.create({
-                data: flight1,
-              });
+            for (const flight of flights) {
+              const createdFlight = await this.prismaService.flightCrawl.create(
+                {
+                  data: {
+                    brand: flight.brand,
+                    start_time: flight.start_time,
+                    start_day: flight.start_day,
+                    end_day: flight.end_day,
+                    end_time: flight.end_time,
+                    trip_time: flight.trip_time,
+                    take_place: flight.take_place,
+                    destination: flight.destination,
+                    trip_to: flight.trip_to,
+                    price: flight.tickets[0].price,
+                    type_ticket: flight.tickets[0].type_ticket,
+                    baggage_weight: flight.tickets[0].baggage_weight,
+                  },
+                },
+              );
+
+              for (const ticket of flight.tickets) {
+                await this.prismaService.ticket.create({
+                  data: {
+                    type_ticket: ticket.type_ticket,
+                    price: ticket.price,
+                    baggage_weight: ticket.baggage_weight,
+                    baggage_price: ticket.baggage_price,
+                    flightId: createdFlight.id,
+                  },
+                });
+              }
             }
             resolve();
           } catch (error) {
@@ -158,6 +222,9 @@ export class FlightCrawlService {
     return this.prismaService.flightCrawl.findFirst({
       where: {
         id,
+      },
+      include: {
+        Ticket: true,
       },
     });
   }

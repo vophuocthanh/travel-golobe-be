@@ -106,10 +106,6 @@ export class TourService {
         ...data,
         userId,
         price: data.price,
-        location: {
-          connect: { id: data.location },
-        },
-        images: { set: data.image.split(',') },
       },
     });
   }
@@ -122,10 +118,6 @@ export class TourService {
       data: {
         ...data,
         price: data.price,
-        location: {
-          connect: { id: data.location },
-        },
-        images: { set: data.image.split(',') },
       },
     });
   }

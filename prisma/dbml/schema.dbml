@@ -27,7 +27,6 @@ Table users {
   bookings bookings [not null]
   tours user_on_tours [not null]
   tourReviews tour_reviews [not null]
-  location locations [not null]
   reviewReply replies_flight [not null]
   reviewReplyTour replies_tour [not null]
   reviewReplyHotel replies_hotel [not null]
@@ -35,6 +34,10 @@ Table users {
   roadVehicles user_on_road_vehicles [not null]
   roadVehicleReview road_vehicle_reviews [not null]
   reviewReplyRoadVehicle replies_road_vehicle [not null]
+  hotelFavorites hotel_favorites [not null]
+  flightFavorites flight_favorites [not null]
+  tourFavorites tour_favorites [not null]
+  roadVehicleFavorites road_vehicle_favorites [not null]
 }
 
 Table roles {
@@ -63,9 +66,36 @@ Table hotel_crawl {
   image_5 String
   userId String
   number_of_seats_remaining Int
+  isFavorite Boolean [default: false]
+  rooms rooms [not null]
   users user_on_hotel_crawls [not null]
   hotelCrawlReviewa hotel_crawl_reviews [not null]
   bookings bookings [not null]
+  hotelFavorites hotel_favorites [not null]
+}
+
+Table rooms {
+  id String [pk]
+  hotelId String [not null]
+  type RoomType [not null]
+  pricePerDay Float [not null]
+  available Boolean [not null, default: true]
+  hotel hotel_crawl [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table hotel_favorites {
+  id String [pk]
+  userId String [not null]
+  hotelId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  hotelCrawl hotel_crawl [not null]
+  user users [not null]
+
+  indexes {
+    (userId, hotelId) [unique]
+  }
 }
 
 Table flight_crawl {
@@ -85,9 +115,39 @@ Table flight_crawl {
   userId String
   image String
   number_of_seats_remaining Int
+  isFavorite Boolean [default: false]
+  type_ticket TicketType [not null]
+  baggage_weight BaggageWeight [not null]
   users user_on_flight_crawls [not null]
   flightReviews flight_crawl_reviews [not null]
   bookings bookings [not null]
+  flightFavorites flight_favorites [not null]
+  Ticket Ticket [not null]
+}
+
+Table Ticket {
+  id String [pk]
+  type_ticket TicketType [not null]
+  price Float [not null]
+  baggage_weight BaggageWeight [not null]
+  baggage_price Float [not null]
+  flightId String [not null]
+  flight flight_crawl [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table flight_favorites {
+  id String [pk]
+  userId String [not null]
+  flightId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  flightCrawl flight_crawl [not null]
+  user users [not null]
+
+  indexes {
+    (userId, flightId) [unique]
+  }
 }
 
 Table tours {
@@ -95,27 +155,51 @@ Table tours {
   name String [not null]
   userId String [not null]
   description String
-  locationId String [not null]
-  location locations [not null]
   price Float
+  original_price Float
   createAt DateTime [default: `now()`, not null]
   updateAt DateTime
-  remainingCount Int
+  start_date DateTime
+  end_date DateTime
+  starting_gate String
+  sightseeing String
+  cuisine String
+  suitable String
+  ideal_time String
+  road_vehicle String
+  voucher String
+  time_trip String
+  baby_price Float
+  child_price Float
+  adult_price Float
   image String [not null]
   image_2 String
   image_3 String
   image_4 String
   image_5 String
-  images String[] [not null]
   transport String
-  hotel String
   startLocation String
   endLocation String
   rating Float [default: 1]
   number_of_seats_remaining Int
+  isFavorite Boolean [default: false]
   bookings bookings [not null]
   users user_on_tours [not null]
   tourReviews tour_reviews [not null]
+  tourFavorites tour_favorites [not null]
+}
+
+Table tour_favorites {
+  id String [pk]
+  userId String [not null]
+  tourId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  tour tours [not null]
+  user users [not null]
+
+  indexes {
+    (userId, tourId) [unique]
+  }
 }
 
 Table road_vehicles {
@@ -131,9 +215,24 @@ Table road_vehicles {
   take_place String [not null]
   destination String [not null]
   location String [not null]
+  isFavorite Boolean [default: false]
   users user_on_road_vehicles [not null]
   bookings bookings [not null]
   roadVehicleReview road_vehicle_reviews [not null]
+  roadVehicleFavorite road_vehicle_favorites [not null]
+}
+
+Table road_vehicle_favorites {
+  id String [pk]
+  userId String [not null]
+  roadVehicleId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  roadVehicle road_vehicles [not null]
+  user users [not null]
+
+  indexes {
+    (userId, roadVehicleId) [unique]
+  }
 }
 
 Table user_flight_favorites {
@@ -272,17 +371,6 @@ Table replies_road_vehicle {
   replies replies_road_vehicle [not null]
 }
 
-Table locations {
-  id String [pk]
-  name String [not null]
-  description String [not null]
-  createAt DateTime [default: `now()`, not null]
-  updateAt DateTime
-  tours tours [not null]
-  userId String [not null]
-  user users
-}
-
 Table user_on_tours {
   userId String [not null]
   users users [not null]
@@ -332,9 +420,47 @@ Table ReplyToParent {
   repliesId String [ref: > replies_hotel.id]
 }
 
+Enum RoomType {
+  SINGLE
+  DOUBLE
+  SUITE
+  DELUXE
+}
+
+Enum BaggageWeight {
+  FREE_7KG
+  WEIGHT_15KG
+  WEIGHT_25KG
+  WEIGHT_32KG
+}
+
+Enum TicketType {
+  ECONOMY
+  BUSINESS
+  FIRST_CLASS
+}
+
 Ref: users.roleId > roles.id
 
-Ref: tours.locationId > locations.id
+Ref: rooms.hotelId > hotel_crawl.id
+
+Ref: hotel_favorites.hotelId > hotel_crawl.id
+
+Ref: hotel_favorites.userId > users.id
+
+Ref: Ticket.flightId > flight_crawl.id
+
+Ref: flight_favorites.flightId > flight_crawl.id
+
+Ref: flight_favorites.userId > users.id
+
+Ref: tour_favorites.tourId > tours.id
+
+Ref: tour_favorites.userId > users.id
+
+Ref: road_vehicle_favorites.roadVehicleId > road_vehicles.id
+
+Ref: road_vehicle_favorites.userId > users.id
 
 Ref: user_flight_favorites.userId > users.id
 
@@ -387,8 +513,6 @@ Ref: replies_road_vehicle.reviewId > road_vehicle_reviews.id
 Ref: replies_road_vehicle.userId > users.id
 
 Ref: replies_road_vehicle.parentReplyId - replies_road_vehicle.id
-
-Ref: locations.userId > users.id
 
 Ref: user_on_tours.userId > users.id
 

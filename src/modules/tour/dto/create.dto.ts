@@ -19,10 +19,6 @@ export class CreateDtoTour {
   @IsNumber()
   price: number;
 
-  @ApiProperty()
-  @IsNotEmpty()
-  location: string;
-
   @IsOptional()
   @IsString()
   created_at?: string;
@@ -36,20 +32,32 @@ export class CreateDtoTour {
   id?: string;
 
   @IsOptional()
-  @IsNumber()
-  remainingCount?: number;
-
-  @IsOptional()
-  @IsString()
-  count?: string;
-
-  @IsOptional()
   @IsString()
   cuisine?: string;
 
   @IsOptional()
   @IsString()
-  suitable_subject?: string;
+  start_date?: string;
+
+  @IsOptional()
+  @IsString()
+  end_date?: string;
+
+  @IsOptional()
+  @IsString()
+  suitable?: string;
+
+  @IsOptional()
+  @IsString()
+  time_trip?: string;
+
+  @IsOptional()
+  @IsNumber()
+  number_of_seats_remaining?: number;
+
+  @IsOptional()
+  @IsNumber()
+  rating?: number;
 
   @IsOptional()
   @IsString()
@@ -57,31 +65,27 @@ export class CreateDtoTour {
 
   @IsOptional()
   @IsString()
-  time_out?: string;
-
-  @IsOptional()
-  @IsString()
   ideal_time?: string;
 
   @IsOptional()
   @IsString()
-  image2?: string;
+  image_2?: string;
 
   @IsOptional()
   @IsString()
-  image3?: string;
+  image_3?: string;
 
   @IsOptional()
   @IsString()
-  image4?: string;
+  image_4?: string;
+
+  @IsOptional()
+  @IsString()
+  image_5?: string;
 
   @IsOptional()
   @IsString()
   transport?: string;
-
-  @IsOptional()
-  @IsString()
-  hotel?: string;
 
   @IsOptional()
   @IsString()
@@ -90,4 +94,20 @@ export class CreateDtoTour {
   @IsOptional()
   @IsString()
   sight_seeing?: string;
+
+  @IsOptional()
+  @IsString()
+  road_vehicle?: string;
+
+  @IsOptional()
+  @IsNumber()
+  baby_price?: number;
+
+  @IsOptional()
+  @IsNumber()
+  children_price?: number;
+
+  @IsOptional()
+  @IsNumber()
+  adult_price?: number;
 }

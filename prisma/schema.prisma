@@ -205,7 +205,7 @@ model Tour {
   start_date                DateTime? // Ngày khởi hành
   end_date                  DateTime? // Ngày kết thúc
   starting_gate             String? // Nơi khởi hành
-  sightseeing               String? // Điểm tham quan
+  sight_seeing               String? // Điểm tham quan
   cuisine                   String? // Ẩm thực
   suitable                  String? // Phù hợp
   ideal_time                String? // Thời gian lý tưởng

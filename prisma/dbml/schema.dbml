@@ -164,7 +164,7 @@ Table tours {
   start_date DateTime
   end_date DateTime
   starting_gate String
-  sightseeing String
+  sight_seeing String
   cuisine String
   suitable String
   ideal_time String

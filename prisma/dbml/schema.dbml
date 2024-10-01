@@ -179,9 +179,6 @@ Table tours {
   image_3 String
   image_4 String
   image_5 String
-  transport String
-  startLocation String
-  endLocation String
   rating Float [default: 1]
   number_of_seats_remaining Int
   bookings bookings [not null]

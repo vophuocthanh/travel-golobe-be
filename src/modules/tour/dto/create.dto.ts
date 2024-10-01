@@ -33,10 +33,6 @@ export class CreateDtoTour {
 
   @IsOptional()
   @IsString()
-  cuisine?: string;
-
-  @IsOptional()
-  @IsString()
   start_date?: string;
 
   @IsOptional()
@@ -45,19 +41,23 @@ export class CreateDtoTour {
 
   @IsOptional()
   @IsString()
+  starting_gate?: string;
+
+  @IsOptional()
+  @IsString()
+  sight_seeing?: string;
+
+  @IsOptional()
+  @IsString()
+  cuisine?: string;
+
+  @IsOptional()
+  @IsString()
   suitable?: string;
 
   @IsOptional()
   @IsString()
-  time_trip?: string;
-
-  @IsOptional()
-  @IsNumber()
-  number_of_seats_remaining?: number;
-
-  @IsOptional()
-  @IsNumber()
-  rating?: number;
+  ideal_time?: string;
 
   @IsOptional()
   @IsString()
@@ -65,7 +65,19 @@ export class CreateDtoTour {
 
   @IsOptional()
   @IsString()
-  ideal_time?: string;
+  time_trip?: string;
+
+  @IsOptional()
+  @IsNumber()
+  baby_price?: number;
+
+  @IsOptional()
+  @IsNumber()
+  children_price?: number;
+
+  @IsOptional()
+  @IsNumber()
+  adult_price?: number;
 
   @IsOptional()
   @IsString()
@@ -84,30 +96,14 @@ export class CreateDtoTour {
   image_5?: string;
 
   @IsOptional()
-  @IsString()
-  transport?: string;
+  @IsNumber()
+  rating?: number;
 
   @IsOptional()
-  @IsString()
-  starting_gate?: string;
-
-  @IsOptional()
-  @IsString()
-  sight_seeing?: string;
+  @IsNumber()
+  number_of_seats_remaining?: number;
 
   @IsOptional()
   @IsString()
   road_vehicle?: string;
-
-  @IsOptional()
-  @IsNumber()
-  baby_price?: number;
-
-  @IsOptional()
-  @IsNumber()
-  children_price?: number;
-
-  @IsOptional()
-  @IsNumber()
-  adult_price?: number;
 }

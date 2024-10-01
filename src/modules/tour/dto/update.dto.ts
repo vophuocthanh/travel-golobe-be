@@ -19,10 +19,6 @@ export class UpdateDtoTour {
   @IsNumber()
   price: number;
 
-  @ApiProperty()
-  @IsNotEmpty()
-  location: string;
-
   @IsOptional()
   @IsString()
   created_at?: string;
@@ -31,37 +27,65 @@ export class UpdateDtoTour {
   @IsString()
   updated_at?: string;
 
+  @ApiProperty()
   @IsOptional()
   @IsString()
-  id?: string;
+  start_date?: string;
 
-  @IsOptional()
-  @IsNumber()
-  remainingCount?: number;
-
+  @ApiProperty()
   @IsOptional()
   @IsString()
-  count?: string;
+  end_date?: string;
 
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  starting_gate?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  sight_seeing?: string;
+
+  @ApiProperty()
   @IsOptional()
   @IsString()
   cuisine?: string;
 
+  @ApiProperty()
   @IsOptional()
   @IsString()
-  suitable_subject?: string;
+  suitable?: string;
 
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  ideal_time?: string;
+
+  @ApiProperty()
   @IsOptional()
   @IsString()
   vchouer?: string;
 
+  @ApiProperty()
   @IsOptional()
   @IsString()
-  time_out?: string;
+  time_trip?: string;
 
+  @ApiProperty()
   @IsOptional()
-  @IsString()
-  ideal_time?: string;
+  @IsNumber()
+  baby_price?: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
+  children_price?: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
+  adult_price?: number;
 
   @ApiProperty()
   @IsOptional()
@@ -85,24 +109,16 @@ export class UpdateDtoTour {
 
   @ApiProperty()
   @IsOptional()
-  @IsString()
-  transport?: string;
-
-  @ApiProperty()
-  @IsOptional()
-  @IsString()
-  hotel?: string;
-
-  @IsOptional()
-  @IsString()
-  starting_gate?: string;
-
-  @IsOptional()
-  @IsString()
-  sight_seeing?: string;
+  @IsNumber()
+  rating?: number;
 
   @ApiProperty()
   @IsOptional()
   @IsNumber()
-  rating?: number;
+  number_of_seats_remaining?: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  road_vehicle?: string;
 }

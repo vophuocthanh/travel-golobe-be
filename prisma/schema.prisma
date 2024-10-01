@@ -195,9 +195,9 @@ model FlightFavorite {
 
 model Tour {
   id                        String    @id @default(cuid())
-  name                      String
+  name                      String  // Tên tour
   userId                    String
-  description               String?
+  description               String?  // Mô tả tour
   price                     Float? // Giá tour
   original_price            Float? // Giá gốc
   createAt                  DateTime  @default(now())
@@ -220,10 +220,7 @@ model Tour {
   image_3                   String?
   image_4                   String?
   image_5                   String?
-  transport                 String?
-  startLocation             String?
-  endLocation               String?
-  rating                    Float?    @default(1)
+  rating                    Float?    @default(1)  // Đánh giá
   number_of_seats_remaining Int? // Số ghế còn lại
 
   bookings      Booking[]

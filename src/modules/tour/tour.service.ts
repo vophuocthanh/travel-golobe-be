@@ -98,15 +98,6 @@ export class TourService {
     return { message: 'Tour deleted successfully' };
   }
 
-  async findToursByLocation(startLocation: string, endLocation: string) {
-    return this.prismaService.tour.findMany({
-      where: {
-        startLocation,
-        endLocation,
-      },
-    });
-  }
-
   // isFavorite
 
   async markAsFavorite(userId: string, tourId: string): Promise<void> {

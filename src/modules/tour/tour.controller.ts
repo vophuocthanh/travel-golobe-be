@@ -71,15 +71,6 @@ export class TourController {
     return this.tourService.getTourById(id);
   }
 
-  @Get('search')
-  @ApiOperation({ summary: 'Tìm kiếm tour theo địa điểm' })
-  async searchTours(
-    @Query('start') startLocation: string,
-    @Query('end') endLocation: string,
-  ) {
-    return this.tourService.findToursByLocation(startLocation, endLocation);
-  }
-
   @UseGuards(HandleAuthGuard)
   @Post()
   @ApiOperation({ summary: 'Tạo tour' })

@@ -66,7 +66,6 @@ Table hotel_crawl {
   image_5 String
   userId String
   number_of_seats_remaining Int
-  isFavorite Boolean [default: false]
   rooms rooms [not null]
   users user_on_hotel_crawls [not null]
   hotelCrawlReviewa hotel_crawl_reviews [not null]
@@ -87,11 +86,13 @@ Table rooms {
 
 Table hotel_favorites {
   id String [pk]
-  userId String [not null]
-  hotelId String [not null]
-  createdAt DateTime [default: `now()`, not null]
-  hotelCrawl hotel_crawl [not null]
   user users [not null]
+  userId String [not null]
+  hotel hotel_crawl [not null]
+  hotelId String [not null]
+  isFavorite Boolean [not null, default: false]
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime
 
   indexes {
     (userId, hotelId) [unique]
@@ -115,7 +116,6 @@ Table flight_crawl {
   userId String
   image String
   number_of_seats_remaining Int
-  isFavorite Boolean [default: false]
   type_ticket TicketType [not null]
   baggage_weight BaggageWeight [not null]
   users user_on_flight_crawls [not null]
@@ -139,11 +139,13 @@ Table Ticket {
 
 Table flight_favorites {
   id String [pk]
-  userId String [not null]
-  flightId String [not null]
-  createdAt DateTime [default: `now()`, not null]
-  flightCrawl flight_crawl [not null]
   user users [not null]
+  userId String [not null]
+  flightCrawl flight_crawl [not null]
+  flightId String [not null]
+  isFavorite Boolean [default: false]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
 
   indexes {
     (userId, flightId) [unique]
@@ -182,7 +184,6 @@ Table tours {
   endLocation String
   rating Float [default: 1]
   number_of_seats_remaining Int
-  isFavorite Boolean [default: false]
   bookings bookings [not null]
   users user_on_tours [not null]
   tourReviews tour_reviews [not null]
@@ -192,10 +193,12 @@ Table tours {
 Table tour_favorites {
   id String [pk]
   userId String [not null]
-  tourId String [not null]
-  createdAt DateTime [default: `now()`, not null]
-  tour tours [not null]
   user users [not null]
+  tourId String [not null]
+  tour tours [not null]
+  isFavorite Boolean [default: false]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
 
   indexes {
     (userId, tourId) [unique]
@@ -444,19 +447,19 @@ Ref: users.roleId > roles.id
 
 Ref: rooms.hotelId > hotel_crawl.id
 
-Ref: hotel_favorites.hotelId > hotel_crawl.id
-
 Ref: hotel_favorites.userId > users.id
+
+Ref: hotel_favorites.hotelId > hotel_crawl.id
 
 Ref: Ticket.flightId > flight_crawl.id
 
-Ref: flight_favorites.flightId > flight_crawl.id
-
 Ref: flight_favorites.userId > users.id
 
-Ref: tour_favorites.tourId > tours.id
+Ref: flight_favorites.flightId > flight_crawl.id
 
 Ref: tour_favorites.userId > users.id
+
+Ref: tour_favorites.tourId > tours.id
 
 Ref: road_vehicle_favorites.roadVehicleId > road_vehicles.id
 

@@ -18,10 +18,6 @@ export class TourService {
     const search = filters.search || '';
     const skip = page > 1 ? (page - 1) * items_per_page : 0;
 
-    // Fetch flightCrawl and hotelCrawl data
-    const flightCrawls = await this.prismaService.flightCrawl.findMany();
-    const hotelCrawls = await this.prismaService.hotelCrawl.findMany();
-
     const tours = await this.prismaService.tour.findMany({
       take: items_per_page,
       skip,
@@ -39,21 +35,6 @@ export class TourService {
       },
     });
 
-    const getRandomItem = (items: any[]) => {
-      return items[Math.floor(Math.random() * items.length)];
-    };
-
-    const toursWithRandomData = tours.map((tour) => {
-      const randomFlight = getRandomItem(flightCrawls);
-      const randomHotel = getRandomItem(hotelCrawls);
-
-      return {
-        ...tour,
-        randomFlightCrawl: randomFlight || null,
-        randomHotelCrawl: randomHotel || null,
-      };
-    });
-
     const total = await this.prismaService.tour.count({
       where: {
         OR: [
@@ -67,7 +48,7 @@ export class TourService {
     });
 
     return {
-      data: toursWithRandomData,
+      data: tours,
       total,
       currentPage: page,
       itemsPerPage: items_per_page,
@@ -75,29 +56,15 @@ export class TourService {
   }
 
   async getTourById(id: string) {
-    const tourId = await this.prismaService.tour.findUnique({
-      where: {
-        id,
-      },
+    const tour = await this.prismaService.tour.findUnique({
+      where: { id },
     });
-    if (!tourId) {
-      throw new Error('Tour not found');
+
+    if (!tour) {
+      throw new Error(`Tour with ID ${id} not found`);
     }
 
-    const flightCrawls = await this.prismaService.flightCrawl.findMany();
-    const hotelCrawls = await this.prismaService.hotelCrawl.findMany();
-
-    const getRandomItem = (items: any[]) => {
-      return items[Math.floor(Math.random() * items.length)];
-    };
-
-    const randomFlight = getRandomItem(flightCrawls);
-    const randomHotel = getRandomItem(hotelCrawls);
-    return {
-      ...tourId,
-      randomFlightCrawl: randomFlight || null,
-      randomHotelCrawl: randomHotel || null,
-    };
+    return tour;
   }
 
   async createTours(data: CreateDtoTour, userId: string): Promise<Tour> {
@@ -138,5 +105,70 @@ export class TourService {
         endLocation,
       },
     });
+  }
+
+  // isFavorite
+
+  async markAsFavorite(userId: string, tourId: string): Promise<void> {
+    await this.prismaService.tourFavorite.upsert({
+      where: {
+        userId_tourId: {
+          userId,
+          tourId,
+        },
+      },
+      create: {
+        userId,
+        tourId,
+        isFavorite: true,
+      },
+      update: {
+        isFavorite: true,
+      },
+    });
+  }
+
+  async unmarkAsFavorite(userId: string, tourId: string): Promise<void> {
+    await this.prismaService.tourFavorite.updateMany({
+      where: {
+        userId,
+        tourId,
+      },
+      data: {
+        isFavorite: false,
+      },
+    });
+  }
+
+  async getFavoriteTours(userId: string) {
+    const isFavoriteTour = await this.prismaService.tour.findMany({
+      where: {
+        tourFavorites: {
+          some: {
+            userId,
+            isFavorite: true,
+          },
+        },
+      },
+      include: {
+        tourFavorites: {
+          where: {
+            userId,
+          },
+        },
+      },
+    });
+
+    const totalFavoriteTour = await this.prismaService.tourFavorite.count({
+      where: {
+        userId,
+        isFavorite: true,
+      },
+    });
+
+    return {
+      data: isFavoriteTour,
+      total: totalFavoriteTour,
+    };
   }
 }

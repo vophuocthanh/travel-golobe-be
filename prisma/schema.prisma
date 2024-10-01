@@ -61,7 +61,7 @@ model Role {
 }
 
 model HotelCrawl {
-  id                        String   @id @default(uuid())
+  id                        String  @id @default(uuid())
   hotel_names               String
   location                  String
   price                     Float?
@@ -80,10 +80,8 @@ model HotelCrawl {
   image_5                   String?
   userId                    String?
   number_of_seats_remaining Int?
-  isFavorite                Boolean? @default(false)
 
-  rooms Room[]
-
+  rooms             Room[]
   users             UserOnHotelCrawl[]
   hotelCrawlReviewa HotelCrawlReview[]
   bookings          Booking[]
@@ -93,15 +91,15 @@ model HotelCrawl {
 }
 
 model Room {
-  id          String    @id @default(uuid())
+  id          String     @id @default(uuid())
   hotelId     String
   type        RoomType
   pricePerDay Float
-  available   Boolean   @default(true)
+  available   Boolean    @default(true)
   hotel       HotelCrawl @relation(fields: [hotelId], references: [id])
 
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("rooms")
 }
@@ -113,22 +111,22 @@ enum RoomType {
   DELUXE
 }
 
-
 model HotelFavorite {
-  id        String   @id @default(uuid())
-  userId    String
-  hotelId   String
-  createdAt DateTime @default(now())
-
-  hotelCrawl HotelCrawl @relation(fields: [hotelId], references: [id])
+  id         String     @id @default(cuid())
   user       User       @relation(fields: [userId], references: [id])
+  userId     String
+  hotel      HotelCrawl @relation(fields: [hotelId], references: [id])
+  hotelId    String
+  isFavorite Boolean    @default(false)
+  createdAt  DateTime?  @default(now())
+  updatedAt  DateTime?  @updatedAt
 
   @@unique([userId, hotelId])
   @@map("hotel_favorites")
 }
 
 model FlightCrawl {
-  id                        String   @id @default(uuid())
+  id                        String        @id @default(uuid())
   brand                     String
   price                     Float
   start_time                String
@@ -139,20 +137,19 @@ model FlightCrawl {
   take_place                String
   destination               String
   trip_to                   String
-  createAt                  DateTime @default(now())
-  updateAt                  DateTime @updatedAt
+  createAt                  DateTime      @default(now())
+  updateAt                  DateTime      @updatedAt
   userId                    String?
   image                     String?
   number_of_seats_remaining Int?
-  isFavorite                Boolean? @default(false)
   type_ticket               TicketType
-  baggage_weight  BaggageWeight 
+  baggage_weight            BaggageWeight
 
   users           UserOnFlightCrawl[]
   flightReviews   FlightCrawlReview[]
   bookings        Booking[]
   flightFavorites FlightFavorite[]
-  Ticket Ticket[]
+  Ticket          Ticket[]
 
   @@map("flight_crawl")
 }
@@ -164,19 +161,17 @@ enum BaggageWeight {
   WEIGHT_32KG
 }
 
-
 model Ticket {
-  id             String         @id @default(uuid())
+  id             String        @id @default(uuid())
   type_ticket    TicketType
   price          Float
   baggage_weight BaggageWeight
   baggage_price  Float
   flightId       String
-  flight         FlightCrawl    @relation(fields: [flightId], references: [id])
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  flight         FlightCrawl   @relation(fields: [flightId], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 }
-
 
 enum TicketType {
   ECONOMY
@@ -185,13 +180,14 @@ enum TicketType {
 }
 
 model FlightFavorite {
-  id        String   @id @default(uuid())
-  userId    String
-  flightId  String
-  createdAt DateTime @default(now())
-
-  flightCrawl FlightCrawl @relation(fields: [flightId], references: [id])
+  id          String      @id @default(uuid())
   user        User        @relation(fields: [userId], references: [id])
+  userId      String
+  flightCrawl FlightCrawl @relation(fields: [flightId], references: [id])
+  flightId    String
+  isFavorite  Boolean?    @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime?   @updatedAt
 
   @@unique([userId, flightId])
   @@map("flight_favorites")
@@ -229,7 +225,6 @@ model Tour {
   endLocation               String?
   rating                    Float?    @default(1)
   number_of_seats_remaining Int? // Số ghế còn lại
-  isFavorite                Boolean?  @default(false)
 
   bookings      Booking[]
   users         UserOnTour[]
@@ -240,13 +235,14 @@ model Tour {
 }
 
 model TourFavorite {
-  id        String   @id @default(uuid())
-  userId    String
-  tourId    String
-  createdAt DateTime @default(now())
-
-  tour Tour @relation(fields: [tourId], references: [id])
-  user User @relation(fields: [userId], references: [id])
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  tourId     String
+  tour       Tour      @relation(fields: [tourId], references: [id])
+  isFavorite Boolean?  @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime? @updatedAt
 
   @@unique([userId, tourId])
   @@map("tour_favorites")

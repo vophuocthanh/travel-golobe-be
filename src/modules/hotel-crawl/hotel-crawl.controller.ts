@@ -7,6 +7,7 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -31,6 +32,7 @@ import {
 } from 'src/modules/hotel-crawl/dto/hotel-crawl.dto';
 import { UpdateHotelCrawlDto } from 'src/modules/hotel-crawl/dto/update.dto';
 import { HotelCrawlService } from 'src/modules/hotel-crawl/hotel-crawl.service';
+import { RequestWithUser } from 'src/types/users';
 
 @ApiBearerAuth()
 @ApiTags('hotel-crawl')
@@ -146,4 +148,72 @@ export class HotelCrawlController {
   async deleteFlightCrawl(id: string): Promise<{ message: string }> {
     return this.hotelCrawlService.deleteHotelCrawl(id);
   }
+
+  // isFavorite
+
+  // Đánh dấu khách sạn là yêu thích
+  @UseGuards(HandleAuthGuard)
+  @ApiOperation({ summary: 'Đánh dấu khách sạn là yêu thích' })
+  @ApiResponse({ status: 201, description: 'Marked as favorite' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @Post(':id/favorite')
+  async markAsFavorite(
+    @Param('id') hotelId: string,
+    @Req() req: RequestWithUser,
+  ) {
+    const userId = req.user.id;
+    await this.hotelCrawlService.markAsFavorite(userId, hotelId);
+    return { message: 'Marked as favorite' };
+  }
+
+  // Bỏ yêu thích
+  @UseGuards(HandleAuthGuard)
+  @ApiOperation({ summary: 'Bỏ đánh dấu yêu thích khách sạn' })
+  @ApiResponse({ status: 201, description: 'Unmarked as favorite' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @Post(':id/unfavorite')
+  async unmarkAsFavorite(
+    @Param('id') hotelId: string,
+    @Req() req: RequestWithUser,
+  ) {
+    const userId = req.user.id;
+    await this.hotelCrawlService.unmarkAsFavorite(userId, hotelId);
+    return { message: 'Unmarked as favorite' };
+  }
+
+  // Lấy danh sách các khách sạn yêu thích của người dùng
+  @UseGuards(HandleAuthGuard)
+  @ApiOperation({
+    summary: 'Lấy danh sách các khách sạn yêu thích của người dùng',
+  })
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @Get('favorites')
+  async getFavoriteHotels(@Req() req: RequestWithUser) {
+    const userId = req.user.id;
+    const favorites = await this.hotelCrawlService.getFavoriteHotels(userId);
+    return favorites;
+  }
+
+  // // Kiểm tra xem khách sạn có được yêu thích hay không
+  // @UseGuards(HandleAuthGuard)
+  // @ApiOperation({
+  //   summary: 'Kiểm tra xem khách sạn có được yêu thích hay không',
+  // })
+  // @ApiResponse({ status: 200, description: 'Successfully' })
+  // @ApiResponse({ status: 400, description: 'Bad Request' })
+  // @ApiResponse({ status: 401, description: 'Unauthorized' })
+  // @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  // @Get(':id/is-favorite')
+  // async isFavorite(@Param('id') hotelId: string, @Req() req: RequestWithUser) {
+  //   const userId = req.user.id;
+  //   const isFavorite = await this.hotelCrawlService.isFavorite(userId, hotelId);
+  //   return { isFavorite };
+  // }
 }

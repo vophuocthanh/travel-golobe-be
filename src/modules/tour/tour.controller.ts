@@ -48,6 +48,18 @@ export class TourController {
   ): Promise<TourPaginationResponseType> {
     return this.tourService.getTours(params);
   }
+  @UseGuards(HandleAuthGuard)
+  @ApiOperation({ summary: 'Lấy danh sách các tour yêu thích của người dùng' })
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @Get('favorite')
+  async getFavoriteTours(@Req() req: RequestWithUser) {
+    const userId = req.user.id;
+    const favorites = await this.tourService.getFavoriteTours(userId);
+    return favorites;
+  }
 
   @Get(':id')
   @ApiOperation({ summary: 'Lấy thông tin tour theo id' })
@@ -105,5 +117,37 @@ export class TourController {
     return this.tourService.deleteTour(id);
   }
 
-  // Review
+  // isFavorite
+
+  @UseGuards(HandleAuthGuard)
+  @ApiOperation({ summary: 'Đánh dấu tour là yêu thích' })
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @Post(':id/favorite')
+  async markAsFavorite(
+    @Param('id') tourId: string,
+    @Req() req: RequestWithUser,
+  ) {
+    const userId = req.user.id;
+    await this.tourService.markAsFavorite(userId, tourId);
+    return { message: 'Marked as favorite' };
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @ApiOperation({ summary: 'Bỏ đánh dấu yêu thích tour' })
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @Post(':id/unfavorite')
+  async unmarkAsFavorite(
+    @Param('id') tourId: string,
+    @Req() req: RequestWithUser,
+  ) {
+    const userId = req.user.id;
+    await this.tourService.unmarkAsFavorite(userId, tourId);
+    return { message: 'Unmarked as favorite' };
+  }
 }

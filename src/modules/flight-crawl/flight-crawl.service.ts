@@ -251,4 +251,75 @@ export class FlightCrawlService {
       message: 'Successfully deleted the flight',
     };
   }
+
+  // isFavorite
+
+  // Đánh dấu chuyến bay là yêu thích
+
+  async markAsFavorite(userId: string, flightId: string): Promise<void> {
+    await this.prismaService.flightFavorite.upsert({
+      where: {
+        userId_flightId: {
+          userId,
+          flightId,
+        },
+      },
+      create: {
+        userId,
+        flightId,
+        isFavorite: true,
+      },
+      update: {
+        isFavorite: true,
+      },
+    });
+  }
+
+  // Bỏ đánh dấu yêu thích
+
+  async unmarkAsFavorite(userId: string, flightId: string): Promise<void> {
+    await this.prismaService.flightFavorite.updateMany({
+      where: {
+        userId,
+        flightId,
+      },
+      data: {
+        isFavorite: false,
+      },
+    });
+  }
+
+  // Lấy danh sách các chuyến bay yêu thích của người dùng
+
+  async getFavoriteFlights(userId: string) {
+    const isFavoriteFlight = await this.prismaService.flightCrawl.findMany({
+      where: {
+        flightFavorites: {
+          some: {
+            userId,
+            isFavorite: true,
+          },
+        },
+      },
+      include: {
+        flightFavorites: {
+          where: {
+            userId,
+          },
+        },
+      },
+    });
+
+    const totalFavoriteFlight = await this.prismaService.flightFavorite.count({
+      where: {
+        userId,
+        isFavorite: true,
+      },
+    });
+
+    return {
+      data: isFavoriteFlight,
+      total: totalFavoriteFlight,
+    };
+  }
 }

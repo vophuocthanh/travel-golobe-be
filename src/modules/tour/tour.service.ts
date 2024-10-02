@@ -79,11 +79,20 @@ export class TourService {
     };
   }
 
-  async getTourById(id: string) {
+  async getTourById(id: string, userId?: string) {
     const tour = await this.prismaService.tour.findUnique({
       where: { id },
       include: {
-        tourFavorites: true,
+        tourFavorites: userId
+          ? {
+              where: {
+                userId,
+              },
+              select: {
+                isFavorite: true,
+              },
+            }
+          : false,
       },
     });
 
@@ -91,7 +100,15 @@ export class TourService {
       throw new Error(`Tour with ID ${id} not found`);
     }
 
-    return tour;
+    const isFavorite =
+      userId && tour.tourFavorites.length > 0
+        ? tour.tourFavorites[0].isFavorite
+        : false;
+
+    return {
+      ...tour,
+      isFavorite,
+    };
   }
 
   async createTours(data: CreateDtoTour, userId: string): Promise<Tour> {

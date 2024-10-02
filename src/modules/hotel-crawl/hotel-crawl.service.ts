@@ -191,18 +191,37 @@ export class HotelCrawlService {
     };
   }
 
-  async getHotelCrawlById(id: string): Promise<HotelCrawl> {
-    return this.prismaService.hotelCrawl.findFirst({
+  async getHotelCrawlById(
+    id: string,
+    userId?: string,
+  ): Promise<HotelCrawl & { isFavorite: boolean }> {
+    const hotel = await this.prismaService.hotelCrawl.findFirst({
       where: {
         id,
       },
       include: {
         rooms: true,
-        hotelFavorites: true,
+        hotelFavorites: userId
+          ? {
+              where: {
+                userId,
+              },
+              select: {
+                isFavorite: true,
+              },
+            }
+          : false,
       },
     });
+
+    return {
+      ...hotel,
+      isFavorite:
+        userId && hotel?.hotelFavorites?.length > 0
+          ? hotel.hotelFavorites[0].isFavorite
+          : false,
+    };
   }
-  h;
 
   async putHotelCrawl(
     id: string,

@@ -240,16 +240,36 @@ export class FlightCrawlService {
     };
   }
 
-  async getFlightCrawlById(id: string): Promise<FlightCrawl> {
-    return this.prismaService.flightCrawl.findFirst({
+  async getFlightCrawlById(
+    id: string,
+    userId?: string,
+  ): Promise<FlightCrawl & { isFavorite: boolean }> {
+    const flight = await this.prismaService.flightCrawl.findFirst({
       where: {
         id,
       },
       include: {
         Ticket: true,
-        flightFavorites: true,
+        flightFavorites: userId
+          ? {
+              where: {
+                userId,
+              },
+              select: {
+                isFavorite: true,
+              },
+            }
+          : false,
       },
     });
+
+    return {
+      ...flight,
+      isFavorite:
+        userId && flight?.flightFavorites?.length > 0
+          ? flight.flightFavorites[0].isFavorite
+          : false,
+    };
   }
 
   async putFlightCrawl(

@@ -247,6 +247,7 @@ export class FlightCrawlService {
       },
       include: {
         Ticket: true,
+        flightFavorites: true,
       },
     });
   }

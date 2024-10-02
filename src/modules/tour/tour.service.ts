@@ -82,6 +82,9 @@ export class TourService {
   async getTourById(id: string) {
     const tour = await this.prismaService.tour.findUnique({
       where: { id },
+      include: {
+        tourFavorites: true,
+      },
     });
 
     if (!tour) {

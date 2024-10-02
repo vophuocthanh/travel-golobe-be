@@ -198,6 +198,7 @@ export class HotelCrawlService {
       },
       include: {
         rooms: true,
+        hotelFavorites: true,
       },
     });
   }

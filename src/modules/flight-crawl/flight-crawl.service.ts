@@ -174,31 +174,34 @@ export class FlightCrawlService {
             : []),
         ],
       },
-      include: userId
-        ? {
-            flightFavorites: {
-              where: {
-                userId,
-              },
-              select: {
-                isFavorite: true,
-              },
-            },
-          }
-        : undefined,
+      include: {
+        flightFavorites: {
+          where: {
+            userId,
+          },
+          select: {
+            isFavorite: true,
+          },
+        },
+      },
       orderBy: {
         price: sort_by_price,
       },
     });
 
-    // Thêm trường isFavorite cho mỗi chuyến bay
-    const data = flightCrawl.map((flight) => ({
-      ...flight,
-      isFavorite:
-        userId && flight.flightFavorites?.length > 0
-          ? flight.flightFavorites[0].isFavorite
-          : false,
-    }));
+    const flightWithFavorite = flightCrawl.map((flight) => {
+      const isFavorite =
+        flight.flightFavorites.length > 0 &&
+        flight.flightFavorites[0].isFavorite;
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { flightFavorites, ...flightWithoutFavorites } = flight;
+
+      return {
+        ...flightWithoutFavorites,
+        isFavorite,
+      };
+    });
 
     const total = await this.prismaService.flightCrawl.count({
       where: {
@@ -233,42 +236,40 @@ export class FlightCrawlService {
     });
 
     return {
-      data,
+      data: flightWithFavorite,
       total,
       currentPage: page,
       itemsPerPage: items_per_page,
     };
   }
 
-  async getFlightCrawlById(
-    id: string,
-    userId?: string,
-  ): Promise<FlightCrawl & { isFavorite: boolean }> {
+  async getFlightCrawlById(id: string, userId?: string) {
     const flight = await this.prismaService.flightCrawl.findFirst({
       where: {
         id,
       },
       include: {
         Ticket: true,
-        flightFavorites: userId
-          ? {
-              where: {
-                userId,
-              },
-              select: {
-                isFavorite: true,
-              },
-            }
-          : false,
+        flightFavorites: {
+          where: {
+            userId,
+          },
+          select: {
+            isFavorite: true,
+          },
+        },
       },
     });
 
+    const isFavorite =
+      flight.flightFavorites.length > 0 && flight.flightFavorites[0].isFavorite;
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { flightFavorites, ...flightWithoutFavorites } = flight;
+
     return {
-      ...flight,
-      isFavorite:
-        userId && flight?.flightFavorites?.length > 0
-          ? flight.flightFavorites[0].isFavorite
-          : false,
+      ...flightWithoutFavorites,
+      isFavorite,
     };
   }
 

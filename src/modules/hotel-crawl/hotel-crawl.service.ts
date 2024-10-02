@@ -93,7 +93,7 @@ export class HotelCrawlService {
 
   async getHotelCrawl(
     filters: HotelCrawlDto,
-    userId?: string,
+    userId?: string, // Thêm userId vào tham số
   ): Promise<HotelCrawlPaginationResponseType> {
     const items_per_page = Number(filters.items_per_page) || 10;
     const page = Number(filters.page) || 1;
@@ -107,10 +107,12 @@ export class HotelCrawlService {
       filters.max_price?.toString() || `${Number.MAX_SAFE_INTEGER}`,
     );
 
+    // Lọc theo star_number nếu có
     const starNumber = filters.star_number
       ? Number(filters.star_number)
       : undefined;
 
+    // Lấy danh sách khách sạn
     const hotelCrawl = await this.prismaService.hotelCrawl.findMany({
       take: items_per_page,
       skip,
@@ -137,28 +139,18 @@ export class HotelCrawlService {
       orderBy: {
         price: sort_by_price,
       },
-      include: userId
-        ? {
-            hotelFavorites: {
-              where: {
-                userId,
-              },
-              select: {
-                isFavorite: true,
-              },
-            },
-          }
-        : undefined,
+      include: {
+        hotelFavorites: {
+          where: {
+            userId,
+            isFavorite: true,
+          },
+          select: {
+            isFavorite: true,
+          },
+        },
+      },
     });
-
-    // Thêm trường isFavorite cho mỗi khách sạn
-    const data = hotelCrawl.map((hotel) => ({
-      ...hotel,
-      isFavorite:
-        userId && hotel.hotelFavorites.length > 0
-          ? hotel.hotelFavorites[0].isFavorite
-          : false,
-    }));
 
     const total = await this.prismaService.hotelCrawl.count({
       where: {
@@ -183,43 +175,54 @@ export class HotelCrawlService {
       },
     });
 
+    const hotelCrawlWithFavorites = hotelCrawl.map((hotel) => {
+      const isFavorite =
+        hotel.hotelFavorites.length > 0 && hotel.hotelFavorites[0].isFavorite;
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { hotelFavorites, ...hotelWithoutFavorites } = hotel;
+
+      return {
+        ...hotelWithoutFavorites,
+        isFavorite,
+      };
+    });
+
     return {
-      data,
+      data: hotelCrawlWithFavorites,
       total,
       currentPage: page,
       itemsPerPage: items_per_page,
     };
   }
 
-  async getHotelCrawlById(
-    id: string,
-    userId?: string,
-  ): Promise<HotelCrawl & { isFavorite: boolean }> {
-    const hotel = await this.prismaService.hotelCrawl.findFirst({
+  async getHotelCrawlById(id: string, userId?: string) {
+    const hotelId = await this.prismaService.hotelCrawl.findFirst({
       where: {
         id,
       },
       include: {
         rooms: true,
-        hotelFavorites: userId
-          ? {
-              where: {
-                userId,
-              },
-              select: {
-                isFavorite: true,
-              },
-            }
-          : false,
+        hotelFavorites: {
+          where: {
+            userId,
+          },
+          select: {
+            isFavorite: true,
+          },
+        },
       },
     });
 
+    const isFavorite =
+      hotelId.hotelFavorites.length > 0 && hotelId.hotelFavorites[0].isFavorite;
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { hotelFavorites, ...hotelWithoutFavorites } = hotelId;
+
     return {
-      ...hotel,
-      isFavorite:
-        userId && hotel?.hotelFavorites?.length > 0
-          ? hotel.hotelFavorites[0].isFavorite
-          : false,
+      ...hotelWithoutFavorites,
+      isFavorite,
     };
   }
 

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Tour } from '@prisma/client';
 import * as dayjs from 'dayjs';
 import { CreateDtoTour } from 'src/modules/tour/dto/create.dto';
@@ -12,7 +12,6 @@ import { PrismaService } from 'src/prisma.service';
 @Injectable()
 export class TourService {
   constructor(private prismaService: PrismaService) {}
-
   async getTours(
     filters: TourDto,
     userId?: string,
@@ -34,30 +33,20 @@ export class TourService {
           },
         ],
       },
-      include: userId
-        ? {
-            tourFavorites: {
-              where: {
-                userId,
-              },
-              select: {
-                isFavorite: true,
-              },
-            },
-          }
-        : undefined,
+      include: {
+        tourFavorites: {
+          where: {
+            userId,
+          },
+          select: {
+            isFavorite: true,
+          },
+        },
+      },
       orderBy: {
         createAt: 'desc',
       },
     });
-
-    const data = tours.map((tour) => ({
-      ...tour,
-      isFavorite:
-        userId && tour.tourFavorites.length > 0
-          ? tour.tourFavorites[0].isFavorite
-          : false,
-    }));
 
     const total = await this.prismaService.tour.count({
       where: {
@@ -71,42 +60,56 @@ export class TourService {
       },
     });
 
+    const toursWithFavorite = tours.map((tour) => {
+      const isFavorite =
+        tour.tourFavorites.length > 0 && tour.tourFavorites[0].isFavorite;
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { tourFavorites, ...tourWithoutFavorites } = tour;
+
+      return {
+        ...tourWithoutFavorites,
+        isFavorite,
+      };
+    });
+
     return {
-      data,
+      data: toursWithFavorite,
       total,
       currentPage: page,
       itemsPerPage: items_per_page,
     };
   }
 
-  async getTourById(id: string, userId?: string) {
+  async getTourById(tourId: string, userId?: string) {
     const tour = await this.prismaService.tour.findUnique({
-      where: { id },
+      where: {
+        id: tourId,
+      },
       include: {
-        tourFavorites: userId
-          ? {
-              where: {
-                userId,
-              },
-              select: {
-                isFavorite: true,
-              },
-            }
-          : false,
+        tourFavorites: {
+          where: {
+            userId,
+          },
+          select: {
+            isFavorite: true,
+          },
+        },
       },
     });
 
     if (!tour) {
-      throw new Error(`Tour with ID ${id} not found`);
+      throw new NotFoundException('Tour not found');
     }
 
     const isFavorite =
-      userId && tour.tourFavorites.length > 0
-        ? tour.tourFavorites[0].isFavorite
-        : false;
+      tour.tourFavorites.length > 0 && tour.tourFavorites[0].isFavorite;
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { tourFavorites, ...tourWithoutFavorites } = tour;
 
     return {
-      ...tour,
+      ...tourWithoutFavorites,
       isFavorite,
     };
   }

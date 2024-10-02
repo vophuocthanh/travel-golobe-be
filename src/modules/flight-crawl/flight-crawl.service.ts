@@ -126,6 +126,7 @@ export class FlightCrawlService {
 
   async getFlightsCrawl(
     filters: FlightCrawlDto,
+    userId?: string,
   ): Promise<FlightCrawlPaginationResponseType> {
     const items_per_page = Number(filters.items_per_page) || 10;
     const page = Number(filters.page) || 1;
@@ -173,10 +174,31 @@ export class FlightCrawlService {
             : []),
         ],
       },
+      include: userId
+        ? {
+            flightFavorites: {
+              where: {
+                userId,
+              },
+              select: {
+                isFavorite: true,
+              },
+            },
+          }
+        : undefined,
       orderBy: {
         price: sort_by_price,
       },
     });
+
+    // Thêm trường isFavorite cho mỗi chuyến bay
+    const data = flightCrawl.map((flight) => ({
+      ...flight,
+      isFavorite:
+        userId && flight.flightFavorites?.length > 0
+          ? flight.flightFavorites[0].isFavorite
+          : false,
+    }));
 
     const total = await this.prismaService.flightCrawl.count({
       where: {
@@ -211,7 +233,7 @@ export class FlightCrawlService {
     });
 
     return {
-      data: flightCrawl,
+      data,
       total,
       currentPage: page,
       itemsPerPage: items_per_page,

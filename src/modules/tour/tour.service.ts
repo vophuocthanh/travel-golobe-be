@@ -13,7 +13,10 @@ import { PrismaService } from 'src/prisma.service';
 export class TourService {
   constructor(private prismaService: PrismaService) {}
 
-  async getTours(filters: TourDto): Promise<TourPaginationResponseType> {
+  async getTours(
+    filters: TourDto,
+    userId?: string,
+  ): Promise<TourPaginationResponseType> {
     const items_per_page = Number(filters.items_per_page) || 10;
     const page = Number(filters.page) || 1;
     const search = filters.search || '';
@@ -31,10 +34,30 @@ export class TourService {
           },
         ],
       },
+      include: userId
+        ? {
+            tourFavorites: {
+              where: {
+                userId,
+              },
+              select: {
+                isFavorite: true,
+              },
+            },
+          }
+        : undefined,
       orderBy: {
         createAt: 'desc',
       },
     });
+
+    const data = tours.map((tour) => ({
+      ...tour,
+      isFavorite:
+        userId && tour.tourFavorites.length > 0
+          ? tour.tourFavorites[0].isFavorite
+          : false,
+    }));
 
     const total = await this.prismaService.tour.count({
       where: {
@@ -49,7 +72,7 @@ export class TourService {
     });
 
     return {
-      data: tours,
+      data,
       total,
       currentPage: page,
       itemsPerPage: items_per_page,

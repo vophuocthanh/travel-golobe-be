@@ -109,7 +109,7 @@ export class HotelCommentController {
     );
   }
 
-  @Get(':hotelId/review/:reviewId/replies')
+  @Get(':reviewId/replies')
   @ApiOperation({ summary: 'Lấy tất cả trả lời của đánh giá' })
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })

@@ -14,7 +14,7 @@ export class HotelCommentService {
 
   async getHotelReviews(
     hotelCrawlId: string,
-  ): Promise<{ data: HotelReviewWithUserDto[] }> {
+  ): Promise<{ data: HotelReviewWithUserDto[]; total: number }> {
     const reviews = await this.prismaService.hotelCrawlReview.findMany({
       where: {
         hotelCrawlId,
@@ -31,6 +31,12 @@ export class HotelCommentService {
       },
     });
 
+    const totalReview = await this.prismaService.hotelCrawlReview.count({
+      where: {
+        hotelCrawlId,
+      },
+    });
+
     const reviewWithUser = reviews.map((review) => ({
       id: review.id,
       content: review.content,
@@ -41,6 +47,7 @@ export class HotelCommentService {
 
     return {
       data: reviewWithUser,
+      total: totalReview,
     };
   }
 
@@ -91,7 +98,15 @@ export class HotelCommentService {
       throw new NotFoundException('Hotel not found');
     }
 
-    if (hotel.userId !== userId) {
+    const review = await this.prismaService.hotelCrawlReview.findUnique({
+      where: { id: reviewId },
+    });
+
+    if (!review) {
+      throw new NotFoundException('Review not found');
+    }
+
+    if (review.userId !== userId && hotel.userId !== userId) {
       throw new ForbiddenException('You are not allowed to delete this review');
     }
 

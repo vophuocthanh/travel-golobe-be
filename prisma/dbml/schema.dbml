@@ -252,15 +252,23 @@ Table bookings {
   tourId String
   userId String [not null]
   flightCrawlId String
-  flightCrawls flight_crawl
   hotelCrawlId String
-  hotelCrawls hotel_crawl
   roadVehicleId String
-  roadVehicles road_vehicles
   tour tours
+  flightCrawls flight_crawl
+  hotelCrawls hotel_crawl
+  roadVehicles road_vehicles
   user users [not null]
-  createdAt DateTime [default: `now()`, not null]
+  flightQuantity Int
+  hotelQuantity Int
+  tourQuantity Int
+  roadVehicleQuantity Int
+  flightPrice Float
+  hotelPrice Float
+  tourPrice Float
+  roadVehiclePrice Float
   totalAmount Float
+  createdAt DateTime [default: `now()`, not null]
 }
 
 Table tour_reviews {
@@ -464,13 +472,13 @@ Ref: road_vehicle_favorites.userId > users.id
 
 Ref: user_flight_favorites.userId > users.id
 
+Ref: bookings.tourId > tours.id
+
 Ref: bookings.flightCrawlId > flight_crawl.id
 
 Ref: bookings.hotelCrawlId > hotel_crawl.id
 
 Ref: bookings.roadVehicleId > road_vehicles.id
-
-Ref: bookings.tourId > tours.id
 
 Ref: bookings.userId > users.id
 

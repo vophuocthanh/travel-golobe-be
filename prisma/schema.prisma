@@ -195,9 +195,9 @@ model FlightFavorite {
 
 model Tour {
   id                        String    @id @default(cuid())
-  name                      String  // Tên tour
+  name                      String // Tên tour
   userId                    String
-  description               String?  // Mô tả tour
+  description               String? // Mô tả tour
   price                     Float? // Giá tour
   original_price            Float? // Giá gốc
   createAt                  DateTime  @default(now())
@@ -205,7 +205,7 @@ model Tour {
   start_date                DateTime? // Ngày khởi hành
   end_date                  DateTime? // Ngày kết thúc
   starting_gate             String? // Nơi khởi hành
-  sight_seeing               String? // Điểm tham quan
+  sight_seeing              String? // Điểm tham quan
   cuisine                   String? // Ẩm thực
   suitable                  String? // Phù hợp
   ideal_time                String? // Thời gian lý tưởng
@@ -220,7 +220,7 @@ model Tour {
   image_3                   String?
   image_4                   String?
   image_5                   String?
-  rating                    Float?    @default(1)  // Đánh giá
+  rating                    Float?    @default(1) // Đánh giá
   number_of_seats_remaining Int? // Số ghế còn lại
 
   bookings      Booking[]
@@ -298,20 +298,35 @@ model UserFlightFavorite {
 //  Booking in system
 
 model Booking {
-  id            String       @id @default(uuid())
+  id            String  @id @default(uuid())
   tourId        String?
   userId        String
   flightCrawlId String?
-  flightCrawls  FlightCrawl? @relation(fields: [flightCrawlId], references: [id])
   hotelCrawlId  String?
-  hotelCrawls   HotelCrawl?  @relation(fields: [hotelCrawlId], references: [id])
   roadVehicleId String?
-  roadVehicles  RoadVehicle? @relation(fields: [roadVehicleId], references: [id])
-  tour          Tour?        @relation(fields: [tourId], references: [id])
-  user          User         @relation(fields: [userId], references: [id])
-  createdAt     DateTime     @default(now())
 
-  totalAmount Float?
+  tour         Tour?        @relation(fields: [tourId], references: [id])
+  flightCrawls FlightCrawl? @relation(fields: [flightCrawlId], references: [id])
+  hotelCrawls  HotelCrawl?  @relation(fields: [hotelCrawlId], references: [id])
+  roadVehicles RoadVehicle? @relation(fields: [roadVehicleId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+
+  // Quantity fields
+  flightQuantity      Int? // Số lượng đặt chuyến bay
+  hotelQuantity       Int? // Số lượng đặt khách sạn
+  tourQuantity        Int? // Số lượng đặt tour
+  roadVehicleQuantity Int? // Số lượng đặt phương tiện đường bộ
+
+  // Price fields
+  flightPrice      Float? // Giá của chuyến bay
+  hotelPrice       Float? // Giá của khách sạn
+  tourPrice        Float? // Giá của tour
+  roadVehiclePrice Float? // Giá của phương tiện đường bộ
+
+  // Tổng số tiền
+  totalAmount Float? // Tổng số tiền cho toàn bộ dịch vụ
+
+  createdAt DateTime @default(now())
 
   @@map("bookings")
 }

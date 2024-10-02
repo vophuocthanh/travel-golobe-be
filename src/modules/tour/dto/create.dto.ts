@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsDateString,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateDtoTour {
   @ApiProperty()
@@ -31,12 +37,14 @@ export class CreateDtoTour {
   @IsString()
   id?: string;
 
+  @ApiProperty()
   @IsOptional()
-  @IsString()
+  @IsDateString()
   start_date?: string;
 
+  @ApiProperty()
   @IsOptional()
-  @IsString()
+  @IsDateString()
   end_date?: string;
 
   @IsOptional()

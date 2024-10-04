@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { Booking } from '@prisma/client';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Booking, BookingStatus } from '@prisma/client';
+import { mailService } from 'src/lib/mail.service';
 import {
   BookingDto,
   BookingPaginationResponseType,
@@ -135,6 +136,7 @@ export class BookingsService {
       data: {
         flightCrawlId,
         userId,
+        flightQuantity,
         totalAmount: totalAmountFlight,
       },
     });
@@ -172,6 +174,7 @@ export class BookingsService {
       data: {
         hotelCrawlId,
         userId,
+        hotelQuantity,
         totalAmount: totalAmountHotel,
       },
     });
@@ -335,5 +338,108 @@ export class BookingsService {
     });
 
     return { message: 'Booking canceled successfully' };
+  }
+
+  async getBookedFlightDetails(
+    userId: string,
+    bookingId: string,
+  ): Promise<any> {
+    const booking = await this.prismaService.booking.findUnique({
+      where: { id: bookingId },
+      include: {
+        flightCrawls: true,
+      },
+    });
+
+    if (!booking || booking.userId !== userId) {
+      throw new NotFoundException('No flight booking found for this user.');
+    }
+
+    const { ...flightDetails } = booking.flightCrawls;
+
+    return {
+      bookingId: booking.id,
+      flightId: booking.flightCrawlId,
+      ...flightDetails,
+      price: booking.totalAmount,
+      flightQuantity: booking.flightQuantity,
+      invoice: [],
+    };
+  }
+
+  async getBookedHotelDetails(userId: string, bookingId: string): Promise<any> {
+    const booking = await this.prismaService.booking.findUnique({
+      where: { id: bookingId },
+      include: {
+        hotelCrawls: true,
+      },
+    });
+
+    if (!booking || booking.userId !== userId) {
+      throw new NotFoundException('No hotel booking found for this user.');
+    }
+
+    const { ...hotelDetails } = booking.hotelCrawls;
+
+    return {
+      bookingId: booking.id,
+      hotelId: booking.hotelCrawlId,
+      ...hotelDetails,
+      price: booking.totalAmount,
+      hotelQuantity: booking.hotelQuantity,
+      status: booking.status,
+      invoice: [],
+    };
+  }
+
+  // confirmBooking
+
+  async confirmBooking(bookingId: string, userId: string): Promise<Booking> {
+    const booking = await this.prismaService.booking.findUnique({
+      where: { id: bookingId },
+    });
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    if (booking.userId !== userId) {
+      throw new Error('You are not authorized to confirm this booking');
+    }
+
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+      select: { email: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const updatedBooking = await this.prismaService.booking.update({
+      where: { id: bookingId },
+      data: {
+        status: BookingStatus.CONFIRMED,
+      },
+    });
+
+    await this.prismaService.invoiceDetail.create({
+      data: {
+        bookingId: updatedBooking.id,
+        userId: updatedBooking.userId,
+        totalAmount: updatedBooking.totalAmount,
+      },
+    });
+
+    const htmlContent = `<h1>Xác Nhận Đặt Phòng</h1>
+      <p>Thông tin đặt phòng của bạn:</p>
+      <pre>${JSON.stringify(updatedBooking, null, 2)}</pre>`;
+
+    await mailService.sendMail({
+      to: user.email,
+      subject: 'Xác Nhận Đặt Phòng',
+      html: htmlContent,
+    });
+
+    return updatedBooking;
   }
 }

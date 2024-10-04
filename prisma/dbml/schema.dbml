@@ -38,6 +38,8 @@ Table users {
   flightFavorites flight_favorites [not null]
   tourFavorites tour_favorites [not null]
   roadVehicleFavorites road_vehicle_favorites [not null]
+  InvoiceDetail invoice_details [not null]
+  Payment payments [not null]
 }
 
 Table roles {
@@ -269,6 +271,44 @@ Table bookings {
   roadVehiclePrice Float
   totalAmount Float
   createdAt DateTime [default: `now()`, not null]
+  status BookingStatus [not null, default: 'PENDING']
+  confirmationTime DateTime
+  InvoiceDetail invoice_details [not null]
+  Payment payments [not null]
+}
+
+Table payments {
+  id String [pk]
+  bookingId String [not null]
+  userId String [not null]
+  amount Float [not null]
+  paymentMethod PaymentMethod [not null]
+  status PaymentStatus [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+  booking bookings [not null]
+  user users [not null]
+  InvoiceDetail invoice_details [not null]
+}
+
+Table invoice_details {
+  id String [pk]
+  bookingId String [not null]
+  booking bookings [not null]
+  userId String [not null]
+  user users [not null]
+  paymentId String
+  payment payments
+  flightQuantity Int
+  hotelQuantity Int
+  tourQuantity Int
+  roadVehicleQuantity Int
+  flightPrice Float
+  hotelPrice Float
+  tourPrice Float
+  roadVehiclePrice Float
+  totalAmount Float
+  createdAt DateTime [default: `now()`, not null]
 }
 
 Table tour_reviews {
@@ -448,6 +488,27 @@ Enum TicketType {
   FIRST_CLASS
 }
 
+Enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELED
+  SUCCESS
+}
+
+Enum PaymentMethod {
+  CASH
+  CREDIT_CARD
+  DEBIT_CARD
+  PAYPAL
+  BANK_TRANSFER
+}
+
+Enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
 Ref: users.roleId > roles.id
 
 Ref: rooms.hotelId > hotel_crawl.id
@@ -481,6 +542,16 @@ Ref: bookings.hotelCrawlId > hotel_crawl.id
 Ref: bookings.roadVehicleId > road_vehicles.id
 
 Ref: bookings.userId > users.id
+
+Ref: payments.bookingId > bookings.id
+
+Ref: payments.userId > users.id
+
+Ref: invoice_details.bookingId > bookings.id
+
+Ref: invoice_details.userId > users.id
+
+Ref: invoice_details.paymentId > payments.id
 
 Ref: tour_reviews.userId > users.id
 

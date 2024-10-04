@@ -34,6 +34,7 @@ import { RequestWithUser } from 'src/types/users';
 export class TourController {
   constructor(private tourService: TourService) {}
 
+  // @UseGuards(HandleAuthGuard)
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'items_per_page', required: false })
   @ApiQuery({ name: 'search', required: false })
@@ -45,8 +46,10 @@ export class TourController {
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async getTours(
     @Query() params: TourDto,
+    @Req() req: RequestWithUser,
   ): Promise<TourPaginationResponseType> {
-    return this.tourService.getTours(params);
+    const userId = req.user?.id;
+    return this.tourService.getTours(params, userId);
   }
   @UseGuards(HandleAuthGuard)
   @ApiOperation({ summary: 'Lấy danh sách các tour yêu thích của người dùng' })

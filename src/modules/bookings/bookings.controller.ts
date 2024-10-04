@@ -3,18 +3,20 @@ import {
   Controller,
   Delete,
   Get,
+  Param,
   Post,
   Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { Booking } from '@prisma/client';
+import { Booking, FlightCrawl, HotelCrawl } from '@prisma/client';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import { BookingsService } from 'src/modules/bookings/bookings.service';
 import {
   BookingDto,
   BookingPaginationResponseType,
+  ConfirmBookingDto,
   CreateFlightBookingDto,
   CreateHotelBookingDto,
   CreateTourBookingDto,
@@ -43,6 +45,45 @@ export class BookingsController {
   ): Promise<{ data: Booking[] }> {
     const userId = req.user.id;
     return this.bookingService.getBookedFlights(userId);
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @Get('flight/:bookingId')
+  async getBookedFlightDetails(
+    @Req() req: RequestWithUser,
+    @Param('bookingId') bookingId: string,
+  ): Promise<{
+    bookingId: string;
+    flightId: string;
+    totalPrice: number;
+    flightDetails: FlightCrawl;
+  }> {
+    const userId = req.user.id;
+    return this.bookingService.getBookedFlightDetails(userId, bookingId);
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @Get('hotel/:bookingId')
+  async getBookedHotelDetails(
+    @Req() req: RequestWithUser,
+    @Param('bookingId') bookingId: string,
+  ): Promise<{
+    bookingId: string;
+    hotelId: string;
+    totalPrice: number;
+    hotelDetails: HotelCrawl;
+  }> {
+    const userId = req.user.id;
+    return this.bookingService.getBookedHotelDetails(userId, bookingId);
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @Post('confirm')
+  async confirmBooking(
+    @Body() body: ConfirmBookingDto,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.bookingService.confirmBooking(body.bookingId, req.user.id);
   }
 
   @UseGuards(HandleAuthGuard)

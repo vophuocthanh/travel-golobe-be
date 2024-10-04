@@ -48,6 +48,8 @@ model User {
   flightFavorites        FlightFavorite[]
   tourFavorites          TourFavorite[]
   roadVehicleFavorites   RoadVehicleFavorite[]
+  InvoiceDetail          InvoiceDetail[]
+  Payment                Payment[]
 
   @@map("users")
 }
@@ -311,24 +313,94 @@ model Booking {
   roadVehicles RoadVehicle? @relation(fields: [roadVehicleId], references: [id])
   user         User         @relation(fields: [userId], references: [id])
 
-  // Quantity fields
   flightQuantity      Int? // Số lượng đặt chuyến bay
   hotelQuantity       Int? // Số lượng đặt khách sạn
   tourQuantity        Int? // Số lượng đặt tour
   roadVehicleQuantity Int? // Số lượng đặt phương tiện đường bộ
 
-  // Price fields
   flightPrice      Float? // Giá của chuyến bay
   hotelPrice       Float? // Giá của khách sạn
   tourPrice        Float? // Giá của tour
   roadVehiclePrice Float? // Giá của phương tiện đường bộ
 
-  // Tổng số tiền
   totalAmount Float? // Tổng số tiền cho toàn bộ dịch vụ
 
   createdAt DateTime @default(now())
 
+  // Trạng thái đặt chỗ
+  status BookingStatus @default(PENDING) // Trạng thái mặc định là chờ xác nhận
+
+  // Thời gian xác nhận
+  confirmationTime DateTime?
+
+  InvoiceDetail InvoiceDetail[]
+  Payment       Payment[] // Quan hệ với bảng Payment
+
   @@map("bookings")
+}
+
+enum BookingStatus {
+  PENDING // Chờ xác nhận
+  CONFIRMED // Đã xác nhận
+  CANCELED // Đã hủy
+  SUCCESS // Thành công
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  bookingId     String
+  userId        String
+  amount        Float
+  paymentMethod PaymentMethod
+  status        PaymentStatus
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime?     @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  InvoiceDetail InvoiceDetail[]
+
+  @@map("payments")
+}
+
+enum PaymentMethod {
+  CASH // Thanh toán bằng tiền mặt
+  CREDIT_CARD // Thanh toán bằng thẻ tín dụng
+  DEBIT_CARD // Thanh toán bằng thẻ ghi nợ
+  PAYPAL // Thanh toán qua PayPal
+  BANK_TRANSFER // Thanh toán qua chuyển khoản ngân hàng
+}
+
+enum PaymentStatus {
+  PENDING // Thanh toán đang chờ xử lý
+  COMPLETED // Thanh toán đã hoàn tất
+  FAILED // Thanh toán thất bại
+}
+
+model InvoiceDetail {
+  id        String   @id @default(uuid())
+  bookingId String
+  booking   Booking  @relation(fields: [bookingId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  paymentId String?
+  payment   Payment? @relation(fields: [paymentId], references: [id])
+
+  flightQuantity      Int?
+  hotelQuantity       Int?
+  tourQuantity        Int?
+  roadVehicleQuantity Int?
+
+  flightPrice      Float?
+  hotelPrice       Float?
+  tourPrice        Float?
+  roadVehiclePrice Float?
+  totalAmount      Float?
+
+  createdAt DateTime @default(now())
+
+  @@map("invoice_details")
 }
 
 //  Review

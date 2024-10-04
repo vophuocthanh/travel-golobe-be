@@ -16,6 +16,10 @@ export class TourService {
     filters: TourDto,
     userId?: string,
   ): Promise<TourPaginationResponseType> {
+    if (!filters) {
+      throw new Error('Filters must be provided');
+    }
+
     const items_per_page = Number(filters.items_per_page) || 10;
     const page = Number(filters.page) || 1;
     const search = filters.search || '';
@@ -25,51 +29,47 @@ export class TourService {
       take: items_per_page,
       skip,
       where: {
-        OR: [
-          {
-            name: {
-              contains: search,
-            },
-          },
-        ],
-      },
-      include: {
-        tourFavorites: {
-          where: {
-            userId,
-          },
-          select: {
-            isFavorite: true,
-          },
+        name: {
+          contains: search,
+          mode: 'insensitive',
         },
       },
-      orderBy: {
-        createAt: 'desc',
+      include: {
+        tourFavorites: userId
+          ? {
+              where: { userId },
+              select: { isFavorite: true },
+            }
+          : false,
       },
+      orderBy: { createAt: 'desc' },
     });
 
     const total = await this.prismaService.tour.count({
       where: {
-        OR: [
-          {
-            name: {
-              contains: search,
-            },
-          },
-        ],
+        name: {
+          contains: search,
+          mode: 'insensitive',
+        },
       },
     });
 
+    if (!tours) {
+      throw new NotFoundException('No tours found');
+    }
+
     const toursWithFavorite = tours.map((tour) => {
       const isFavorite =
-        tour.tourFavorites.length > 0 && tour.tourFavorites[0].isFavorite;
+        userId &&
+        tour.tourFavorites?.length > 0 &&
+        tour.tourFavorites[0].isFavorite;
 
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { tourFavorites, ...tourWithoutFavorites } = tour;
 
       return {
         ...tourWithoutFavorites,
-        isFavorite,
+        isFavorite: isFavorite || false,
       };
     });
 

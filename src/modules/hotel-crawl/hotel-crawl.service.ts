@@ -107,12 +107,10 @@ export class HotelCrawlService {
       filters.max_price?.toString() || `${Number.MAX_SAFE_INTEGER}`,
     );
 
-    // Lọc theo star_number nếu có
     const starNumber = filters.star_number
       ? Number(filters.star_number)
       : undefined;
 
-    // Lấy danh sách khách sạn
     const hotelCrawl = await this.prismaService.hotelCrawl.findMany({
       take: items_per_page,
       skip,

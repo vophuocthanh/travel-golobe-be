@@ -2,18 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { PaymentMethod, PaymentStatus } from '@prisma/client';
 import axios from 'axios';
 import * as crypto from 'crypto';
-import { MomoDto } from 'src/modules/momo/dto/momo.dto';
+import { MomoDto, MomoIpnDto } from 'src/modules/momo/dto/momo.dto';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class MomoService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly YOUR_SECRET_KEY = process.env.MOMO_YOUR_SECRET_KEY;
+  private readonly PARTNER_CODE = process.env.MOMO_PARTNER_CODE;
+  private readonly ACCESS_KEY = process.env.MOMO_ACCESS_KEY;
+  private readonly REDIRECT_URL = process.env.MOMO_REDIRECT_URL;
+  private readonly IPN_URL = process.env.MOMO_IPN_URL;
 
-  private YOUR_SECRET_KEY = process.env.MOMO_YOUR_SECRET_KEY;
-  private PARTNER_CODE = process.env.MOMO_PARTNER_CODE;
-  private ACCESS_KEY = process.env.MOMO_ACCESS_KEY;
-  private REDIRECT_URL = process.env.MOMO_REDIRECT_URL;
-  private IPN_URL = process.env.MOMO_IPN_URL;
+  constructor(private readonly prisma: PrismaService) {}
 
   async createPayment(data: MomoDto, userId: string) {
     const booking = await this.prisma.booking.findUnique({
@@ -21,18 +21,21 @@ export class MomoService {
       select: { totalAmount: true },
     });
 
-    const amount = booking.totalAmount;
-    const orderId = `${this.PARTNER_CODE}${new Date().getTime()}`;
+    if (!booking) {
+      throw new Error('Booking not found');
+    }
+
+    const { totalAmount: amount } = booking;
+    const orderId = `${this.PARTNER_CODE}_${data.bookingId}_${Date.now()}`;
     const requestId = orderId;
     const extraData = '';
 
-    const rawSignature = this.createRawSignature(
+    const signature = this.generateSignatureForPayment(
       amount,
       orderId,
       requestId,
       extraData,
     );
-    const signature = this.generateSignature(rawSignature);
 
     const requestBody = {
       partnerCode: this.PARTNER_CODE,
@@ -53,11 +56,11 @@ export class MomoService {
     };
 
     try {
-      const response = await axios.post(
+      const { data: response } = await axios.post(
         'https://test-payment.momo.vn/v2/gateway/api/create',
         requestBody,
       );
-      const paymentUrl = response.data.payUrl;
+      const paymentUrl = response.payUrl;
 
       await this.prisma.payment.create({
         data: {
@@ -66,10 +69,17 @@ export class MomoService {
           amount,
           paymentMethod: PaymentMethod.CREDIT_CARD,
           status: PaymentStatus.PENDING,
+          orderId,
         },
       });
 
-      return paymentUrl;
+      return {
+        partnerCode: this.PARTNER_CODE,
+        orderId,
+        amount,
+        requestId,
+        paymentUrl,
+      };
     } catch (error) {
       console.error(
         'Error creating payment:',
@@ -79,16 +89,101 @@ export class MomoService {
     }
   }
 
-  private createRawSignature(
+  async checkPaymentStatus(orderId: string, requestId: string) {
+    const signature = this.generateSignatureForStatus(orderId, requestId);
+
+    const requestBody = {
+      partnerCode: this.PARTNER_CODE,
+      accessKey: this.ACCESS_KEY,
+      orderId,
+      requestId,
+      signature,
+    };
+
+    try {
+      const { data: response } = await axios.post(
+        'https://test-payment.momo.vn/v2/gateway/api/query',
+        requestBody,
+      );
+      const paymentStatus = response?.status;
+
+      if (paymentStatus === 'COMPLETED') {
+        await this.prisma.payment.update({
+          where: { orderId },
+          data: { status: PaymentStatus.COMPLETED },
+        });
+      }
+
+      return response;
+    } catch (error) {
+      console.error(
+        'Error checking payment status:',
+        error.response?.data || error.message,
+      );
+      throw new Error('Error checking payment status');
+    }
+  }
+
+  async updatePaymentStatus(orderId: string, status: PaymentStatus) {
+    const payment = await this.prisma.payment.findUnique({
+      where: { orderId },
+    });
+
+    if (!payment) {
+      throw new Error('Payment record not found');
+    }
+
+    return this.prisma.payment.update({
+      where: { orderId },
+      data: { status },
+    });
+  }
+
+  private generateSignatureForPayment(
     amount: number,
     orderId: string,
     requestId: string,
     extraData: string,
   ): string {
-    return `accessKey=${this.ACCESS_KEY}&amount=${amount}&extraData=${extraData}&ipnUrl=${this.IPN_URL}&orderId=${orderId}&orderInfo=pay with MoMo&partnerCode=${this.PARTNER_CODE}&redirectUrl=${this.REDIRECT_URL}&requestId=${requestId}&requestType=payWithMethod`;
+    const rawSignature = `accessKey=${this.ACCESS_KEY}&amount=${amount}&extraData=${extraData}&ipnUrl=${this.IPN_URL}&orderId=${orderId}&orderInfo=pay with MoMo&partnerCode=${this.PARTNER_CODE}&redirectUrl=${this.REDIRECT_URL}&requestId=${requestId}&requestType=payWithMethod`;
+    return this.createSignature(rawSignature);
   }
 
-  private generateSignature(rawSignature: string): string {
+  private generateSignatureForStatus(
+    orderId: string,
+    requestId: string,
+  ): string {
+    const rawSignature = `accessKey=${this.ACCESS_KEY}&orderId=${orderId}&partnerCode=${this.PARTNER_CODE}&requestId=${requestId}`;
+    return this.createSignature(rawSignature);
+  }
+
+  async handleIpn(ipnData: MomoIpnDto): Promise<void> {
+    console.log('Received MoMo IPN data:', ipnData);
+
+    // const signature = this.generateSignatureForIpn(ipnData);
+    // if (signature !== ipnData.signature) {
+    //   console.error('Signature mismatch! Invalid IPN.');
+    //   throw new HttpException('Invalid signature', HttpStatus.BAD_REQUEST);
+    // }
+
+    if (ipnData.resultCode === 0) {
+      console.log('Payment successful:', ipnData);
+      await this.updatePaymentStatus(ipnData.orderId, PaymentStatus.COMPLETED);
+      console.log(
+        'Payment status updated to COMPLETED for orderId:',
+        ipnData.orderId,
+      );
+    } else {
+      console.error(
+        `Payment failed with resultCode ${ipnData.resultCode}:`,
+        ipnData.message,
+      );
+    }
+
+    console.log('IPN processed successfully.');
+  }
+
+  private createSignature(rawSignature: string): string {
     return crypto
       .createHmac('sha256', this.YOUR_SECRET_KEY)
       .update(rawSignature)

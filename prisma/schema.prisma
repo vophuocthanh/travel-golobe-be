@@ -347,22 +347,24 @@ enum BookingStatus {
 }
 
 model Payment {
-  id            String        @id @default(cuid())
-  bookingId     String
-  userId        String
-  amount        Float
-  paymentMethod PaymentMethod
-  status        PaymentStatus
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime?     @updatedAt
+  id            String        @id @default(cuid()) // ID của giao dịch thanh toán
+  bookingId     String        // ID của đơn đặt phòng
+  userId        String        // ID của người dùng
+  amount        Float         // Số tiền thanh toán
+  paymentMethod PaymentMethod // Phương thức thanh toán
+  status        PaymentStatus // Trạng thái thanh toán
+  orderId       String?        @unique// ID đơn hàng từ cổng thanh toán
+  createdAt     DateTime      @default(now()) // Thời gian tạo
+  updatedAt     DateTime?     @updatedAt // Thời gian cập nhật (nếu có)
 
-  booking Booking @relation(fields: [bookingId], references: [id])
-  user    User    @relation(fields: [userId], references: [id])
+  booking       Booking        @relation(fields: [bookingId], references: [id]) // Liên kết với mô hình Booking
+  user          User           @relation(fields: [userId], references: [id]) // Liên kết với mô hình User
 
-  InvoiceDetail InvoiceDetail[]
+  InvoiceDetail InvoiceDetail[] // Liên kết tới InvoiceDetail (nếu có)
 
-  @@map("payments")
+  @@map("payments") // Tên bảng trong cơ sở dữ liệu
 }
+
 
 enum PaymentMethod {
   CASH // Thanh toán bằng tiền mặt

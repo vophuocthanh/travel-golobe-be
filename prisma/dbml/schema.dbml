@@ -284,6 +284,7 @@ Table payments {
   amount Float [not null]
   paymentMethod PaymentMethod [not null]
   status PaymentStatus [not null]
+  orderId String [unique]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime
   booking bookings [not null]

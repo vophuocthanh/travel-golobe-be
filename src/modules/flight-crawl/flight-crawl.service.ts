@@ -140,6 +140,8 @@ export class FlightCrawlService {
     const startDate = this.parseDateString(filters.start_day);
     const endDate = this.parseDateString(filters.end_day);
 
+    const filterBrand = filters.brand || '';
+
     const skip = page > 1 ? (page - 1) * items_per_page : 0;
 
     const flightCrawl = await this.prismaService.flightCrawl.findMany({
@@ -168,6 +170,15 @@ export class FlightCrawlService {
                   start_day: {
                     gte: startDate || new Date('1970-01-01'),
                     lte: endDate || new Date(),
+                  },
+                },
+              ]
+            : []),
+          ...(filterBrand
+            ? [
+                {
+                  brand: {
+                    equals: filterBrand,
                   },
                 },
               ]
@@ -227,6 +238,15 @@ export class FlightCrawlService {
                   start_day: {
                     gte: startDate || new Date('1970-01-01'),
                     lte: endDate || new Date(),
+                  },
+                },
+              ]
+            : []),
+          ...(filterBrand
+            ? [
+                {
+                  brand: {
+                    equals: filterBrand,
                   },
                 },
               ]

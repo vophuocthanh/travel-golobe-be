@@ -74,6 +74,12 @@ export class FlightCrawlController {
     type: String,
     description: 'End day in format dd-mm-yyyy',
   })
+  @ApiQuery({
+    name: 'brand',
+    required: false,
+    enum: ['Vietnam Airlines', 'VietJet Air', 'Bamboo Airways'],
+    description: 'Airline brand',
+  })
   @ApiOperation({ summary: 'Lấy thông tin chuyến bay từ các trang web khác' })
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })

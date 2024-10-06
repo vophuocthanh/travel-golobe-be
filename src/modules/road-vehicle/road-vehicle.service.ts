@@ -17,6 +17,12 @@ export class RoadVehicleService {
     return `${year}-${month}-${day}`;
   }
 
+  private parseDateString(dateString: string): Date | undefined {
+    if (!dateString) return undefined;
+    const [day, month, year] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+
   async importRoadVehicleFromCSV(filePath: string): Promise<void> {
     const roadVehicles = [];
 
@@ -66,28 +72,84 @@ export class RoadVehicleService {
     const search = filters.search || '';
     const skip = page > 1 ? (page - 1) * items_per_page : 0;
 
+    const sort_by_price = filters.sort_by_price || 'asc';
+
+    const min_price = parseFloat(filters.min_price?.toString() || '0');
+    const max_price = parseFloat(
+      filters.max_price?.toString() || `${Number.MAX_SAFE_INTEGER}`,
+    );
+
+    const startDate = this.parseDateString(filters.start_day);
+    const endDate = this.parseDateString(filters.end_day);
+
     const roadVehicleCraw = await this.prismaService.roadVehicle.findMany({
       take: items_per_page,
       skip,
       where: {
-        OR: [
+        AND: [
           {
-            brand: {
-              contains: search,
+            price: {
+              gte: min_price,
+              lte: max_price,
             },
           },
+          {
+            OR: [
+              {
+                brand: {
+                  contains: search,
+                },
+              },
+            ],
+          },
+          ...(startDate || endDate
+            ? [
+                {
+                  start_day: {
+                    gte: startDate || new Date('1970-01-01'),
+                    lte: endDate || new Date(),
+                  },
+                },
+              ]
+            : []),
         ],
+      },
+      orderBy: {
+        price: sort_by_price,
       },
     });
     const total = await this.prismaService.roadVehicle.count({
       where: {
-        OR: [
+        AND: [
           {
-            brand: {
-              contains: search,
+            price: {
+              gte: min_price,
+              lte: max_price,
             },
           },
+          {
+            OR: [
+              {
+                brand: {
+                  contains: search,
+                },
+              },
+            ],
+          },
+          ...(startDate || endDate
+            ? [
+                {
+                  start_day: {
+                    gte: startDate || new Date('1970-01-01'),
+                    lte: endDate || new Date(),
+                  },
+                },
+              ]
+            : []),
         ],
+      },
+      orderBy: {
+        price: sort_by_price,
       },
     });
     return {

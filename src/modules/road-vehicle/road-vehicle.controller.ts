@@ -39,6 +39,36 @@ export class RoadVehicleController {
   constructor(private roadVehicleService: RoadVehicleService) {}
 
   @Get('crawl')
+  @ApiQuery({
+    name: 'sort_by_price',
+    required: false,
+    enum: ['asc', 'desc'],
+    description: 'Sort road vehicles by price',
+  })
+  @ApiQuery({
+    name: 'min_price',
+    required: false,
+    type: Number,
+    description: 'Minimum price filter',
+  })
+  @ApiQuery({
+    name: 'max_price',
+    required: false,
+    type: Number,
+    description: 'Maximum price filter',
+  })
+  @ApiQuery({
+    name: 'start_day',
+    required: false,
+    type: String,
+    description: 'Start day in format dd-mm-yyyy',
+  })
+  @ApiQuery({
+    name: 'end_day',
+    required: false,
+    type: String,
+    description: 'End day in format dd-mm-yyyy',
+  })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'items_per_page', required: false })
   @ApiQuery({ name: 'search', required: false })

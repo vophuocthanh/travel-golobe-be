@@ -218,6 +218,7 @@ Table road_vehicles {
   destination String [not null]
   location String [not null]
   isFavorite Boolean [default: false]
+  number_of_seats_remaining Int
   users user_on_road_vehicles [not null]
   bookings bookings [not null]
   roadVehicleReview road_vehicle_reviews [not null]

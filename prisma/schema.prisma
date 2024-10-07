@@ -250,19 +250,20 @@ model TourFavorite {
 // Road vehicles (phương tiện đường bộ)
 
 model RoadVehicle {
-  id             String   @id @default(cuid())
-  brand          String // Hãng xe
-  price          Float // Giá vé hoặc chi phí di chuyển
-  number_of_seat String // Số ghế
-  start_time     String // Thời gian khởi hành
-  start_day      DateTime // Ngày khởi hành
-  end_day        DateTime // Ngày kết thúc
-  end_time       String // Thời gian kết thúc
-  trip_time      String // Thời gian hành trình
-  take_place     String // Điểm xuất phát
-  destination    String // Điểm đến
-  location       String
-  isFavorite     Boolean? @default(false)
+  id                        String   @id @default(cuid())
+  brand                     String // Hãng xe
+  price                     Float // Giá vé hoặc chi phí di chuyển
+  number_of_seat            String // Số ghế
+  start_time                String // Thời gian khởi hành
+  start_day                 DateTime // Ngày khởi hành
+  end_day                   DateTime // Ngày kết thúc
+  end_time                  String // Thời gian kết thúc
+  trip_time                 String // Thời gian hành trình
+  take_place                String // Điểm xuất phát
+  destination               String // Điểm đến
+  location                  String
+  isFavorite                Boolean? @default(false)
+  number_of_seats_remaining Int?
 
   users               UserOnRoadVehicle[]
   bookings            Booking[]
@@ -348,23 +349,22 @@ enum BookingStatus {
 
 model Payment {
   id            String        @id @default(cuid()) // ID của giao dịch thanh toán
-  bookingId     String        // ID của đơn đặt phòng
-  userId        String        // ID của người dùng
-  amount        Float         // Số tiền thanh toán
+  bookingId     String // ID của đơn đặt phòng
+  userId        String // ID của người dùng
+  amount        Float // Số tiền thanh toán
   paymentMethod PaymentMethod // Phương thức thanh toán
   status        PaymentStatus // Trạng thái thanh toán
-  orderId       String?        @unique// ID đơn hàng từ cổng thanh toán
+  orderId       String?       @unique // ID đơn hàng từ cổng thanh toán
   createdAt     DateTime      @default(now()) // Thời gian tạo
   updatedAt     DateTime?     @updatedAt // Thời gian cập nhật (nếu có)
 
-  booking       Booking        @relation(fields: [bookingId], references: [id]) // Liên kết với mô hình Booking
-  user          User           @relation(fields: [userId], references: [id]) // Liên kết với mô hình User
+  booking Booking @relation(fields: [bookingId], references: [id]) // Liên kết với mô hình Booking
+  user    User    @relation(fields: [userId], references: [id]) // Liên kết với mô hình User
 
   InvoiceDetail InvoiceDetail[] // Liên kết tới InvoiceDetail (nếu có)
 
   @@map("payments") // Tên bảng trong cơ sở dữ liệu
 }
-
 
 enum PaymentMethod {
   CASH // Thanh toán bằng tiền mặt

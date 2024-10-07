@@ -22,7 +22,6 @@ async function bootstrap() {
     .addTag('hotel-crawl')
     .addTag('hotel-comment')
     .addTag('momo')
-    .addTag('location')
     .addTag('role')
     .addTag('road-vehicle')
     .addTag('tour')

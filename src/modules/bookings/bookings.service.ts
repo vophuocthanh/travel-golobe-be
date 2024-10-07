@@ -7,6 +7,7 @@ import {
 } from 'src/modules/bookings/dto/booking.dto';
 import { CreateFlightBookingDto } from 'src/modules/bookings/dto/create-flight-booking.dto';
 import { CreateHotelBookingDto } from 'src/modules/bookings/dto/create-hotel-booking.dto';
+import { CreateRoadVehicleBookingDto } from 'src/modules/bookings/dto/create-road-vehicle-booking.dto';
 import { CreateTourBookingDto } from 'src/modules/bookings/dto/create-tour-booking.dto';
 import { PrismaService } from 'src/prisma.service';
 
@@ -84,6 +85,16 @@ export class BookingsService {
     return { data: getFlightBooking };
   }
 
+  async getRoadVehicleBooking(userId: string): Promise<{ data: Booking[] }> {
+    const getRoadVehicleBooking = await this.prismaService.booking.findMany({
+      where: { userId, roadVehicleId: { not: null } },
+      include: {
+        roadVehicles: true,
+      },
+    });
+    return { data: getRoadVehicleBooking };
+  }
+
   async getBookedHotels(userId: string): Promise<{ data: Booking[] }> {
     const getHotelBooking = await this.prismaService.booking.findMany({
       where: { userId, hotelCrawlId: { not: null } },
@@ -138,6 +149,44 @@ export class BookingsService {
         userId,
         flightQuantity,
         totalAmount: totalAmountFlight,
+      },
+    });
+  }
+
+  async bookRoadVehicle(
+    createRoadVehicleBookingDto: CreateRoadVehicleBookingDto,
+    userId: string,
+  ): Promise<Booking> {
+    const { roadVehicleId, roadVehicleQuantity } = createRoadVehicleBookingDto;
+
+    const roadVehicle = await this.prismaService.roadVehicle.findUnique({
+      where: { id: roadVehicleId },
+    });
+
+    if (!roadVehicle) {
+      throw new Error('Road vehicle not found');
+    }
+
+    if (roadVehicle.number_of_seats_remaining < roadVehicleQuantity) {
+      throw new Error('Not enough available seats for the requested quantity');
+    }
+
+    await this.prismaService.roadVehicle.update({
+      where: { id: roadVehicleId },
+      data: {
+        number_of_seats_remaining:
+          roadVehicle.number_of_seats_remaining - roadVehicleQuantity,
+      },
+    });
+
+    const totalAmountRoadVehicle = roadVehicle.price * roadVehicleQuantity;
+
+    return this.prismaService.booking.create({
+      data: {
+        roadVehicleId,
+        userId,
+        roadVehicleQuantity,
+        totalAmount: totalAmountRoadVehicle,
       },
     });
   }
@@ -300,6 +349,26 @@ export class BookingsService {
     return { message: 'Booking canceled successfully' };
   }
 
+  async cancelRoadVehicleBooking(bookingId: string, userId: string) {
+    const booking = await this.prismaService.booking.findUnique({
+      where: { id: bookingId },
+    });
+
+    if (!booking) {
+      throw new Error('Booking not found');
+    }
+
+    if (booking.userId !== userId) {
+      throw new Error('You are not authorized to cancel this booking');
+    }
+
+    await this.prismaService.booking.delete({
+      where: { id: bookingId },
+    });
+
+    return { message: 'Booking canceled successfully' };
+  }
+
   async cancelHotelBooking(bookingId: string, userId: string) {
     const booking = await this.prismaService.booking.findUnique({
       where: { id: bookingId },
@@ -387,6 +456,36 @@ export class BookingsService {
       ...hotelDetails,
       price: booking.totalAmount,
       hotelQuantity: booking.hotelQuantity,
+      status: booking.status,
+      invoice: [],
+    };
+  }
+
+  async getBookedRoadVehicleDetails(
+    userId: string,
+    bookingId: string,
+  ): Promise<any> {
+    const booking = await this.prismaService.booking.findUnique({
+      where: { id: bookingId },
+      include: {
+        roadVehicles: true,
+      },
+    });
+
+    if (!booking || booking.userId !== userId) {
+      throw new NotFoundException(
+        'No road vehicle booking found for this user.',
+      );
+    }
+
+    const { ...roadVehicleDetails } = booking.roadVehicles;
+
+    return {
+      bookingId: booking.id,
+      roadVehicleId: booking.roadVehicleId,
+      ...roadVehicleDetails,
+      price: booking.totalAmount,
+      roadVehicleQuantity: booking.roadVehicleQuantity,
       status: booking.status,
       invoice: [],
     };

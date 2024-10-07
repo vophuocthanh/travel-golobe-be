@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { Booking, FlightCrawl, HotelCrawl } from '@prisma/client';
+import { Booking, FlightCrawl, HotelCrawl, RoadVehicle } from '@prisma/client';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import { BookingsService } from 'src/modules/bookings/bookings.service';
 import {
@@ -21,6 +21,7 @@ import {
   CreateHotelBookingDto,
   CreateTourBookingDto,
 } from 'src/modules/bookings/dto';
+import { CreateRoadVehicleBookingDto } from 'src/modules/bookings/dto/create-road-vehicle-booking.dto';
 
 import { RequestWithUser } from 'src/types/users';
 
@@ -45,6 +46,15 @@ export class BookingsController {
   ): Promise<{ data: Booking[] }> {
     const userId = req.user.id;
     return this.bookingService.getBookedFlights(userId);
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @Get('book/road-vehicle')
+  async getBookedRoadVehicles(
+    @Req() req: RequestWithUser,
+  ): Promise<{ data: Booking[] }> {
+    const userId = req.user.id;
+    return this.bookingService.getRoadVehicleBooking(userId);
   }
 
   @UseGuards(HandleAuthGuard)
@@ -78,6 +88,21 @@ export class BookingsController {
   }
 
   @UseGuards(HandleAuthGuard)
+  @Get('road-vehicle/:bookingId')
+  async getBookedRoadVehicleDetails(
+    @Req() req: RequestWithUser,
+    @Param('bookingId') bookingId: string,
+  ): Promise<{
+    bookingId: string;
+    roadVehicleId: string;
+    totalPrice: number;
+    roadVehicleDetails: RoadVehicle;
+  }> {
+    const userId = req.user.id;
+    return this.bookingService.getBookedRoadVehicleDetails(userId, bookingId);
+  }
+
+  @UseGuards(HandleAuthGuard)
   @Post('confirm')
   async confirmBooking(
     @Body() body: ConfirmBookingDto,
@@ -104,6 +129,19 @@ export class BookingsController {
   ) {
     const userId = req.user.id;
     return this.bookingService.cancelFlightBooking(bookingId, userId);
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @Post('book/road-vehicle')
+  async bookRoadVehicle(
+    @Body() createRoadVehicleBookingDto: CreateRoadVehicleBookingDto,
+    @Req() req: RequestWithUser,
+  ) {
+    const userId = req.user.id;
+    return this.bookingService.bookRoadVehicle(
+      createRoadVehicleBookingDto,
+      userId,
+    );
   }
 
   @UseGuards(HandleAuthGuard)
@@ -162,5 +200,15 @@ export class BookingsController {
   ) {
     const userId = req.user.id;
     return this.bookingService.cancelTourBooking(bookingId, userId);
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @Delete('book/road-vehicle/:id')
+  async cancelRoadVehicleBooking(
+    @Req() req: RequestWithUser,
+    @Query('bookingId') bookingId: string,
+  ) {
+    const userId = req.user.id;
+    return this.bookingService.cancelRoadVehicleBooking(bookingId, userId);
   }
 }

@@ -47,6 +47,7 @@ export class MomoController {
   @Post('ipn')
   @HttpCode(HttpStatus.OK)
   async handleMomoIpn(@Body() ipnData: MomoIpnDto) {
+    console.log('ipnData:', ipnData);
     return this.momoService.handleIpn(ipnData);
   }
 }

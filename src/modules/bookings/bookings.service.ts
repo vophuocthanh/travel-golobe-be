@@ -119,14 +119,24 @@ export class BookingsService {
     createFlightBookingDto: CreateFlightBookingDto,
     userId: string,
   ): Promise<Booking> {
-    const { flightCrawlId, flightQuantity } = createFlightBookingDto;
+    const { flightCrawlId, flightQuantity, ticketFlighttId } =
+      createFlightBookingDto;
 
     const flight = await this.prismaService.flightCrawl.findUnique({
       where: { id: flightCrawlId },
+      include: { Ticket: true },
     });
 
     if (!flight) {
       throw new Error('Flight not found');
+    }
+
+    const ticket = flight.Ticket.find(
+      (ticket) => ticket.id === ticketFlighttId,
+    );
+
+    if (!ticket) {
+      throw new Error('Ticket not found for this flight');
     }
 
     if (flight.number_of_seats_remaining < flightQuantity) {
@@ -141,13 +151,14 @@ export class BookingsService {
       },
     });
 
-    const totalAmountFlight = flight.price * flightQuantity;
+    const totalAmountFlight = ticket.price * flightQuantity;
 
     return this.prismaService.booking.create({
       data: {
         flightCrawlId,
         userId,
         flightQuantity,
+        ticketFlighttId,
         totalAmount: totalAmountFlight,
       },
     });
@@ -195,14 +206,25 @@ export class BookingsService {
     createHotelBookingDto: CreateHotelBookingDto,
     userId: string,
   ) {
-    const { hotelCrawlId, hotelQuantity } = createHotelBookingDto;
+    const { hotelCrawlId, hotelQuantity, roomId } = createHotelBookingDto;
 
     const hotel = await this.prismaService.hotelCrawl.findUnique({
       where: { id: hotelCrawlId },
+      include: { rooms: true },
     });
 
     if (!hotel) {
       throw new Error('Hotel not found');
+    }
+
+    const room = hotel.rooms.find((room) => room.id === roomId);
+
+    if (!room) {
+      throw new Error('Room not found');
+    }
+
+    if (!room.available) {
+      throw new Error('Selected room type is not available');
     }
 
     if (hotel.number_of_seats_remaining < hotelQuantity) {
@@ -217,12 +239,13 @@ export class BookingsService {
       },
     });
 
-    const totalAmountHotel = hotel.price * hotelQuantity;
+    const totalAmountHotel = room.pricePerDay * hotelQuantity;
 
     return this.prismaService.booking.create({
       data: {
         hotelCrawlId,
         userId,
+        roomId,
         hotelQuantity,
         totalAmount: totalAmountHotel,
       },

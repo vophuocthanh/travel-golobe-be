@@ -100,8 +100,9 @@ model Room {
   available   Boolean    @default(true)
   hotel       HotelCrawl @relation(fields: [hotelId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Booking   Booking[]
 
   @@map("rooms")
 }
@@ -173,6 +174,8 @@ model Ticket {
   flight         FlightCrawl   @relation(fields: [flightId], references: [id])
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+
+  Booking Booking[]
 }
 
 enum TicketType {
@@ -323,6 +326,12 @@ model Booking {
   hotelPrice       Float? // Giá của khách sạn
   tourPrice        Float? // Giá của tour
   roadVehiclePrice Float? // Giá của phương tiện đường bộ
+
+  roomId String? // Thêm roomId
+  room   Room?   @relation(fields: [roomId], references: [id])
+
+  ticketFlighttId String? // Thêm ticketId
+  ticket          Ticket? @relation(fields: [ticketFlighttId], references: [id])
 
   totalAmount Float? // Tổng số tiền cho toàn bộ dịch vụ
 

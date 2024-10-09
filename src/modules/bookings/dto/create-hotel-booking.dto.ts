@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateHotelBookingDto {
   @ApiProperty()
@@ -9,4 +9,9 @@ export class CreateHotelBookingDto {
   @ApiProperty()
   @IsOptional()
   hotelQuantity?: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsUUID()
+  roomId: string;
 }

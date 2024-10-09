@@ -9,4 +9,8 @@ export class CreateFlightBookingDto {
   @ApiProperty()
   @IsNumber()
   flightQuantity?: number;
+
+  @ApiProperty()
+  @IsString()
+  ticketFlighttId?: string;
 }

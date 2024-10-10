@@ -103,6 +103,21 @@ export class BookingsController {
   }
 
   @UseGuards(HandleAuthGuard)
+  @Get('tour/:bookingId')
+  async getBookedTourDetails(
+    @Req() req: RequestWithUser,
+    @Param('bookingId') bookingId: string,
+  ): Promise<{
+    bookingId: string;
+    tourId: string;
+    totalPrice: number;
+    tourDetails: any;
+  }> {
+    const userId = req.user.id;
+    return this.bookingService.getBookedTourDetails(userId, bookingId);
+  }
+
+  @UseGuards(HandleAuthGuard)
   @Post('confirm')
   async confirmBooking(
     @Body() body: ConfirmBookingDto,

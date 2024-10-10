@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Booking, BookingStatus } from '@prisma/client';
 import { mailService } from 'src/lib/mail.service';
 import {
@@ -253,102 +257,100 @@ export class BookingsService {
   }
 
   async bookTour(createTourBookingDto: CreateTourBookingDto, userId: string) {
-    const { tourId, flightCrawlId, hotelCrawlId, tourQuantity } =
-      createTourBookingDto;
+    const {
+      tourId,
+      tourQuantity,
+      flightQuantity = 1,
+      hotelQuantity = 1,
+    } = createTourBookingDto;
 
     const tour = await this.prismaService.tour.findUnique({
       where: { id: tourId },
     });
 
-    const flightCrawl = flightCrawlId
-      ? await this.prismaService.flightCrawl.findUnique({
-          where: { id: flightCrawlId },
-        })
-      : null;
+    if (!tour) throw new NotFoundException('Tour not found');
 
-    const hotelCrawl = hotelCrawlId
-      ? await this.prismaService.hotelCrawl.findUnique({
-          where: { id: hotelCrawlId },
-        })
-      : null;
+    // Lấy ngẫu nhiên chuyến bay
+    const flightCrawls = await this.prismaService.flightCrawl.findMany();
+    const flightCrawl =
+      flightCrawls[Math.floor(Math.random() * flightCrawls.length)];
 
-    if (!tour) throw new Error('Tour not found');
-    if (flightCrawlId && !flightCrawl) throw new Error('Flight not found');
-    if (hotelCrawlId && !hotelCrawl) throw new Error('Hotel not found');
+    // Lấy ngẫu nhiên khách sạn
+    const hotelCrawls = await this.prismaService.hotelCrawl.findMany();
+    const hotelCrawl =
+      hotelCrawls[Math.floor(Math.random() * hotelCrawls.length)];
 
+    // Kiểm tra số chỗ còn lại cho tour
     if (tour.number_of_seats_remaining < tourQuantity) {
-      throw new Error('Not enough available seats for the requested quantity');
+      throw new BadRequestException(
+        'Not enough available seats for the requested quantity',
+      );
     }
 
-    await this.prismaService.tour.update({
-      where: { id: tourId },
-      data: {
-        number_of_seats_remaining:
-          tour.number_of_seats_remaining - tourQuantity,
-      },
-    });
-
-    if (flightCrawl) {
-      if (
-        flightCrawl.number_of_seats_remaining <
-        createTourBookingDto.flightQuantity
-      ) {
-        throw new Error('Not enough available seats for the flight');
-      }
-
-      await this.prismaService.flightCrawl.update({
-        where: { id: flightCrawlId },
+    return await this.prismaService.$transaction(async (prisma) => {
+      // Cập nhật số chỗ còn lại cho tour
+      await prisma.tour.update({
+        where: { id: tourId },
         data: {
           number_of_seats_remaining:
-            flightCrawl.number_of_seats_remaining -
-            createTourBookingDto.flightQuantity,
+            tour.number_of_seats_remaining - tourQuantity,
         },
       });
-    }
 
-    if (hotelCrawl) {
-      if (
-        hotelCrawl.number_of_seats_remaining <
-        createTourBookingDto.hotelQuantity
-      ) {
-        throw new Error('Not enough available rooms for the hotel');
+      // Kiểm tra số chỗ còn lại cho chuyến bay
+      if (flightCrawl) {
+        if (flightCrawl.number_of_seats_remaining < flightQuantity) {
+          throw new BadRequestException(
+            'Not enough available seats for the flight',
+          );
+        }
+        await prisma.flightCrawl.update({
+          where: { id: flightCrawl.id },
+          data: {
+            number_of_seats_remaining:
+              flightCrawl.number_of_seats_remaining - flightQuantity,
+          },
+        });
       }
 
-      await this.prismaService.hotelCrawl.update({
-        where: { id: hotelCrawlId },
+      // Kiểm tra số chỗ còn lại cho khách sạn
+      if (hotelCrawl) {
+        if (hotelCrawl.number_of_seats_remaining < hotelQuantity) {
+          throw new BadRequestException(
+            'Not enough available rooms for the hotel',
+          );
+        }
+        await prisma.hotelCrawl.update({
+          where: { id: hotelCrawl.id },
+          data: {
+            number_of_seats_remaining:
+              hotelCrawl.number_of_seats_remaining - hotelQuantity,
+          },
+        });
+      }
+
+      // Tính tổng số tiền
+      const tourPrice = tour.price * tourQuantity;
+      const flightPrice = flightCrawl ? flightCrawl.price * flightQuantity : 0;
+      const hotelPrice = hotelCrawl ? hotelCrawl.price * hotelQuantity : 0;
+
+      const totalAmountTour = tourPrice + flightPrice + hotelPrice;
+
+      return await prisma.booking.create({
         data: {
-          number_of_seats_remaining:
-            hotelCrawl.number_of_seats_remaining -
-            createTourBookingDto.hotelQuantity,
+          tourId,
+          userId,
+          flightCrawlId: flightCrawl.id,
+          hotelCrawlId: hotelCrawl.id,
+          tourQuantity,
+          flightQuantity,
+          hotelQuantity,
+          tourPrice,
+          flightPrice,
+          hotelPrice,
+          totalAmount: totalAmountTour,
         },
       });
-    }
-
-    // Tính tổng số tiền
-    const tourPrice = tour.price * tourQuantity;
-    const flightPrice = flightCrawl
-      ? flightCrawl.price * (createTourBookingDto.flightQuantity || 0)
-      : 0;
-    const hotelPrice = hotelCrawl
-      ? hotelCrawl.price * (createTourBookingDto.hotelQuantity || 0)
-      : 0;
-
-    const totalAmountTour = tourPrice + flightPrice + hotelPrice;
-
-    return this.prismaService.booking.create({
-      data: {
-        tourId,
-        userId,
-        flightCrawlId: flightCrawlId || null,
-        hotelCrawlId: hotelCrawlId || null,
-        tourQuantity: tourQuantity,
-        flightQuantity: createTourBookingDto.flightQuantity || null,
-        hotelQuantity: createTourBookingDto.hotelQuantity || null,
-        tourPrice,
-        flightPrice,
-        hotelPrice,
-        totalAmount: totalAmountTour,
-      },
     });
   }
 
@@ -509,6 +511,35 @@ export class BookingsService {
       ...roadVehicleDetails,
       price: booking.totalAmount,
       roadVehicleQuantity: booking.roadVehicleQuantity,
+      status: booking.status,
+      invoice: [],
+    };
+  }
+
+  async getBookedTourDetails(userId: string, bookingId: string): Promise<any> {
+    const booking = await this.prismaService.booking.findUnique({
+      where: { id: bookingId },
+      include: {
+        tour: true,
+        flightCrawls: true,
+        hotelCrawls: true,
+      },
+    });
+
+    if (!booking || booking.userId !== userId) {
+      throw new NotFoundException('No tour booking found for this user.');
+    }
+
+    const { ...tourDetails } = booking.tour;
+
+    return {
+      bookingId: booking.id,
+      tourId: booking.tourId,
+      ...tourDetails,
+      price: booking.totalAmount,
+      tourQuantity: booking.tourQuantity,
+      flightQuantity: booking.flightQuantity,
+      hotelQuantity: booking.hotelQuantity,
       status: booking.status,
       invoice: [],
     };

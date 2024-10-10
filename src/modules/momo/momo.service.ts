@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PaymentMethod, PaymentStatus } from '@prisma/client';
 import axios from 'axios';
 import * as crypto from 'crypto';
@@ -131,13 +131,35 @@ export class MomoService {
     });
 
     if (!payment) {
-      throw new Error('Payment record not found');
+      throw new HttpException('Payment not found', HttpStatus.NOT_FOUND);
     }
 
-    return this.prisma.payment.update({
+    const updatedPayment = await this.prisma.payment.update({
       where: { orderId },
       data: { status },
     });
+
+    if (status === PaymentStatus.COMPLETED) {
+      const bookingId = payment.bookingId;
+
+      const relatedPayments = await this.prisma.payment.findMany({
+        where: { bookingId },
+      });
+
+      if (relatedPayments.length > 1) {
+        throw new HttpException(
+          'Cannot delete booking with existing payments',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      // Xóa bản ghi trong bảng booking
+      await this.prisma.booking.delete({
+        where: { id: bookingId },
+      });
+    }
+
+    return updatedPayment;
   }
 
   private generateSignatureForPayment(
@@ -159,8 +181,6 @@ export class MomoService {
   }
 
   async handleIpn(ipnData: MomoIpnDto): Promise<void> {
-    console.log('Received MoMo IPN data:', ipnData);
-
     // const signature = this.generateSignatureForIpn(ipnData);
     // if (signature !== ipnData.signature) {
     //   console.error('Signature mismatch! Invalid IPN.');

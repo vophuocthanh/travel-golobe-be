@@ -358,7 +358,7 @@ enum BookingStatus {
 
 model Payment {
   id            String        @id @default(cuid()) // ID của giao dịch thanh toán
-  bookingId     String // ID của đơn đặt phòng
+  bookingId     String? // ID của đơn đặt phòng
   userId        String // ID của người dùng
   amount        Float // Số tiền thanh toán
   paymentMethod PaymentMethod // Phương thức thanh toán
@@ -367,8 +367,9 @@ model Payment {
   createdAt     DateTime      @default(now()) // Thời gian tạo
   updatedAt     DateTime?     @updatedAt // Thời gian cập nhật (nếu có)
 
-  booking Booking @relation(fields: [bookingId], references: [id]) // Liên kết với mô hình Booking
-  user    User    @relation(fields: [userId], references: [id]) // Liên kết với mô hình User
+  booking Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  // Liên kết với mô hình Booking
+  user    User     @relation(fields: [userId], references: [id]) // Liên kết với mô hình User
 
   InvoiceDetail InvoiceDetail[] // Liên kết tới InvoiceDetail (nếu có)
 

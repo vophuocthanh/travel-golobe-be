@@ -595,4 +595,53 @@ export class BookingsService {
 
     return updatedBooking;
   }
+
+  // hàm xoá khi mà đặt booking quá 24h thì nó sẽ tự động xoá trong database
+
+  private async deleteExpiredBookings(entity: string) {
+    const expiredBookings = await this.prismaService.booking.findMany({
+      where: {
+        [entity]: { not: null },
+        createdAt: {
+          lt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 ngày trước
+        },
+      },
+    });
+
+    for (const booking of expiredBookings) {
+      await this.prismaService.booking.delete({
+        where: { id: booking.id },
+      });
+    }
+
+    return expiredBookings.length;
+  }
+
+  async deleteExpiredFlightBookings() {
+    const deletedCount = await this.deleteExpiredBookings('flightCrawlId');
+    return {
+      message: `${deletedCount} expired flight bookings deleted successfully`,
+    };
+  }
+
+  async deleteExpiredHotelBookings() {
+    const deletedCount = await this.deleteExpiredBookings('hotelCrawlId');
+    return {
+      message: `${deletedCount} expired hotel bookings deleted successfully`,
+    };
+  }
+
+  async deleteExpiredTourBookings() {
+    const deletedCount = await this.deleteExpiredBookings('tourId');
+    return {
+      message: `${deletedCount} expired tour bookings deleted successfully`,
+    };
+  }
+
+  async deleteExpiredRoadVehicleBookings() {
+    const deletedCount = await this.deleteExpiredBookings('roadVehicleId');
+    return {
+      message: `${deletedCount} expired road vehicle bookings deleted successfully`,
+    };
+  }
 }

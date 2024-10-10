@@ -286,7 +286,7 @@ Table bookings {
 
 Table payments {
   id String [pk]
-  bookingId String [not null]
+  bookingId String
   userId String [not null]
   amount Float [not null]
   paymentMethod PaymentMethod [not null]
@@ -294,7 +294,7 @@ Table payments {
   orderId String [unique]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime
-  booking bookings [not null]
+  booking bookings
   user users [not null]
   InvoiceDetail invoice_details [not null]
 }
@@ -555,7 +555,7 @@ Ref: bookings.roomId > rooms.id
 
 Ref: bookings.ticketFlighttId > Ticket.id
 
-Ref: payments.bookingId > bookings.id
+Ref: payments.bookingId > bookings.id [delete: Set Null]
 
 Ref: payments.userId > users.id
 

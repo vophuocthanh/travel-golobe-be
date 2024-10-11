@@ -73,6 +73,7 @@ Table hotel_crawl {
   hotelCrawlReviewa hotel_crawl_reviews [not null]
   bookings bookings [not null]
   hotelFavorites hotel_favorites [not null]
+  Tour tours [not null]
 }
 
 Table rooms {
@@ -126,6 +127,7 @@ Table flight_crawl {
   bookings bookings [not null]
   flightFavorites flight_favorites [not null]
   Ticket Ticket [not null]
+  Tour tours [not null]
 }
 
 Table Ticket {
@@ -185,6 +187,13 @@ Table tours {
   image_5 String
   rating Float [default: 1]
   number_of_seats_remaining Int
+  totalAmount Float
+  hotelId String
+  hotel hotel_crawl
+  flightId String
+  flight flight_crawl
+  roadVehicleId String
+  roadVehicle road_vehicles
   bookings bookings [not null]
   users user_on_tours [not null]
   tourReviews tour_reviews [not null]
@@ -225,6 +234,7 @@ Table road_vehicles {
   bookings bookings [not null]
   roadVehicleReview road_vehicle_reviews [not null]
   roadVehicleFavorite road_vehicle_favorites [not null]
+  Tour tours [not null]
 }
 
 Table road_vehicle_favorites {
@@ -530,6 +540,12 @@ Ref: Ticket.flightId > flight_crawl.id
 Ref: flight_favorites.userId > users.id
 
 Ref: flight_favorites.flightId > flight_crawl.id
+
+Ref: tours.hotelId > hotel_crawl.id
+
+Ref: tours.flightId > flight_crawl.id
+
+Ref: tours.roadVehicleId > road_vehicles.id
 
 Ref: tour_favorites.userId > users.id
 

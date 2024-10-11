@@ -154,6 +154,9 @@ export class TourService {
             isFavorite: true,
           },
         },
+        hotel: true,
+        flight: true,
+        roadVehicle: true,
       },
     });
 
@@ -165,32 +168,101 @@ export class TourService {
       tour.tourFavorites.length > 0 && tour.tourFavorites[0].isFavorite;
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { tourFavorites, ...tourWithoutFavorites } = tour;
+    const { tourFavorites, flight, roadVehicle, ...tourWithoutFavorites } =
+      tour;
+
+    let roadVehicleDetails = null;
+
+    if (flight) {
+      roadVehicleDetails = {
+        type: 'Máy bay',
+        details: flight,
+      };
+    } else if (roadVehicle) {
+      roadVehicleDetails = {
+        type: 'Xe khách',
+        details: roadVehicle,
+      };
+    }
 
     return {
       ...tourWithoutFavorites,
       isFavorite,
+      hotel: tour.hotel || null,
+      road_vehicle: roadVehicleDetails || null,
     };
   }
 
   async createTours(data: CreateDtoTour, userId: string): Promise<Tour> {
-    const startDate = dayjs(data.start_date, 'DD/MM/YYYY');
-    const endDate = dayjs(data.end_date, 'DD/MM/YYYY');
+    const startDate = this.parseDateString(data.start_date);
+    const endDate = this.parseDateString(data.end_date);
 
-    if (!startDate.isValid() || !endDate.isValid()) {
-      throw new Error(
-        'start_date and end_date must be valid dates in the format DD/MM/YYYY',
-      );
+    if (!startDate || !endDate) {
+      throw new Error('Invalid start or end date');
     }
 
-    const numberOfDays = endDate.diff(startDate, 'day') + 1;
+    const numberOfDays = dayjs(endDate).diff(dayjs(startDate), 'day') + 1;
     const numberOfNights = numberOfDays > 1 ? numberOfDays - 1 : 0;
 
     const timeTripFormatted = `${numberOfDays}N${numberOfNights}D`;
 
-    const babyPrice = 0;
-    const childPrice = data.price / 2;
-    const adultPrice = data.price;
+    let hotelPrice = 0;
+    if (data.hotelId) {
+      const hotel = await this.prismaService.hotelCrawl.findUnique({
+        where: { id: data.hotelId },
+        select: { price: true, number_of_seats_remaining: true },
+      });
+      if (!hotel) {
+        throw new NotFoundException('Hotel not found');
+      }
+      if (hotel.number_of_seats_remaining === 0) {
+        throw new Error('No available seats remaining in the selected hotel');
+      }
+      hotelPrice = hotel.price;
+    }
+
+    let transportPrice = 0;
+    let roadVehicleType: string | null = null;
+
+    if (data.flightId && data.roadVehicleId) {
+      throw new Error(
+        'You can only select either flightId or roadVehicleId, not both.',
+      );
+    }
+
+    if (data.flightId) {
+      const flight = await this.prismaService.flightCrawl.findUnique({
+        where: { id: data.flightId },
+        select: { price: true, number_of_seats_remaining: true },
+      });
+      if (!flight) {
+        throw new NotFoundException('Flight not found');
+      }
+      if (flight.number_of_seats_remaining === 0) {
+        throw new Error('No available seats remaining in the selected flight');
+      }
+      transportPrice = flight.price;
+      roadVehicleType = 'Máy bay';
+    }
+
+    if (data.roadVehicleId) {
+      const roadVehicle = await this.prismaService.roadVehicle.findUnique({
+        where: { id: data.roadVehicleId },
+        select: { price: true, number_of_seats_remaining: true },
+      });
+      if (!roadVehicle) {
+        throw new NotFoundException('Road vehicle not found');
+      }
+      if (roadVehicle.number_of_seats_remaining === 0) {
+        throw new Error(
+          'No available seats remaining in the selected road vehicle',
+        );
+      }
+      transportPrice = roadVehicle.price;
+      roadVehicleType = 'Xe khách';
+    }
+
+    const totalAmount = hotelPrice + transportPrice + data.price;
 
     return this.prismaService.tour.create({
       data: {
@@ -199,9 +271,11 @@ export class TourService {
         start_date: startDate.toISOString(),
         end_date: endDate.toISOString(),
         time_trip: timeTripFormatted,
-        baby_price: babyPrice,
-        child_price: childPrice,
-        adult_price: adultPrice,
+        baby_price: 0,
+        child_price: totalAmount / 2,
+        adult_price: totalAmount,
+        totalAmount,
+        road_vehicle: roadVehicleType,
       },
     });
   }

@@ -88,6 +88,7 @@ model HotelCrawl {
   hotelCrawlReviewa HotelCrawlReview[]
   bookings          Booking[]
   hotelFavorites    HotelFavorite[]
+  Tour              Tour[]
 
   @@map("hotel_crawl")
 }
@@ -153,6 +154,7 @@ model FlightCrawl {
   bookings        Booking[]
   flightFavorites FlightFavorite[]
   Ticket          Ticket[]
+  Tour            Tour[]
 
   @@map("flight_crawl")
 }
@@ -199,14 +201,14 @@ model FlightFavorite {
 }
 
 model Tour {
-  id                        String    @id @default(cuid())
+  id                        String       @id @default(cuid())
   name                      String // Tên tour
   userId                    String
   description               String? // Mô tả tour
   price                     Float? // Giá tour
   original_price            Float? // Giá gốc
-  createAt                  DateTime  @default(now())
-  updateAt                  DateTime? @updatedAt
+  createAt                  DateTime     @default(now())
+  updateAt                  DateTime?    @updatedAt
   start_date                DateTime? // Ngày khởi hành
   end_date                  DateTime? // Ngày kết thúc
   starting_gate             String? // Nơi khởi hành
@@ -225,8 +227,15 @@ model Tour {
   image_3                   String?
   image_4                   String?
   image_5                   String?
-  rating                    Float?    @default(1) // Đánh giá
+  rating                    Float?       @default(1) // Đánh giá
   number_of_seats_remaining Int? // Số ghế còn lại
+  totalAmount               Float? // Tổng số tiền
+  hotelId                   String?
+  hotel                     HotelCrawl?  @relation(fields: [hotelId], references: [id])
+  flightId                  String?
+  flight                    FlightCrawl? @relation(fields: [flightId], references: [id])
+  roadVehicleId             String?
+  roadVehicle               RoadVehicle? @relation(fields: [roadVehicleId], references: [id])
 
   bookings      Booking[]
   users         UserOnTour[]
@@ -272,6 +281,7 @@ model RoadVehicle {
   bookings            Booking[]
   roadVehicleReview   RoadVehicleReview[]
   roadVehicleFavorite RoadVehicleFavorite[]
+  Tour                Tour[]
 
   @@map("road_vehicles")
 }

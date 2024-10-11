@@ -21,8 +21,8 @@ export class CreateTourBookingDto {
   @Min(1)
   tourQuantity: number;
 
-  flightQuantity?: number; // có thể không có, mặc định là 1
-  hotelQuantity?: number;
+  // flightQuantity?: number; // có thể không có, mặc định là 1
+  // hotelQuantity?: number;
 
   // @ApiProperty({
   //   description: 'Số lượng chuyến bay đặt',

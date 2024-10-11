@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Payment } from '@prisma/client';
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class MomoDto {
@@ -122,4 +123,17 @@ export class MomoIpnDto {
   @IsString()
   @IsNotEmpty()
   signature: string;
+}
+
+export class MomoDtoType {
+  items_per_page: number;
+  page: number;
+  search: string;
+}
+
+export interface MomoPaginationResponseType {
+  data: Payment[];
+  total: number;
+  currentPage: number;
+  itemsPerPage: number;
 }

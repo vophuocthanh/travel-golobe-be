@@ -4,14 +4,26 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
-import { MomoDto, MomoIpnDto } from 'src/modules/momo/dto/momo.dto';
+import {
+  MomoDto,
+  MomoDtoType,
+  MomoIpnDto,
+  MomoPaginationResponseType,
+} from 'src/modules/momo/dto/momo.dto';
 import { MomoService } from 'src/modules/momo/momo.service';
 import { RequestWithUser } from 'src/types/users';
 
@@ -20,6 +32,44 @@ import { RequestWithUser } from 'src/types/users';
 @Controller('momo')
 export class MomoController {
   constructor(private readonly momoService: MomoService) {}
+
+  @UseGuards(HandleAuthGuard)
+  @Get('payment')
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'items_per_page', required: false })
+  @ApiQuery({ name: 'search', required: false })
+  @ApiOperation({ summary: 'Lấy tất cả các giao dịch' })
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async getPaymentUrl(
+    @Query() params: MomoDtoType,
+  ): Promise<MomoPaginationResponseType> {
+    return this.momoService.getPaymentAll(params);
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @ApiOperation({
+    summary: 'Lấy danh sách giao dịch của người dùng đang đăng nhập',
+  })
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @Get('user')
+  async getPaymentsByUser(@Req() req: RequestWithUser) {
+    const userId = req.user.id;
+    return this.momoService.getPaymentAllUser(userId);
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @ApiOperation({ summary: 'Lấy chi tiết giao dịch' })
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @Get('payment/:id')
+  async getPaymentDetail(@Param('id') id: string) {
+    return this.momoService.getPaymentById(id);
+  }
 
   @Post('payment')
   @UseGuards(HandleAuthGuard)

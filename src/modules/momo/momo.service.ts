@@ -2,7 +2,12 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PaymentMethod, PaymentStatus } from '@prisma/client';
 import axios from 'axios';
 import * as crypto from 'crypto';
-import { MomoDto, MomoIpnDto } from 'src/modules/momo/dto/momo.dto';
+import {
+  MomoDto,
+  MomoDtoType,
+  MomoIpnDto,
+  MomoPaginationResponseType,
+} from 'src/modules/momo/dto/momo.dto';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
@@ -12,7 +17,7 @@ export class MomoService {
   private readonly ACCESS_KEY = process.env.MOMO_ACCESS_KEY;
   private readonly REDIRECT_URL = 'http://localhost:5173';
   private readonly IPN_URL =
-    'https://65e5-2001-ee0-4b76-6850-d48b-817f-eb73-9fb0.ngrok-free.app/api/momo/ipn';
+    'https://c80d-2001-ee0-4b76-6850-4972-936c-b048-46fa.ngrok-free.app/api/momo/ipn';
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -209,5 +214,87 @@ export class MomoService {
       .createHmac('sha256', this.YOUR_SECRET_KEY)
       .update(rawSignature)
       .digest('hex');
+  }
+
+  async getPaymentAll(
+    filters: MomoDtoType,
+  ): Promise<MomoPaginationResponseType> {
+    const items_per_page = Number(filters.items_per_page) || 10000;
+    const page = Number(filters.page) || 1;
+    const search = filters.search || '';
+    const skip = page > 1 ? (page - 1) * items_per_page : 0;
+
+    const payments = await this.prisma.payment.findMany({
+      take: items_per_page,
+      skip,
+      where: {
+        OR: [
+          {
+            booking: {
+              user: {
+                email: {
+                  contains: search,
+                  mode: 'insensitive',
+                },
+              },
+            },
+          },
+          {
+            bookingId: null,
+          },
+        ],
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const total = await this.prisma.payment.count({
+      where: {
+        OR: [
+          {
+            booking: {
+              user: {
+                email: {
+                  contains: search,
+                  mode: 'insensitive',
+                },
+              },
+            },
+          },
+          {
+            bookingId: null,
+          },
+        ],
+      },
+    });
+
+    return {
+      data: payments,
+      total,
+      currentPage: page,
+      itemsPerPage: items_per_page,
+    };
+  }
+
+  async getPaymentById(paymentId: string) {
+    return this.prisma.payment.findUnique({
+      where: { id: paymentId },
+    });
+  }
+
+  async getPaymentAllUser(userId: string) {
+    const paymentUser = await this.prisma.payment.findMany({
+      where: {
+        userId: userId,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const total = await this.prisma.payment.count({
+      where: {
+        userId: userId,
+      },
+    });
+
+    return { data: paymentUser, total };
   }
 }

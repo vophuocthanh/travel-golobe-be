@@ -75,44 +75,70 @@ export class BookingsService {
     };
   }
 
-  async getBookedFlights(userId: string): Promise<{ data: Booking[] }> {
+  async getBookedFlights(
+    userId: string,
+  ): Promise<{ data: Booking[]; total: number }> {
     const getFlightBooking = await this.prismaService.booking.findMany({
       where: { userId, flightCrawlId: { not: null } },
       include: {
         flightCrawls: true,
       },
     });
-    return { data: getFlightBooking };
+
+    const total = await this.prismaService.booking.count({
+      where: { userId, flightCrawlId: { not: null } },
+    });
+
+    return { data: getFlightBooking, total };
   }
 
-  async getRoadVehicleBooking(userId: string): Promise<{ data: Booking[] }> {
+  async getRoadVehicleBooking(
+    userId: string,
+  ): Promise<{ data: Booking[]; total: number }> {
     const getRoadVehicleBooking = await this.prismaService.booking.findMany({
       where: { userId, roadVehicleId: { not: null } },
       include: {
         roadVehicles: true,
       },
     });
-    return { data: getRoadVehicleBooking };
+    const total = await this.prismaService.booking.count({
+      where: { userId, roadVehicleId: { not: null } },
+    });
+    return { data: getRoadVehicleBooking, total };
   }
 
-  async getBookedHotels(userId: string): Promise<{ data: Booking[] }> {
+  async getBookedHotels(
+    userId: string,
+  ): Promise<{ data: Booking[]; total: number }> {
     const getHotelBooking = await this.prismaService.booking.findMany({
       where: { userId, hotelCrawlId: { not: null } },
       include: {
         hotelCrawls: true,
       },
     });
-    return { data: getHotelBooking };
+
+    const total = await this.prismaService.booking.count({
+      where: { userId, hotelCrawlId: { not: null } },
+    });
+
+    return { data: getHotelBooking, total };
   }
 
-  async getBookedTours(userId: string): Promise<{ data: Booking[] }> {
+  async getBookedTours(
+    userId: string,
+  ): Promise<{ data: Booking[]; total: number }> {
     const getTourBooking = await this.prismaService.booking.findMany({
       where: { userId, tourId: { not: null } },
       include: {
         tour: true,
       },
     });
-    return { data: getTourBooking };
+
+    const total = await this.prismaService.booking.count({
+      where: { userId, tourId: { not: null } },
+    });
+
+    return { data: getTourBooking, total };
   }
 
   async bookFlight(

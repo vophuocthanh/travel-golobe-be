@@ -1,9 +1,22 @@
 import { Tour } from '@prisma/client';
+import { IsOptional, IsString } from 'class-validator';
 
-export interface TourDto {
+export class TourDto {
   items_per_page?: number;
   page?: number;
   search?: string;
+  rating?: number;
+  sort_by_price?: 'asc' | 'desc';
+  min_price?: number;
+  max_price?: number;
+
+  @IsOptional()
+  @IsString()
+  start_date?: string;
+
+  @IsOptional()
+  @IsString()
+  end_date?: string;
 }
 
 export interface TourPaginationResponseType {

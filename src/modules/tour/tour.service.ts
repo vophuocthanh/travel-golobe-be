@@ -12,10 +12,14 @@ import { PrismaService } from 'src/prisma.service';
 @Injectable()
 export class TourService {
   constructor(private prismaService: PrismaService) {}
-  async getTours(
-    filters: TourDto,
-    userId?: string,
-  ): Promise<TourPaginationResponseType> {
+
+  private parseDateString(dateString: string): Date | undefined {
+    if (!dateString) return undefined;
+    const [day, month, year] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+
+  async getTours(filters: TourDto): Promise<TourPaginationResponseType> {
     if (!filters) {
       throw new Error('Filters must be provided');
     }
@@ -25,32 +29,102 @@ export class TourService {
     const search = filters.search || '';
     const skip = page > 1 ? (page - 1) * items_per_page : 0;
 
+    const sort_by_price = filters.sort_by_price === 'desc' ? 'desc' : 'asc';
+
+    const min_price = filters.min_price
+      ? parseFloat(filters.min_price.toString())
+      : 0;
+    const max_price = filters.max_price
+      ? parseFloat(filters.max_price.toString())
+      : Number.MAX_SAFE_INTEGER;
+
+    const startDate = this.parseDateString(filters.start_date);
+    const endDate = this.parseDateString(filters.end_date);
+
+    const filterRating = filters.rating ? Number(filters.rating) : undefined;
+
     const tours = await this.prismaService.tour.findMany({
       take: items_per_page,
       skip,
       where: {
-        name: {
-          contains: search,
-          mode: 'insensitive',
-        },
+        AND: [
+          {
+            price: {
+              gte: min_price,
+              lte: max_price,
+            },
+          },
+          {
+            OR: [
+              {
+                name: {
+                  contains: search,
+                  mode: 'insensitive',
+                },
+              },
+            ],
+          },
+          ...(startDate || endDate
+            ? [
+                {
+                  start_date: {
+                    gte: startDate || new Date('1970-01-01'),
+                    lte: endDate || new Date(),
+                  },
+                },
+              ]
+            : []),
+          filterRating !== undefined
+            ? {
+                rating: {
+                  equals: filterRating,
+                },
+              }
+            : {},
+        ],
       },
-      include: {
-        tourFavorites: userId
-          ? {
-              where: { userId },
-              select: { isFavorite: true },
-            }
-          : false,
+      orderBy: {
+        price: sort_by_price,
       },
-      orderBy: { createAt: 'desc' },
     });
 
     const total = await this.prismaService.tour.count({
       where: {
-        name: {
-          contains: search,
-          mode: 'insensitive',
-        },
+        AND: [
+          {
+            price: {
+              gte: min_price,
+              lte: max_price,
+            },
+          },
+          {
+            OR: [
+              {
+                name: {
+                  contains: search,
+                  mode: 'insensitive',
+                },
+              },
+            ],
+          },
+          ...(startDate || endDate
+            ? [
+                {
+                  start_date: {
+                    gte: startDate || new Date('1970-01-01'),
+                    lte: endDate || new Date(),
+                  },
+                },
+              ]
+            : []),
+          filterRating !== undefined
+            ? {
+                rating: {
+                  equals: filterRating,
+                },
+              }
+            : {},
+        ],
       },
     });
 
@@ -58,23 +132,8 @@ export class TourService {
       throw new NotFoundException('No tours found');
     }
 
-    const toursWithFavorite = tours.map((tour) => {
-      const isFavorite =
-        userId &&
-        tour.tourFavorites?.length > 0 &&
-        tour.tourFavorites[0].isFavorite;
-
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { tourFavorites, ...tourWithoutFavorites } = tour;
-
-      return {
-        ...tourWithoutFavorites,
-        isFavorite: isFavorite || false,
-      };
-    });
-
     return {
-      data: toursWithFavorite,
+      data: tours,
       total,
       currentPage: page,
       itemsPerPage: items_per_page,

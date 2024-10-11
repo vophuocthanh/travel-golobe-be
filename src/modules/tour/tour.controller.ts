@@ -39,6 +39,42 @@ export class TourController {
   @ApiQuery({ name: 'items_per_page', required: false })
   @ApiQuery({ name: 'search', required: false })
   @Get()
+  @ApiQuery({
+    name: 'sort_by_price',
+    required: false,
+    enum: ['asc', 'desc'],
+    description: 'Sort flights by price',
+  })
+  @ApiQuery({
+    name: 'min_price',
+    required: false,
+    type: Number,
+    description: 'Minimum price filter',
+  })
+  @ApiQuery({
+    name: 'max_price',
+    required: false,
+    type: Number,
+    description: 'Maximum price filter',
+  })
+  @ApiQuery({
+    name: 'start_date',
+    required: false,
+    type: String,
+    description: 'Start day in format dd-mm-yyyy',
+  })
+  @ApiQuery({
+    name: 'end_date',
+    required: false,
+    type: String,
+    description: 'End day in format dd-mm-yyyy',
+  })
+  @ApiQuery({
+    name: 'rating',
+    required: false,
+    type: Number,
+    description: 'Filter hotels by rating',
+  })
   @ApiOperation({ summary: 'Lấy tất cả các tour' })
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
@@ -46,10 +82,8 @@ export class TourController {
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async getTours(
     @Query() params: TourDto,
-    @Req() req: RequestWithUser,
   ): Promise<TourPaginationResponseType> {
-    const userId = req.user?.id;
-    return this.tourService.getTours(params, userId);
+    return this.tourService.getTours(params);
   }
   @UseGuards(HandleAuthGuard)
   @ApiOperation({ summary: 'Lấy danh sách các tour yêu thích của người dùng' })

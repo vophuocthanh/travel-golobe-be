@@ -236,6 +236,7 @@ model Tour {
   flight                    FlightCrawl? @relation(fields: [flightId], references: [id])
   roadVehicleId             String?
   roadVehicle               RoadVehicle? @relation(fields: [roadVehicleId], references: [id])
+  tour_code                 String?
 
   bookings      Booking[]
   users         UserOnTour[]

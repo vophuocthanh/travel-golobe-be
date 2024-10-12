@@ -13,6 +13,16 @@ import { PrismaService } from 'src/prisma.service';
 export class TourService {
   constructor(private prismaService: PrismaService) {}
 
+  private generateTourCode(): string {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = 'MT-';
+    for (let i = 0; i < 8; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      code += characters.charAt(randomIndex);
+    }
+    return code;
+  }
+
   private parseDateString(dateString: string): Date | undefined {
     if (!dateString) return undefined;
     const [day, month, year] = dateString.split('-').map(Number);
@@ -264,6 +274,15 @@ export class TourService {
 
     const totalAmount = hotelPrice + transportPrice + data.price;
 
+    let tourCode: string;
+    do {
+      tourCode = this.generateTourCode();
+    } while (
+      await this.prismaService.tour.findFirst({
+        where: { tour_code: tourCode },
+      })
+    );
+
     return this.prismaService.tour.create({
       data: {
         ...data,
@@ -276,6 +295,7 @@ export class TourService {
         adult_price: totalAmount,
         totalAmount,
         road_vehicle: roadVehicleType,
+        tour_code: tourCode,
       },
     });
   }

@@ -194,6 +194,7 @@ Table tours {
   flight flight_crawl
   roadVehicleId String
   roadVehicle road_vehicles
+  tour_code String
   bookings bookings [not null]
   users user_on_tours [not null]
   tourReviews tour_reviews [not null]

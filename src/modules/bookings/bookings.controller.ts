@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { Booking, FlightCrawl, HotelCrawl, RoadVehicle } from '@prisma/client';
+import { FlightCrawl, HotelCrawl, RoadVehicle } from '@prisma/client';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import { BookingsService } from 'src/modules/bookings/bookings.service';
 import {
@@ -43,18 +43,20 @@ export class BookingsController {
   @Get('book/flight')
   async getBookedFlights(
     @Req() req: RequestWithUser,
-  ): Promise<{ data: Booking[] }> {
+    @Query() params: BookingDto,
+  ): Promise<BookingPaginationResponseType> {
     const userId = req.user.id;
-    return this.bookingService.getBookedFlights(userId);
+    return this.bookingService.getBookedFlights(userId, params);
   }
 
   @UseGuards(HandleAuthGuard)
   @Get('book/road-vehicle')
   async getBookedRoadVehicles(
     @Req() req: RequestWithUser,
-  ): Promise<{ data: Booking[] }> {
+    @Query() params: BookingDto,
+  ): Promise<BookingPaginationResponseType> {
     const userId = req.user.id;
-    return this.bookingService.getRoadVehicleBooking(userId);
+    return this.bookingService.getRoadVehicleBooking(userId, params);
   }
 
   @UseGuards(HandleAuthGuard)
@@ -163,9 +165,10 @@ export class BookingsController {
   @Get('book/hotel')
   async getBookedHotels(
     @Req() req: RequestWithUser,
-  ): Promise<{ data: Booking[] }> {
+    @Query() params: BookingDto,
+  ): Promise<BookingPaginationResponseType> {
     const userId = req.user.id;
-    return this.bookingService.getBookedHotels(userId);
+    return this.bookingService.getBookedHotels(userId, params);
   }
 
   @UseGuards(HandleAuthGuard)
@@ -192,9 +195,10 @@ export class BookingsController {
   @Get('book/tour')
   async getBookedTours(
     @Req() req: RequestWithUser,
-  ): Promise<{ data: Booking[] }> {
+    @Query() params: BookingDto,
+  ): Promise<BookingPaginationResponseType> {
     const userId = req.user.id;
-    return this.bookingService.getBookedTours(userId);
+    return this.bookingService.getBookedTours(userId, params);
   }
 
   @UseGuards(HandleAuthGuard)

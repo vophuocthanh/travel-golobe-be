@@ -18,7 +18,7 @@ export class BookingsService {
   async getAllBookings(
     filters: BookingDto,
   ): Promise<BookingPaginationResponseType> {
-    const items_per_page = Number(filters.items_per_page) || 10000;
+    const items_per_page = Number(filters.items_per_page) || 10;
     const page = Number(filters.page) || 1;
     const search = filters.search || '';
     const skip = page > 1 ? (page - 1) * items_per_page : 0;
@@ -77,8 +77,15 @@ export class BookingsService {
 
   async getBookedFlights(
     userId: string,
-  ): Promise<{ data: Booking[]; total: number }> {
+    filters: BookingDto,
+  ): Promise<BookingPaginationResponseType> {
+    const items_per_page = Number(filters.items_per_page) || 10;
+    const page = Number(filters.page) || 1;
+    const skip = page > 1 ? (page - 1) * items_per_page : 0;
+
     const getFlightBooking = await this.prismaService.booking.findMany({
+      take: items_per_page,
+      skip,
       where: { userId, flightCrawlId: { not: null } },
       include: {
         flightCrawls: true,
@@ -89,13 +96,25 @@ export class BookingsService {
       where: { userId, flightCrawlId: { not: null } },
     });
 
-    return { data: getFlightBooking, total };
+    return {
+      data: getFlightBooking,
+      total,
+      currentPage: page,
+      itemsPerPage: items_per_page,
+    };
   }
 
   async getRoadVehicleBooking(
     userId: string,
-  ): Promise<{ data: Booking[]; total: number }> {
+    filters: BookingDto,
+  ): Promise<BookingPaginationResponseType> {
+    const items_per_page = Number(filters.items_per_page) || 10;
+    const page = Number(filters.page) || 1;
+    const skip = page > 1 ? (page - 1) * items_per_page : 0;
+
     const getRoadVehicleBooking = await this.prismaService.booking.findMany({
+      take: items_per_page,
+      skip,
       where: { userId, roadVehicleId: { not: null } },
       include: {
         roadVehicles: true,
@@ -104,13 +123,25 @@ export class BookingsService {
     const total = await this.prismaService.booking.count({
       where: { userId, roadVehicleId: { not: null } },
     });
-    return { data: getRoadVehicleBooking, total };
+    return {
+      data: getRoadVehicleBooking,
+      total,
+      currentPage: page,
+      itemsPerPage: items_per_page,
+    };
   }
 
   async getBookedHotels(
     userId: string,
-  ): Promise<{ data: Booking[]; total: number }> {
+    filters: BookingDto,
+  ): Promise<BookingPaginationResponseType> {
+    const items_per_page = Number(filters.items_per_page) || 10;
+    const page = Number(filters.page) || 1;
+    const skip = page > 1 ? (page - 1) * items_per_page : 0;
+
     const getHotelBooking = await this.prismaService.booking.findMany({
+      take: items_per_page,
+      skip,
       where: { userId, hotelCrawlId: { not: null } },
       include: {
         hotelCrawls: true,
@@ -121,13 +152,25 @@ export class BookingsService {
       where: { userId, hotelCrawlId: { not: null } },
     });
 
-    return { data: getHotelBooking, total };
+    return {
+      data: getHotelBooking,
+      total,
+      currentPage: page,
+      itemsPerPage: items_per_page,
+    };
   }
 
   async getBookedTours(
     userId: string,
-  ): Promise<{ data: Booking[]; total: number }> {
+    filters: BookingDto,
+  ): Promise<BookingPaginationResponseType> {
+    const items_per_page = Number(filters.items_per_page) || 10;
+    const page = Number(filters.page) || 1;
+    const skip = page > 1 ? (page - 1) * items_per_page : 0;
+
     const getTourBooking = await this.prismaService.booking.findMany({
+      take: items_per_page,
+      skip,
       where: { userId, tourId: { not: null } },
       include: {
         tour: true,
@@ -138,7 +181,12 @@ export class BookingsService {
       where: { userId, tourId: { not: null } },
     });
 
-    return { data: getTourBooking, total };
+    return {
+      data: getTourBooking,
+      total,
+      currentPage: page,
+      itemsPerPage: items_per_page,
+    };
   }
 
   async bookFlight(

@@ -9,7 +9,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { FlightCrawl, HotelCrawl, RoadVehicle } from '@prisma/client';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import { BookingsService } from 'src/modules/bookings/bookings.service';
@@ -41,6 +41,9 @@ export class BookingsController {
 
   @UseGuards(HandleAuthGuard)
   @Get('book/flight')
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'items_per_page', required: false })
+  @ApiQuery({ name: 'search', required: false })
   async getBookedFlights(
     @Req() req: RequestWithUser,
     @Query() params: BookingDto,
@@ -51,6 +54,9 @@ export class BookingsController {
 
   @UseGuards(HandleAuthGuard)
   @Get('book/road-vehicle')
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'items_per_page', required: false })
+  @ApiQuery({ name: 'search', required: false })
   async getBookedRoadVehicles(
     @Req() req: RequestWithUser,
     @Query() params: BookingDto,
@@ -163,6 +169,9 @@ export class BookingsController {
 
   @UseGuards(HandleAuthGuard)
   @Get('book/hotel')
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'items_per_page', required: false })
+  @ApiQuery({ name: 'search', required: false })
   async getBookedHotels(
     @Req() req: RequestWithUser,
     @Query() params: BookingDto,
@@ -193,6 +202,9 @@ export class BookingsController {
 
   @UseGuards(HandleAuthGuard)
   @Get('book/tour')
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'items_per_page', required: false })
+  @ApiQuery({ name: 'search', required: false })
   async getBookedTours(
     @Req() req: RequestWithUser,
     @Query() params: BookingDto,

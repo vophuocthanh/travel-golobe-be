@@ -35,6 +35,7 @@ export class MomoController {
 
   @UseGuards(HandleAuthGuard)
   @Get('payment')
+  @ApiOperation({ summary: 'Lấy tất cả các giao dịch' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'items_per_page', required: false })
   @ApiQuery({ name: 'search', required: false })
@@ -73,6 +74,7 @@ export class MomoController {
 
   @Post('payment')
   @UseGuards(HandleAuthGuard)
+  @ApiOperation({ summary: 'Tạo giao dịch' })
   async createPayment(@Body() momoDto: MomoDto, @Req() req: RequestWithUser) {
     const paymentUrl = await this.momoService.createPayment(
       momoDto,
@@ -83,6 +85,7 @@ export class MomoController {
 
   @Get('payment-status')
   @UseGuards(HandleAuthGuard)
+  @ApiOperation({ summary: 'Kiểm tra trạng thái thanh toán' })
   async checkPaymentStatus(
     @Query('orderId') orderId: string,
     @Query('requestId') requestId: string,
@@ -95,6 +98,7 @@ export class MomoController {
   }
 
   @Post('ipn')
+  @ApiOperation({ summary: 'Xử lý IPN từ Momo' })
   @HttpCode(HttpStatus.OK)
   async handleMomoIpn(@Body() ipnData: MomoIpnDto) {
     console.log('ipnData:', ipnData);

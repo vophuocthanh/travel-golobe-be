@@ -9,7 +9,12 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { FlightCrawl, HotelCrawl, RoadVehicle } from '@prisma/client';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import { BookingsService } from 'src/modules/bookings/bookings.service';
@@ -32,6 +37,7 @@ export class BookingsController {
   constructor(private bookingService: BookingsService) {}
 
   @UseGuards(HandleAuthGuard)
+  @ApiOperation({ summary: 'Lấy tất cả các bookings' })
   @Get()
   async getAllBookings(
     @Query() params: BookingDto,
@@ -41,6 +47,7 @@ export class BookingsController {
 
   @UseGuards(HandleAuthGuard)
   @Get('book/flight')
+  @ApiOperation({ summary: 'Lấy tất cả các bookings của flight' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'items_per_page', required: false })
   @ApiQuery({ name: 'search', required: false })
@@ -54,6 +61,7 @@ export class BookingsController {
 
   @UseGuards(HandleAuthGuard)
   @Get('book/road-vehicle')
+  @ApiOperation({ summary: 'Lấy tất cả các bookings của road vehicle' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'items_per_page', required: false })
   @ApiQuery({ name: 'search', required: false })
@@ -67,6 +75,7 @@ export class BookingsController {
 
   @UseGuards(HandleAuthGuard)
   @Get('flight/:bookingId')
+  @ApiOperation({ summary: 'Lấy thông tin chi tiết của booking flight' })
   async getBookedFlightDetails(
     @Req() req: RequestWithUser,
     @Param('bookingId') bookingId: string,
@@ -82,6 +91,7 @@ export class BookingsController {
 
   @UseGuards(HandleAuthGuard)
   @Get('hotel/:bookingId')
+  @ApiOperation({ summary: 'Lấy thông tin chi tiết của booking hotel' })
   async getBookedHotelDetails(
     @Req() req: RequestWithUser,
     @Param('bookingId') bookingId: string,
@@ -97,6 +107,7 @@ export class BookingsController {
 
   @UseGuards(HandleAuthGuard)
   @Get('road-vehicle/:bookingId')
+  @ApiOperation({ summary: 'Lấy thông tin chi tiết của booking road vehicle' })
   async getBookedRoadVehicleDetails(
     @Req() req: RequestWithUser,
     @Param('bookingId') bookingId: string,
@@ -112,6 +123,7 @@ export class BookingsController {
 
   @UseGuards(HandleAuthGuard)
   @Get('tour/:bookingId')
+  @ApiOperation({ summary: 'Lấy thông tin chi tiết của booking tour' })
   async getBookedTourDetails(
     @Req() req: RequestWithUser,
     @Param('bookingId') bookingId: string,
@@ -136,6 +148,7 @@ export class BookingsController {
 
   @UseGuards(HandleAuthGuard)
   @Post('book/flight')
+  @ApiOperation({ summary: 'Đặt vé máy bay' })
   async bookFlight(
     @Body() createFlightBookingDto: CreateFlightBookingDto,
     @Req() req: RequestWithUser,
@@ -146,6 +159,7 @@ export class BookingsController {
 
   @UseGuards(HandleAuthGuard)
   @Delete('book/flight/:id')
+  @ApiOperation({ summary: 'Hủy vé máy bay' })
   async cancelFlightBooking(
     @Req() req: RequestWithUser,
     @Query('bookingId') bookingId: string,
@@ -156,6 +170,7 @@ export class BookingsController {
 
   @UseGuards(HandleAuthGuard)
   @Post('book/road-vehicle')
+  @ApiOperation({ summary: 'Đặt xe' })
   async bookRoadVehicle(
     @Body() createRoadVehicleBookingDto: CreateRoadVehicleBookingDto,
     @Req() req: RequestWithUser,
@@ -169,6 +184,7 @@ export class BookingsController {
 
   @UseGuards(HandleAuthGuard)
   @Get('book/hotel')
+  @ApiOperation({ summary: 'Lấy tất cả các bookings của hotel' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'items_per_page', required: false })
   @ApiQuery({ name: 'search', required: false })
@@ -182,6 +198,7 @@ export class BookingsController {
 
   @UseGuards(HandleAuthGuard)
   @Post('book/hotel')
+  @ApiOperation({ summary: 'Đặt khách sạn' })
   async bookHotel(
     @Body() createHotelBookingDto: CreateHotelBookingDto,
     @Req() req: RequestWithUser,
@@ -192,6 +209,7 @@ export class BookingsController {
 
   @UseGuards(HandleAuthGuard)
   @Delete('book/hotel/:id')
+  @ApiOperation({ summary: 'Hủy đặt phòng khách sạn' })
   async cancelHotelBooking(
     @Req() req: RequestWithUser,
     @Query('bookingId') bookingId: string,
@@ -202,6 +220,7 @@ export class BookingsController {
 
   @UseGuards(HandleAuthGuard)
   @Get('book/tour')
+  @ApiOperation({ summary: 'Lấy tất cả các bookings của tour' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'items_per_page', required: false })
   @ApiQuery({ name: 'search', required: false })
@@ -215,6 +234,7 @@ export class BookingsController {
 
   @UseGuards(HandleAuthGuard)
   @Post('book/tour')
+  @ApiOperation({ summary: 'Đặt tour' })
   async bookTour(
     @Body() createTourBookingDto: CreateTourBookingDto,
     @Req() req: RequestWithUser,
@@ -225,6 +245,7 @@ export class BookingsController {
 
   @UseGuards(HandleAuthGuard)
   @Delete('book/tour/:id')
+  @ApiOperation({ summary: 'Hủy tour' })
   async cancelTourBooking(
     @Req() req: RequestWithUser,
     @Query('bookingId') bookingId: string,
@@ -235,6 +256,7 @@ export class BookingsController {
 
   @UseGuards(HandleAuthGuard)
   @Delete('book/road-vehicle/:id')
+  @ApiOperation({ summary: 'Hủy đặt xe' })
   async cancelRoadVehicleBooking(
     @Req() req: RequestWithUser,
     @Query('bookingId') bookingId: string,

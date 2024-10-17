@@ -17,7 +17,7 @@ export class MomoService {
   private readonly ACCESS_KEY = process.env.MOMO_ACCESS_KEY;
   private readonly REDIRECT_URL = 'http://localhost:5173';
   private readonly IPN_URL =
-    'https://c80d-2001-ee0-4b76-6850-4972-936c-b048-46fa.ngrok-free.app/api/momo/ipn';
+    'https://1ead-2402-800-612b-46c2-611b-cd8e-f94c-50b9.ngrok-free.app/api/momo/ipn';
 
   constructor(private readonly prisma: PrismaService) {}
 

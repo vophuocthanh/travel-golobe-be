@@ -65,7 +65,7 @@ export class TourCommentController {
   }
 
   @UseGuards(HandleAuthGuard)
-  @Put(':id/reviews/:reviewId')
+  @Put('reviews/:reviewId')
   @ApiOperation({ summary: 'Cập nhật đánh giá của tour' })
   @ApiResponse({ status: 200, description: 'Successfully updated review' })
   @ApiResponse({ status: 400, description: 'Bad Request' })

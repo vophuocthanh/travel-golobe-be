@@ -30,7 +30,9 @@ export class TourCommentService {
     });
   }
 
-  async getTourReviews(tourId: string): Promise<{ data: TourReview[] }> {
+  async getTourReviews(
+    tourId: string,
+  ): Promise<{ data: TourReview[]; total: number }> {
     const reviews = await this.prismaService.tourReview.findMany({
       where: {
         tourId,
@@ -38,9 +40,25 @@ export class TourCommentService {
       orderBy: {
         createAt: 'desc',
       },
+      include: {
+        users: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
+      },
+    });
+
+    const total = await this.prismaService.tourReview.count({
+      where: {
+        tourId,
+      },
     });
     return {
       data: reviews,
+      total,
     };
   }
 

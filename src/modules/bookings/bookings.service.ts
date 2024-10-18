@@ -173,7 +173,14 @@ export class BookingsService {
       skip,
       where: { userId, tourId: { not: null } },
       include: {
-        tour: true,
+        tour: {
+          include: {
+            hotel: true, // Lấy thông tin chi tiết hotel
+            flight: true, // Lấy thông tin chi tiết flight
+          },
+        },
+        hotelCrawls: true,
+        flightCrawls: true,
       },
     });
 

@@ -26,6 +26,7 @@ import { HotelCrawl } from '@prisma/client';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
+import { CreateHotelCrawlDto } from 'src/modules/hotel-crawl/dto/create.dto';
 import {
   HotelCrawlDto,
   HotelCrawlPaginationResponseType,
@@ -85,6 +86,17 @@ export class HotelCrawlController {
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async getFlightCrawlById(@Param('id') id: string): Promise<HotelCrawl> {
     return this.hotelCrawlService.getHotelCrawlById(id);
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @Post('crawl')
+  @ApiOperation({ summary: 'Thêm thông tin khách sạn từ trang web khác' })
+  @ApiResponse({ status: 201, description: 'Created successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async createHotelCrawl(@Body() hotelCrawlDto: CreateHotelCrawlDto) {
+    return this.hotelCrawlService.createHotelCrawl(hotelCrawlDto);
   }
 
   @UseGuards(HandleAuthGuard)

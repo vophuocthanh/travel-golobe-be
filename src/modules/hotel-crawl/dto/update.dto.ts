@@ -65,4 +65,8 @@ export class UpdateHotelCrawlDto {
   @ApiProperty()
   @IsOptional()
   image_5?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  number_of_seats_remaining?: number;
 }

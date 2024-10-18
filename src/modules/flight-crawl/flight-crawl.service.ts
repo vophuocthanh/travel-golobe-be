@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BaggageWeight, FlightCrawl, TicketType } from '@prisma/client';
 import * as csv from 'csv-parser';
 import * as fs from 'fs';
+import { CreateFlightCrawlDto } from 'src/modules/flight-crawl/dto/create.dto';
 import {
   FlightCrawlDto,
   FlightCrawlPaginationResponseType,
@@ -306,11 +307,18 @@ export class FlightCrawlService {
   }
 
   async deleteFlightCrawl(id: string): Promise<{ message: string }> {
+    await this.prismaService.ticket.deleteMany({
+      where: {
+        flightId: id,
+      },
+    });
+
     await this.prismaService.flightCrawl.delete({
       where: {
         id,
       },
     });
+
     return {
       message: 'Successfully deleted the flight',
     };
@@ -385,5 +393,49 @@ export class FlightCrawlService {
       data: isFavoriteFlight,
       total: totalFavoriteFlight,
     };
+  }
+
+  async createFlight(flightData: CreateFlightCrawlDto): Promise<FlightCrawl> {
+    const createdFlight = await this.prismaService.flightCrawl.create({
+      data: {
+        brand: flightData.brand,
+        start_time: flightData.start_time,
+        start_day: this.parseDateString(flightData.start_day),
+        end_day: this.parseDateString(flightData.end_day),
+        end_time: flightData.end_time,
+        trip_time: flightData.trip_time,
+        take_place: flightData.take_place,
+        destination: flightData.destination,
+        trip_to: flightData.trip_to,
+        price: flightData.price,
+        type_ticket: TicketType.ECONOMY,
+        baggage_weight: BaggageWeight.FREE_7KG,
+      },
+    });
+
+    const ticketTypes = [
+      { type: TicketType.ECONOMY, multiplier: 1 },
+      { type: TicketType.BUSINESS, multiplier: 1.5 },
+      { type: TicketType.FIRST_CLASS, multiplier: 2 },
+    ];
+
+    for (const ticket of ticketTypes) {
+      const baggageWeight = BaggageWeight.FREE_7KG;
+      const baggagePrice = this.getBaggagePrice(baggageWeight);
+      const calculatedPrice =
+        flightData.price * ticket.multiplier + baggagePrice;
+
+      await this.prismaService.ticket.create({
+        data: {
+          type_ticket: ticket.type,
+          price: calculatedPrice,
+          baggage_weight: baggageWeight,
+          baggage_price: baggagePrice,
+          flightId: createdFlight.id,
+        },
+      });
+    }
+
+    return createdFlight;
   }
 }

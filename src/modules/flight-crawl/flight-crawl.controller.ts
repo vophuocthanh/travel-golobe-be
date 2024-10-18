@@ -26,6 +26,7 @@ import { FlightCrawl } from '@prisma/client';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
+import { CreateFlightCrawlDto } from 'src/modules/flight-crawl/dto/create.dto';
 import {
   FlightCrawlDto,
   FlightCrawlPaginationResponseType,
@@ -134,6 +135,17 @@ export class FlightCrawlController {
     }
     await this.flightCrawlService.importFlightsFromCSV(file.path);
     return { message: 'File uploaded and flights imported successfully' };
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @Post('crawl')
+  @ApiOperation({ summary: 'Thêm thông tin chuyến bay crawl' })
+  @ApiResponse({ status: 200, description: 'Successfully added the flight' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async addFlightCrawl(@Body() flightCrawlDto: CreateFlightCrawlDto) {
+    return this.flightCrawlService.createFlight(flightCrawlDto);
   }
 
   @UseGuards(HandleAuthGuard)

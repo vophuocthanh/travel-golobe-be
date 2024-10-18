@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { HotelCrawl, RoomType } from '@prisma/client';
 import * as csv from 'csv-parser';
 import * as fs from 'fs';
+import { CreateHotelCrawlDto } from 'src/modules/hotel-crawl/dto/create.dto';
 import {
   HotelCrawlDto,
   HotelCrawlPaginationResponseType,
@@ -324,5 +325,33 @@ export class HotelCrawlService {
       data: isFavorite,
       total: totalFavorite,
     };
+  }
+
+  async createHotelCrawl(data: CreateHotelCrawlDto): Promise<HotelCrawl> {
+    const createdHotel = await this.prismaService.hotelCrawl.create({
+      data,
+    });
+    const defaultPrice = data.price;
+
+    const roomTypes = [
+      { type: RoomType.SINGLE, priceMultiplier: 1.0 },
+      { type: RoomType.DOUBLE, priceMultiplier: 1.2 },
+      { type: RoomType.SUITE, priceMultiplier: 1.4 },
+      { type: RoomType.DELUXE, priceMultiplier: 1.8 },
+    ];
+
+    for (const roomType of roomTypes) {
+      const pricePerDay = defaultPrice * roomType.priceMultiplier;
+
+      await this.prismaService.room.create({
+        data: {
+          type: roomType.type,
+          hotelId: createdHotel.id,
+          pricePerDay: pricePerDay,
+        },
+      });
+    }
+
+    return createdHotel;
   }
 }

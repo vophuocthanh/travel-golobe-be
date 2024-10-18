@@ -45,4 +45,8 @@ export class UpdateFlightCrawlDto {
   @ApiProperty()
   @IsOptional()
   image?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  number_of_seats_remaining?: number;
 }

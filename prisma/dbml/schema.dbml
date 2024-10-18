@@ -59,8 +59,8 @@ Table hotel_crawl {
   received_time String [not null]
   giveback_time String [not null]
   description String [not null]
-  hotel_link String [not null]
-  place String [not null]
+  hotel_link String
+  place String
   image String
   image_2 String
   image_3 String

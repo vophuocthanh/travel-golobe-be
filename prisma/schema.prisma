@@ -73,8 +73,8 @@ model HotelCrawl {
   received_time             String
   giveback_time             String
   description               String
-  hotel_link                String
-  place                     String
+  hotel_link                String?
+  place                     String?
   image                     String?
   image_2                   String?
   image_3                   String?

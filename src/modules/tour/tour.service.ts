@@ -308,6 +308,8 @@ export class TourService {
       data: {
         ...data,
         price: data.price,
+        start_date: this.parseDateString(data.start_date).toISOString(),
+        end_date: this.parseDateString(data.end_date).toISOString(),
       },
     });
   }

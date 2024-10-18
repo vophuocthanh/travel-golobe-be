@@ -29,12 +29,10 @@ export class UpdateDtoTour {
 
   @ApiProperty()
   @IsOptional()
-  @IsString()
   start_date?: string;
 
   @ApiProperty()
   @IsOptional()
-  @IsString()
   end_date?: string;
 
   @ApiProperty()

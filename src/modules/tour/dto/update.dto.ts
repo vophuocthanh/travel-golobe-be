@@ -65,7 +65,7 @@ export class UpdateDtoTour {
   @ApiProperty()
   @IsOptional()
   @IsString()
-  vchouer?: string;
+  voucher?: string;
 
   @ApiProperty()
   @IsOptional()
@@ -80,7 +80,7 @@ export class UpdateDtoTour {
   @ApiProperty()
   @IsOptional()
   @IsNumber()
-  children_price?: number;
+  child_price?: number;
 
   @ApiProperty()
   @IsOptional()

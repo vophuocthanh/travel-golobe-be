@@ -157,7 +157,9 @@ export class HotelCrawlController {
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   @ApiOperation({ summary: 'Xóa thông tin khách sạn' })
   @Delete('crawl/:id')
-  async deleteFlightCrawl(id: string): Promise<{ message: string }> {
+  async deleteFlightCrawl(
+    @Param('id') id: string,
+  ): Promise<{ message: string }> {
     return this.hotelCrawlService.deleteHotelCrawl(id);
   }
 

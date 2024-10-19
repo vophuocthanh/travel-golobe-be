@@ -307,6 +307,12 @@ export class FlightCrawlService {
   }
 
   async deleteFlightCrawl(id: string): Promise<{ message: string }> {
+    await this.prismaService.flightFavorite.deleteMany({
+      where: {
+        flightId: id,
+      },
+    });
+
     await this.prismaService.ticket.deleteMany({
       where: {
         flightId: id,

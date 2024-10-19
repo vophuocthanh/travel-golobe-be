@@ -238,12 +238,21 @@ export class HotelCrawlService {
   }
 
   async deleteHotelCrawl(id: string): Promise<{ message: string }> {
-    await this.prismaService.hotelCrawl.delete({
+    // Xóa tất cả các bản ghi rooms liên quan trước
+    await this.prismaService.room.deleteMany({
       where: {
-        id,
+        hotelId: id,
       },
     });
-    return { message: 'Delete hotel crawl successfully' };
+
+    // Xóa bản ghi hotelCrawl sau khi xóa các bản ghi liên quan
+    await this.prismaService.hotelCrawl.delete({
+      where: {
+        id: id,
+      },
+    });
+
+    return { message: 'Hotel crawl deleted successfully' };
   }
 
   // isFavorite

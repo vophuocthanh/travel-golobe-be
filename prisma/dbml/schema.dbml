@@ -218,17 +218,17 @@ Table tour_favorites {
 
 Table road_vehicles {
   id String [pk]
-  brand String [not null]
-  price Float [not null]
-  number_of_seat String [not null]
-  start_time String [not null]
-  start_day DateTime [not null]
-  end_day DateTime [not null]
-  end_time String [not null]
-  trip_time String [not null]
-  take_place String [not null]
-  destination String [not null]
-  location String [not null]
+  brand String
+  price Float
+  number_of_seat String
+  start_time String
+  start_day DateTime
+  end_day DateTime
+  end_time String
+  trip_time String
+  take_place String
+  destination String
+  location String
   isFavorite Boolean [default: false]
   number_of_seats_remaining Int
   users user_on_road_vehicles [not null]

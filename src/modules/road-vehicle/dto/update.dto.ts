@@ -45,4 +45,8 @@ export class UpdateRoadVehicleCrawlDto {
   @ApiProperty()
   @IsOptional()
   location?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  number_of_seats_remaining?: number;
 }

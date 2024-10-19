@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { RoadVehicle } from '@prisma/client';
 import * as csv from 'csv-parser';
 import * as fs from 'fs';
+import { CreateRoadVehicleDto } from 'src/modules/road-vehicle/dto/create.dto';
 import {
   RoadVehicleCrawlDto,
   RoadVehicleCrawlPaginationResponseType,
@@ -188,5 +189,18 @@ export class RoadVehicleService {
     return {
       message: 'Delete successfully',
     };
+  }
+
+  async createRoadVehicleCrawl(
+    data: CreateRoadVehicleDto,
+  ): Promise<RoadVehicle> {
+    const roadVehicle = await this.prismaService.roadVehicle.create({
+      data: {
+        ...data,
+        start_day: this.parseDateString(data.start_day),
+        end_day: this.parseDateString(data.end_day),
+      },
+    });
+    return roadVehicle;
   }
 }

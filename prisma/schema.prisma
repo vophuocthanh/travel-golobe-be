@@ -263,19 +263,19 @@ model TourFavorite {
 // Road vehicles (phương tiện đường bộ)
 
 model RoadVehicle {
-  id                        String   @id @default(cuid())
-  brand                     String // Hãng xe
-  price                     Float // Giá vé hoặc chi phí di chuyển
-  number_of_seat            String // Số ghế
-  start_time                String // Thời gian khởi hành
-  start_day                 DateTime // Ngày khởi hành
-  end_day                   DateTime // Ngày kết thúc
-  end_time                  String // Thời gian kết thúc
-  trip_time                 String // Thời gian hành trình
-  take_place                String // Điểm xuất phát
-  destination               String // Điểm đến
-  location                  String
-  isFavorite                Boolean? @default(false)
+  id                        String    @id @default(cuid())
+  brand                     String? // Hãng xe
+  price                     Float? // Giá vé hoặc chi phí di chuyển
+  number_of_seat            String? // Số ghế
+  start_time                String? // Thời gian khởi hành
+  start_day                 DateTime? // Ngày khởi hành
+  end_day                   DateTime? // Ngày kết thúc
+  end_time                  String? // Thời gian kết thúc
+  trip_time                 String? // Thời gian hành trình
+  take_place                String? // Điểm xuất phát
+  destination               String? // Điểm đến
+  location                  String?
+  isFavorite                Boolean?  @default(false)
   number_of_seats_remaining Int?
 
   users               UserOnRoadVehicle[]

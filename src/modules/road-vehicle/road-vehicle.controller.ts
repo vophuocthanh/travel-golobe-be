@@ -25,6 +25,7 @@ import { RoadVehicle } from '@prisma/client';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
+import { CreateRoadVehicleDto } from 'src/modules/road-vehicle/dto/create.dto';
 import {
   RoadVehicleCrawlDto,
   RoadVehicleCrawlPaginationResponseType,
@@ -91,6 +92,19 @@ export class RoadVehicleController {
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async getFlightCrawlById(@Param('id') id: string): Promise<RoadVehicle> {
     return this.roadVehicleService.getRoadVehicleCrawlById(id);
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @Post('crawl')
+  @ApiOperation({ summary: 'Thêm thông tin phương tiện đường bộ' })
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async postRoadVehicleCrawl(
+    @Body() createRoadVehicle: CreateRoadVehicleDto,
+  ): Promise<RoadVehicle> {
+    return this.roadVehicleService.createRoadVehicleCrawl(createRoadVehicle);
   }
 
   @UseGuards(HandleAuthGuard)

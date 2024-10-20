@@ -24,6 +24,7 @@ import {
   TourDto,
   TourPaginationResponseType,
 } from 'src/modules/tour/dto/tour.dto';
+import { UpdateTripScheduleDto } from 'src/modules/tour/dto/update-trip-schedule.dto';
 import { UpdateDtoTour } from 'src/modules/tour/dto/update.dto';
 import { TourService } from 'src/modules/tour/tour.service';
 import { RequestWithUser } from 'src/types/users';
@@ -132,6 +133,25 @@ export class TourController {
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async updateTour(@Param('id') id: string, @Body() updateTour: UpdateDtoTour) {
     return this.tourService.updateTour(id, updateTour);
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @Put(':tourId/trip-schedule/:tripScheduleId')
+  @ApiOperation({ summary: 'Sửa lịch trình của chueyesn tour' })
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async updateTripSchedule(
+    @Param('tourId') tourId: string,
+    @Param('tripScheduleId') tripScheduleId: string,
+    @Body() tripSchedule: UpdateTripScheduleDto,
+  ) {
+    return this.tourService.updateTripSchedule(
+      tourId,
+      tripScheduleId,
+      tripSchedule,
+    );
   }
 
   @UseGuards(HandleAuthGuard)

@@ -242,8 +242,20 @@ model Tour {
   users         UserOnTour[]
   tourReviews   TourReview[]
   tourFavorites TourFavorite[]
+  TripSchedule  TripSchedule[]
 
   @@map("tours")
+}
+
+model TripSchedule {
+  id       String   @id @default(cuid())
+  tourId   String
+  tour     Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  day      Int
+  schedule String
+  date     DateTime
+
+  @@map("trip_schedules")
 }
 
 model TourFavorite {

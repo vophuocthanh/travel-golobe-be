@@ -171,7 +171,9 @@ export class RoadVehicleController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  async deleteRoadVehicleCrawl(id: string): Promise<{ message: string }> {
+  async deleteRoadVehicleCrawl(
+    @Param('id') id: string,
+  ): Promise<{ message: string }> {
     return this.roadVehicleService.deleteRoadVehicleCrawl(id);
   }
 }

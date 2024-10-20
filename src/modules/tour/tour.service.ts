@@ -1,11 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Tour } from '@prisma/client';
+import { Tour, TripSchedule } from '@prisma/client';
 import * as dayjs from 'dayjs';
 import { CreateDtoTour } from 'src/modules/tour/dto/create.dto';
 import {
   TourDto,
   TourPaginationResponseType,
 } from 'src/modules/tour/dto/tour.dto';
+import { UpdateTripScheduleDto } from 'src/modules/tour/dto/update-trip-schedule.dto';
 import { UpdateDtoTour } from 'src/modules/tour/dto/update.dto';
 import { PrismaService } from 'src/prisma.service';
 
@@ -167,6 +168,7 @@ export class TourService {
         hotel: true,
         flight: true,
         roadVehicle: true,
+        TripSchedule: true, // Thêm phần lấy lịch trình vào đây
       },
     });
 
@@ -178,8 +180,13 @@ export class TourService {
       tour.tourFavorites.length > 0 && tour.tourFavorites[0].isFavorite;
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { tourFavorites, flight, roadVehicle, ...tourWithoutFavorites } =
-      tour;
+    const {
+      // tourFavorites,
+      flight,
+      roadVehicle,
+      TripSchedule: tripSchedules,
+      ...tourWithoutFavorites
+    } = tour;
 
     let roadVehicleDetails = null;
 
@@ -200,6 +207,7 @@ export class TourService {
       isFavorite,
       hotel: tour.hotel || null,
       road_vehicle: roadVehicleDetails || null,
+      trip_schedules: tripSchedules || [],
     };
   }
 
@@ -283,6 +291,29 @@ export class TourService {
       })
     );
 
+    // Tạo lịch trình cho tour
+    const tripSchedules = [];
+    const startDay = dayjs(startDate);
+    for (let i = 0; i < numberOfDays; i++) {
+      const currentDate = startDay.add(i, 'day').toDate();
+      let defaultSchedule = `Ngày ${i + 1}: `;
+
+      if (i === 0) {
+        defaultSchedule += 'Ngày đầu tiên, khởi hành và nhận phòng.';
+      } else if (i === numberOfDays - 1) {
+        defaultSchedule += 'Ngày cuối, chuẩn bị kết thúc chuyến đi và trở về.';
+      } else {
+        defaultSchedule += `Ngày ${i + 1}, tham quan và khám phá các địa điểm du lịch.`;
+      }
+
+      tripSchedules.push({
+        day: i + 1,
+        schedule: defaultSchedule,
+        date: currentDate,
+      });
+    }
+
+    // Lưu tour cùng với lịch trình vào database
     return this.prismaService.tour.create({
       data: {
         ...data,
@@ -296,6 +327,9 @@ export class TourService {
         totalAmount,
         road_vehicle: roadVehicleType,
         tour_code: tourCode,
+        TripSchedule: {
+          create: tripSchedules, // Lưu lịch trình vào database
+        },
       },
     });
   }
@@ -386,5 +420,30 @@ export class TourService {
       data: isFavoriteTour,
       total: totalFavoriteTour,
     };
+  }
+
+  async updateTripSchedule(
+    tourId: string,
+    tripScheduleId: string,
+    data: UpdateTripScheduleDto,
+  ): Promise<TripSchedule> {
+    const { schedule } = data;
+
+    // Kiểm tra xem lịch trình có tồn tại không
+    const existingSchedule = await this.prismaService.tripSchedule.findUnique({
+      where: { id: tripScheduleId },
+    });
+
+    if (!existingSchedule) {
+      throw new NotFoundException('Trip schedule not found');
+    }
+
+    // Cập nhật chỉ trường schedule
+    return this.prismaService.tripSchedule.update({
+      where: { id: tripScheduleId },
+      data: {
+        schedule,
+      },
+    });
   }
 }

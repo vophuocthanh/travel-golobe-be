@@ -199,6 +199,16 @@ Table tours {
   users user_on_tours [not null]
   tourReviews tour_reviews [not null]
   tourFavorites tour_favorites [not null]
+  TripSchedule trip_schedules [not null]
+}
+
+Table trip_schedules {
+  id String [pk]
+  tourId String [not null]
+  tour tours [not null]
+  day Int [not null]
+  schedule String [not null]
+  date DateTime [not null]
 }
 
 Table tour_favorites {
@@ -547,6 +557,8 @@ Ref: tours.hotelId > hotel_crawl.id
 Ref: tours.flightId > flight_crawl.id
 
 Ref: tours.roadVehicleId > road_vehicles.id
+
+Ref: trip_schedules.tourId > tours.id [delete: Cascade]
 
 Ref: tour_favorites.userId > users.id
 

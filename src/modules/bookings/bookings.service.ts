@@ -538,22 +538,22 @@ export class BookingsService {
     return { message: 'Booking canceled successfully' };
   }
 
-  async getBookedFlightDetails(
-    userId: string,
-    bookingId: string,
-  ): Promise<any> {
+  async getBookedFlightDetails(bookingId: string): Promise<any> {
     const booking = await this.prismaService.booking.findUnique({
       where: { id: bookingId },
       include: {
         flightCrawls: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
       },
     });
 
-    if (!booking || booking.userId !== userId) {
-      throw new NotFoundException('No flight booking found for this user.');
-    }
-
-    const { ...flightDetails } = booking.flightCrawls;
+    const { ...flightDetails } = booking;
 
     return {
       bookingId: booking.id,
@@ -565,17 +565,20 @@ export class BookingsService {
     };
   }
 
-  async getBookedHotelDetails(userId: string, bookingId: string): Promise<any> {
+  async getBookedHotelDetails(bookingId: string): Promise<any> {
     const booking = await this.prismaService.booking.findUnique({
       where: { id: bookingId },
       include: {
         hotelCrawls: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
       },
     });
-
-    if (!booking || booking.userId !== userId) {
-      throw new NotFoundException('No hotel booking found for this user.');
-    }
 
     const { ...hotelDetails } = booking.hotelCrawls;
 
@@ -586,26 +589,29 @@ export class BookingsService {
       price: booking.totalAmount,
       hotelQuantity: booking.hotelQuantity,
       status: booking.status,
+      user: {
+        id: booking.user.id,
+        name: booking.user.name,
+        avatar: booking.user.avatar,
+      },
       invoice: [],
     };
   }
 
-  async getBookedRoadVehicleDetails(
-    userId: string,
-    bookingId: string,
-  ): Promise<any> {
+  async getBookedRoadVehicleDetails(bookingId: string): Promise<any> {
     const booking = await this.prismaService.booking.findUnique({
       where: { id: bookingId },
       include: {
         roadVehicles: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
       },
     });
-
-    if (!booking || booking.userId !== userId) {
-      throw new NotFoundException(
-        'No road vehicle booking found for this user.',
-      );
-    }
 
     const { ...roadVehicleDetails } = booking.roadVehicles;
 
@@ -616,11 +622,16 @@ export class BookingsService {
       price: booking.totalAmount,
       roadVehicleQuantity: booking.roadVehicleQuantity,
       status: booking.status,
+      user: {
+        id: booking.user.id,
+        name: booking.user.name,
+        avatar: booking.user.avatar,
+      },
       invoice: [],
     };
   }
 
-  async getBookedTourDetails(userId: string, bookingId: string): Promise<any> {
+  async getBookedTourDetails(bookingId: string): Promise<any> {
     const booking = await this.prismaService.booking.findUnique({
       where: { id: bookingId },
       include: {
@@ -631,12 +642,15 @@ export class BookingsService {
             roadVehicle: true,
           },
         },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
       },
     });
-
-    if (!booking || booking.userId !== userId) {
-      throw new NotFoundException('No tour booking found for this user.');
-    }
 
     const { tour } = booking;
     const { hotel, flight, roadVehicle, ...tourDetails } = tour;
@@ -666,6 +680,11 @@ export class BookingsService {
       status: booking.status,
       hotelDetails: hotel || null,
       road_vehicle: roadVehicleDetails || null,
+      user: {
+        id: booking.user.id,
+        name: booking.user.name,
+        avatar: booking.user.avatar,
+      },
       invoice: [],
     };
   }

@@ -72,40 +72,31 @@ export class BookingsController {
   @UseGuards(HandleAuthGuard)
   @Get('flight/:bookingId')
   @ApiOperation({ summary: 'Lấy thông tin chi tiết của booking flight' })
-  async getBookedFlightDetails(
-    @Req() req: RequestWithUser,
-    @Param('bookingId') bookingId: string,
-  ): Promise<{
+  async getBookedFlightDetails(@Param('bookingId') bookingId: string): Promise<{
     bookingId: string;
     flightId: string;
     totalPrice: number;
     flightDetails: FlightCrawl;
   }> {
-    const userId = req.user.id;
-    return this.bookingService.getBookedFlightDetails(userId, bookingId);
+    return this.bookingService.getBookedFlightDetails(bookingId);
   }
 
   @UseGuards(HandleAuthGuard)
   @Get('hotel/:bookingId')
   @ApiOperation({ summary: 'Lấy thông tin chi tiết của booking hotel' })
-  async getBookedHotelDetails(
-    @Req() req: RequestWithUser,
-    @Param('bookingId') bookingId: string,
-  ): Promise<{
+  async getBookedHotelDetails(@Param('bookingId') bookingId: string): Promise<{
     bookingId: string;
     hotelId: string;
     totalPrice: number;
     hotelDetails: HotelCrawl;
   }> {
-    const userId = req.user.id;
-    return this.bookingService.getBookedHotelDetails(userId, bookingId);
+    return this.bookingService.getBookedHotelDetails(bookingId);
   }
 
   @UseGuards(HandleAuthGuard)
   @Get('road-vehicle/:bookingId')
   @ApiOperation({ summary: 'Lấy thông tin chi tiết của booking road vehicle' })
   async getBookedRoadVehicleDetails(
-    @Req() req: RequestWithUser,
     @Param('bookingId') bookingId: string,
   ): Promise<{
     bookingId: string;
@@ -113,24 +104,19 @@ export class BookingsController {
     totalPrice: number;
     roadVehicleDetails: RoadVehicle;
   }> {
-    const userId = req.user.id;
-    return this.bookingService.getBookedRoadVehicleDetails(userId, bookingId);
+    return this.bookingService.getBookedRoadVehicleDetails(bookingId);
   }
 
   @UseGuards(HandleAuthGuard)
   @Get('tour/:bookingId')
   @ApiOperation({ summary: 'Lấy thông tin chi tiết của booking tour' })
-  async getBookedTourDetails(
-    @Req() req: RequestWithUser,
-    @Param('bookingId') bookingId: string,
-  ): Promise<{
+  async getBookedTourDetails(@Param('bookingId') bookingId: string): Promise<{
     bookingId: string;
     tourId: string;
     totalPrice: number;
     tourDetails: any;
   }> {
-    const userId = req.user.id;
-    return this.bookingService.getBookedTourDetails(userId, bookingId);
+    return this.bookingService.getBookedTourDetails(bookingId);
   }
 
   @UseGuards(HandleAuthGuard)

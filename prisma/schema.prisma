@@ -360,6 +360,11 @@ model Booking {
 
   createdAt DateTime @default(now())
 
+  checkInDate  DateTime?
+  checkOutDate DateTime?
+
+  flightDate DateTime?
+
   // Trạng thái đặt chỗ
   status BookingStatus @default(PENDING) // Trạng thái mặc định là chờ xác nhận
 

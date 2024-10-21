@@ -1,5 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Booking, BookingStatus } from '@prisma/client';
+import * as moment from 'moment-timezone';
 import { mailService } from 'src/lib/mail.service';
 import {
   BookingDto,
@@ -14,6 +19,18 @@ import { PrismaService } from 'src/prisma.service';
 @Injectable()
 export class BookingsService {
   constructor(private prismaService: PrismaService) {}
+
+  private parseDateStringWithTimezone(dateString: string): Date | undefined {
+    if (!dateString) return undefined;
+    const [day, month, year] = dateString.split('-').map(Number);
+
+    // Tạo đối tượng Date và chuyển đổi về múi giờ Việt Nam (UTC+7)
+    const dateInVN = moment
+      .tz(`${year}-${month}-${day}`, 'Asia/Ho_Chi_Minh')
+      .toDate();
+
+    return dateInVN;
+  }
 
   async getAllBookings(
     filters: BookingDto,
@@ -175,8 +192,8 @@ export class BookingsService {
       include: {
         tour: {
           include: {
-            hotel: true, // Lấy thông tin chi tiết hotel
-            flight: true, // Lấy thông tin chi tiết flight
+            hotel: true,
+            flight: true,
           },
         },
         hotelCrawls: true,
@@ -200,8 +217,14 @@ export class BookingsService {
     createFlightBookingDto: CreateFlightBookingDto,
     userId: string,
   ): Promise<Booking> {
-    const { flightCrawlId, flightQuantity, ticketFlighttId } =
+    const { flightCrawlId, flightQuantity, ticketFlighttId, flightDate } =
       createFlightBookingDto;
+
+    if (!moment(flightDate, 'DD-MM-YYYY', true).isValid()) {
+      throw new BadRequestException(
+        'flightDate must be in the format dd-mm-yyyy',
+      );
+    }
 
     const flight = await this.prismaService.flightCrawl.findUnique({
       where: { id: flightCrawlId },
@@ -224,6 +247,27 @@ export class BookingsService {
       throw new Error('Not enough available seats for the requested quantity');
     }
 
+    const holidays = [
+      moment('01-01-2024', 'DD-MM-YYYY').toDate(),
+      moment('21-01-2024', 'DD-MM-YYYY').toDate(),
+    ];
+
+    const flightMomentDate = moment(flightDate, 'DD-MM-YYYY').toDate();
+
+    const isHoliday = holidays.some((holiday) => {
+      return (
+        holiday.getDate() === flightMomentDate.getDate() &&
+        holiday.getMonth() === flightMomentDate.getMonth() &&
+        holiday.getFullYear() === flightMomentDate.getFullYear()
+      );
+    });
+
+    let totalAmountFlight = ticket.price * flightQuantity;
+
+    if (isHoliday) {
+      totalAmountFlight *= 1.2;
+    }
+
     await this.prismaService.flightCrawl.update({
       where: { id: flightCrawlId },
       data: {
@@ -232,7 +276,7 @@ export class BookingsService {
       },
     });
 
-    const totalAmountFlight = ticket.price * flightQuantity;
+    const isoFlightDate = moment(flightDate, 'DD-MM-YYYY').toISOString();
 
     return this.prismaService.booking.create({
       data: {
@@ -241,6 +285,7 @@ export class BookingsService {
         flightQuantity,
         ticketFlighttId,
         totalAmount: totalAmountFlight,
+        flightDate: isoFlightDate,
       },
     });
   }
@@ -287,7 +332,8 @@ export class BookingsService {
     createHotelBookingDto: CreateHotelBookingDto,
     userId: string,
   ) {
-    const { hotelCrawlId, hotelQuantity, roomId } = createHotelBookingDto;
+    const { hotelCrawlId, hotelQuantity, roomId, checkInDate, checkOutDate } =
+      createHotelBookingDto;
 
     const hotel = await this.prismaService.hotelCrawl.findUnique({
       where: { id: hotelCrawlId },
@@ -299,7 +345,6 @@ export class BookingsService {
     }
 
     const room = hotel.rooms.find((room) => room.id === roomId);
-
     if (!room) {
       throw new Error('Room not found');
     }
@@ -312,6 +357,18 @@ export class BookingsService {
       throw new Error('Not enough available rooms for the requested quantity');
     }
 
+    const parsedCheckInDate = this.parseDateStringWithTimezone(checkInDate);
+    const parsedCheckOutDate = this.parseDateStringWithTimezone(checkOutDate);
+
+    const stayDuration = this.calculateNights(
+      parsedCheckInDate,
+      parsedCheckOutDate,
+    );
+
+    if (stayDuration <= 0) {
+      throw new Error('Invalid stay duration');
+    }
+
     await this.prismaService.hotelCrawl.update({
       where: { id: hotelCrawlId },
       data: {
@@ -320,7 +377,7 @@ export class BookingsService {
       },
     });
 
-    const totalAmountHotel = room.pricePerDay * hotelQuantity;
+    const totalAmountHotel = room.pricePerDay * hotelQuantity * stayDuration;
 
     return this.prismaService.booking.create({
       data: {
@@ -328,9 +385,18 @@ export class BookingsService {
         userId,
         roomId,
         hotelQuantity,
+        checkInDate: parsedCheckInDate,
+        checkOutDate: parsedCheckOutDate,
         totalAmount: totalAmountHotel,
       },
     });
+  }
+
+  private calculateNights(checkInDate: Date, checkOutDate: Date): number {
+    const oneDay = 24 * 60 * 60 * 1000;
+    return Math.round(
+      Math.abs(checkOutDate.getTime() - checkInDate.getTime()) / oneDay,
+    );
   }
 
   async bookTour(createTourBookingDto: CreateTourBookingDto, userId: string) {

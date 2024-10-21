@@ -14,4 +14,12 @@ export class CreateHotelBookingDto {
   @IsOptional()
   @IsUUID()
   roomId: string;
+
+  @ApiProperty()
+  @IsOptional()
+  checkInDate?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  checkOutDate?: string;
 }

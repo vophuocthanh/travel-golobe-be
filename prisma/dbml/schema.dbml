@@ -299,6 +299,9 @@ Table bookings {
   ticket Ticket
   totalAmount Float
   createdAt DateTime [default: `now()`, not null]
+  checkInDate DateTime
+  checkOutDate DateTime
+  flightDate DateTime
   status BookingStatus [not null, default: 'PENDING']
   confirmationTime DateTime
   InvoiceDetail invoice_details [not null]

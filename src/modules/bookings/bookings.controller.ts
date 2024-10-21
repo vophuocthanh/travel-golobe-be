@@ -52,11 +52,9 @@ export class BookingsController {
   @ApiQuery({ name: 'items_per_page', required: false })
   @ApiQuery({ name: 'search', required: false })
   async getBookedFlights(
-    @Req() req: RequestWithUser,
     @Query() params: BookingDto,
   ): Promise<BookingPaginationResponseType> {
-    const userId = req.user.id;
-    return this.bookingService.getBookedFlights(userId, params);
+    return this.bookingService.getBookedFlights(params);
   }
 
   @UseGuards(HandleAuthGuard)
@@ -66,11 +64,9 @@ export class BookingsController {
   @ApiQuery({ name: 'items_per_page', required: false })
   @ApiQuery({ name: 'search', required: false })
   async getBookedRoadVehicles(
-    @Req() req: RequestWithUser,
     @Query() params: BookingDto,
   ): Promise<BookingPaginationResponseType> {
-    const userId = req.user.id;
-    return this.bookingService.getRoadVehicleBooking(userId, params);
+    return this.bookingService.getRoadVehicleBooking(params);
   }
 
   @UseGuards(HandleAuthGuard)
@@ -189,11 +185,9 @@ export class BookingsController {
   @ApiQuery({ name: 'items_per_page', required: false })
   @ApiQuery({ name: 'search', required: false })
   async getBookedHotels(
-    @Req() req: RequestWithUser,
     @Query() params: BookingDto,
   ): Promise<BookingPaginationResponseType> {
-    const userId = req.user.id;
-    return this.bookingService.getBookedHotels(userId, params);
+    return this.bookingService.getBookedHotels(params);
   }
 
   @UseGuards(HandleAuthGuard)
@@ -225,11 +219,9 @@ export class BookingsController {
   @ApiQuery({ name: 'items_per_page', required: false })
   @ApiQuery({ name: 'search', required: false })
   async getBookedTours(
-    @Req() req: RequestWithUser,
     @Query() params: BookingDto,
   ): Promise<BookingPaginationResponseType> {
-    const userId = req.user.id;
-    return this.bookingService.getBookedTours(userId, params);
+    return this.bookingService.getBookedTours(params);
   }
 
   @UseGuards(HandleAuthGuard)

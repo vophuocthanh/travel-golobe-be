@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { PaymentMethod, PaymentStatus } from '@prisma/client';
+import { BookingStatus, PaymentMethod, PaymentStatus } from '@prisma/client';
 import axios from 'axios';
 import * as crypto from 'crypto';
 import {
@@ -17,7 +17,7 @@ export class MomoService {
   private readonly ACCESS_KEY = process.env.MOMO_ACCESS_KEY;
   private readonly REDIRECT_URL = 'http://localhost:5173';
   private readonly IPN_URL =
-    'https://1ead-2402-800-612b-46c2-611b-cd8e-f94c-50b9.ngrok-free.app/api/momo/ipn';
+    'https://6ecc-2001-ee0-4b76-e030-11e0-aa59-6507-f791.ngrok-free.app/api/momo/ipn';
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -144,23 +144,17 @@ export class MomoService {
       data: { status },
     });
 
+    // Nếu thanh toán thành công, cập nhật trạng thái đặt chỗ thành CONFIRMED
     if (status === PaymentStatus.COMPLETED) {
       const bookingId = payment.bookingId;
 
-      const relatedPayments = await this.prisma.payment.findMany({
-        where: { bookingId },
-      });
-
-      if (relatedPayments.length > 1) {
-        throw new HttpException(
-          'Cannot delete booking with existing payments',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      // Xóa bản ghi trong bảng booking
-      await this.prisma.booking.delete({
+      // Cập nhật trạng thái của booking
+      await this.prisma.booking.update({
         where: { id: bookingId },
+        data: {
+          status: BookingStatus.CONFIRMED,
+          confirmationTime: new Date(), // Thay đổi thời gian xác nhận nếu cần
+        },
       });
     }
 

@@ -93,7 +93,6 @@ export class BookingsService {
   }
 
   async getBookedFlights(
-    userId: string,
     filters: BookingDto,
   ): Promise<BookingPaginationResponseType> {
     const items_per_page = Number(filters.items_per_page) || 10;
@@ -103,14 +102,21 @@ export class BookingsService {
     const getFlightBooking = await this.prismaService.booking.findMany({
       take: items_per_page,
       skip,
-      where: { userId, flightCrawlId: { not: null } },
+      where: { flightCrawlId: { not: null } },
       include: {
         flightCrawls: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
       },
     });
 
     const total = await this.prismaService.booking.count({
-      where: { userId, flightCrawlId: { not: null } },
+      where: { flightCrawlId: { not: null } },
     });
 
     return {
@@ -122,7 +128,6 @@ export class BookingsService {
   }
 
   async getRoadVehicleBooking(
-    userId: string,
     filters: BookingDto,
   ): Promise<BookingPaginationResponseType> {
     const items_per_page = Number(filters.items_per_page) || 10;
@@ -132,13 +137,20 @@ export class BookingsService {
     const getRoadVehicleBooking = await this.prismaService.booking.findMany({
       take: items_per_page,
       skip,
-      where: { userId, roadVehicleId: { not: null } },
+      where: { roadVehicleId: { not: null } },
       include: {
         roadVehicles: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
       },
     });
     const total = await this.prismaService.booking.count({
-      where: { userId, roadVehicleId: { not: null } },
+      where: { roadVehicleId: { not: null } },
     });
     return {
       data: getRoadVehicleBooking,
@@ -149,7 +161,6 @@ export class BookingsService {
   }
 
   async getBookedHotels(
-    userId: string,
     filters: BookingDto,
   ): Promise<BookingPaginationResponseType> {
     const items_per_page = Number(filters.items_per_page) || 10;
@@ -159,14 +170,21 @@ export class BookingsService {
     const getHotelBooking = await this.prismaService.booking.findMany({
       take: items_per_page,
       skip,
-      where: { userId, hotelCrawlId: { not: null } },
+      where: { hotelCrawlId: { not: null } },
       include: {
         hotelCrawls: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
       },
     });
 
     const total = await this.prismaService.booking.count({
-      where: { userId, hotelCrawlId: { not: null } },
+      where: { hotelCrawlId: { not: null } },
     });
 
     return {
@@ -178,7 +196,6 @@ export class BookingsService {
   }
 
   async getBookedTours(
-    userId: string,
     filters: BookingDto,
   ): Promise<BookingPaginationResponseType> {
     const items_per_page = Number(filters.items_per_page) || 10;
@@ -188,7 +205,7 @@ export class BookingsService {
     const getTourBooking = await this.prismaService.booking.findMany({
       take: items_per_page,
       skip,
-      where: { userId, tourId: { not: null } },
+      where: { tourId: { not: null } },
       include: {
         tour: {
           include: {
@@ -198,11 +215,18 @@ export class BookingsService {
         },
         hotelCrawls: true,
         flightCrawls: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
       },
     });
 
     const total = await this.prismaService.booking.count({
-      where: { userId, tourId: { not: null } },
+      where: { tourId: { not: null } },
     });
 
     return {

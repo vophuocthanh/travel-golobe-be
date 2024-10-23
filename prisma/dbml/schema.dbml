@@ -525,6 +525,7 @@ Enum BookingStatus {
   CONFIRMED
   CANCELED
   SUCCESS
+  WAITING_PAYMENT
 }
 
 Enum PaymentMethod {

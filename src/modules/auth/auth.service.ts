@@ -8,7 +8,9 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { compare, hash } from 'bcrypt';
 import { mailService } from 'src/lib/mail.service';
+import { RefreshTokenDto } from 'src/modules/auth/dto/refresh-token.dto';
 import { RegisterDto } from 'src/modules/auth/dto/register.dto';
+import { UserService } from 'src/modules/user/user.service';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
@@ -16,6 +18,7 @@ export class AuthService {
   constructor(
     private prismaService: PrismaService,
     private jwtService: JwtService,
+    private userService: UserService,
   ) {}
 
   generateVerificationCode(): { code: string; expiresAt: Date } {
@@ -516,5 +519,33 @@ export class AuthService {
     });
 
     return { message: 'Password changed successfully' };
+  }
+
+  async refreshToken(refreshTokenDto: RefreshTokenDto) {
+    const { refresh_token } = refreshTokenDto;
+
+    // 1. Xác thực refresh token
+    const userId = await this.validateRefreshToken(refresh_token);
+    if (!userId) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    // 2. Tạo mới access token
+    const user = await this.userService.getDetail(userId);
+    const newAccessToken = this.jwtService.sign({
+      id: user.id,
+      email: user.email,
+    });
+
+    return { access_token: newAccessToken };
+  }
+
+  private async validateRefreshToken(token: string): Promise<string | null> {
+    try {
+      const decoded = this.jwtService.verify(token);
+      return decoded.userId; // Hoặc trả về thông tin cần thiết từ token
+    } catch (error) {
+      return null; // Nếu token không hợp lệ
+    }
   }
 }

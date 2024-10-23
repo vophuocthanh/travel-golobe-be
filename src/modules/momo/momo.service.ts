@@ -279,6 +279,7 @@ export class MomoService {
     const paymentUser = await this.prisma.payment.findMany({
       where: {
         userId: userId,
+        status: PaymentStatus.COMPLETED,
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -286,6 +287,7 @@ export class MomoService {
     const total = await this.prisma.payment.count({
       where: {
         userId: userId,
+        status: PaymentStatus.COMPLETED,
       },
     });
 

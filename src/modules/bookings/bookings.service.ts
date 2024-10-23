@@ -669,11 +669,15 @@ export class BookingsService {
       };
     }
 
+    const originalTourPrice = tour.price;
+    const totalAmount = booking.totalAmount;
+
     return {
       bookingId: booking.id,
       tourId: booking.tourId,
       ...tourDetails,
-      price: booking.totalAmount,
+      originalTourPrice,
+      price: totalAmount,
       tourQuantity: booking.tourQuantity,
       flightQuantity: booking.flightQuantity,
       hotelQuantity: booking.hotelQuantity,
@@ -715,7 +719,7 @@ export class BookingsService {
     const updatedBooking = await this.prismaService.booking.update({
       where: { id: bookingId },
       data: {
-        status: BookingStatus.CONFIRMED,
+        status: BookingStatus.WAITING_PAYMENT,
       },
     });
 

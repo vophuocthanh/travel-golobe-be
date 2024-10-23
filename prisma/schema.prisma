@@ -382,6 +382,7 @@ enum BookingStatus {
   CONFIRMED // Đã xác nhận
   CANCELED // Đã hủy
   SUCCESS // Thành công
+  WAITING_PAYMENT // Chờ thanh toán
 }
 
 model Payment {

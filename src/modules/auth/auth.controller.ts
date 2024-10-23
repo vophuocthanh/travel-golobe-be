@@ -14,6 +14,7 @@ import {
   ResetPasswordDto,
 } from 'src/modules/auth/dto/auth.dto';
 import { LoginDto } from 'src/modules/auth/dto/login.dto';
+import { RefreshTokenDto } from 'src/modules/auth/dto/refresh-token.dto';
 import { RegisterDto } from 'src/modules/auth/dto/register.dto';
 import { VerifyEmailDto } from 'src/modules/auth/dto/verify-code';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
@@ -52,6 +53,12 @@ export class AuthController {
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   login(@Body() body: LoginDto): Promise<User> {
     return this.authService.login(body);
+  }
+
+  @Post('refresh-token')
+  @ApiOperation({ summary: 'Tạo lại access_token' })
+  async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
+    return this.authService.refreshToken(refreshTokenDto);
   }
 
   @Post('forgot-password')

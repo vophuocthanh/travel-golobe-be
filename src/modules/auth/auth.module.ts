@@ -24,6 +24,12 @@ import { AuthService } from './auth.service';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, PrismaService, UserService, FileUploadService],
+  providers: [
+    AuthService,
+    PrismaService,
+    UserService,
+    FileUploadService,
+    UserService,
+  ],
 })
 export class AuthModule {}

@@ -276,16 +276,16 @@ model TourFavorite {
 
 model RoadVehicle {
   id                        String    @id @default(cuid())
-  brand                     String? // Hãng xe
-  price                     Float? // Giá vé hoặc chi phí di chuyển
-  number_of_seat            String? // Số ghế
-  start_time                String? // Thời gian khởi hành
-  start_day                 DateTime? // Ngày khởi hành
-  end_day                   DateTime? // Ngày kết thúc
-  end_time                  String? // Thời gian kết thúc
-  trip_time                 String? // Thời gian hành trình
-  take_place                String? // Điểm xuất phát
-  destination               String? // Điểm đến
+  brand                     String?
+  price                     Float?
+  number_of_seat            String?
+  start_time                String?
+  start_day                 DateTime?
+  end_day                   DateTime?
+  end_time                  String?
+  trip_time                 String?
+  take_place                String?
+  destination               String?
   location                  String?
   isFavorite                Boolean?  @default(false)
   number_of_seats_remaining Int?
@@ -340,23 +340,23 @@ model Booking {
   roadVehicles RoadVehicle? @relation(fields: [roadVehicleId], references: [id])
   user         User         @relation(fields: [userId], references: [id])
 
-  flightQuantity      Int? // Số lượng đặt chuyến bay
-  hotelQuantity       Int? // Số lượng đặt khách sạn
-  tourQuantity        Int? // Số lượng đặt tour
-  roadVehicleQuantity Int? // Số lượng đặt phương tiện đường bộ
+  flightQuantity      Int?
+  hotelQuantity       Int?
+  tourQuantity        Int?
+  roadVehicleQuantity Int?
 
-  flightPrice      Float? // Giá của chuyến bay
-  hotelPrice       Float? // Giá của khách sạn
-  tourPrice        Float? // Giá của tour
-  roadVehiclePrice Float? // Giá của phương tiện đường bộ
+  flightPrice      Float?
+  hotelPrice       Float?
+  tourPrice        Float?
+  roadVehiclePrice Float?
 
-  roomId String? // Thêm roomId
+  roomId String?
   room   Room?   @relation(fields: [roomId], references: [id])
 
-  ticketFlighttId String? // Thêm ticketId
+  ticketFlighttId String?
   ticket          Ticket? @relation(fields: [ticketFlighttId], references: [id])
 
-  totalAmount Float? // Tổng số tiền cho toàn bộ dịch vụ
+  totalAmount Float?
 
   createdAt DateTime @default(now())
 
@@ -365,58 +365,55 @@ model Booking {
 
   flightDate DateTime?
 
-  // Trạng thái đặt chỗ
-  status BookingStatus @default(PENDING) // Trạng thái mặc định là chờ xác nhận
+  status BookingStatus @default(PENDING)
 
-  // Thời gian xác nhận
   confirmationTime DateTime?
 
   InvoiceDetail InvoiceDetail[]
-  Payment       Payment[] // Quan hệ với bảng Payment
+  Payment       Payment[]
 
   @@map("bookings")
 }
 
 enum BookingStatus {
-  PENDING // Chờ xác nhận
-  CONFIRMED // Đã xác nhận
-  CANCELED // Đã hủy
-  SUCCESS // Thành công
-  WAITING_PAYMENT // Chờ thanh toán
+  PENDING
+  CONFIRMED
+  CANCELED
+  SUCCESS
+  WAITING_PAYMENT
 }
 
 model Payment {
-  id            String        @id @default(cuid()) // ID của giao dịch thanh toán
-  bookingId     String? // ID của đơn đặt phòng
-  userId        String // ID của người dùng
-  amount        Float // Số tiền thanh toán
-  paymentMethod PaymentMethod // Phương thức thanh toán
-  status        PaymentStatus // Trạng thái thanh toán
-  orderId       String?       @unique // ID đơn hàng từ cổng thanh toán
-  createdAt     DateTime      @default(now()) // Thời gian tạo
-  updatedAt     DateTime?     @updatedAt // Thời gian cập nhật (nếu có)
+  id            String        @id @default(cuid())
+  bookingId     String?
+  userId        String
+  amount        Float
+  paymentMethod PaymentMethod
+  status        PaymentStatus
+  orderId       String?       @unique
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime?     @updatedAt
 
   booking Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
-  // Liên kết với mô hình Booking
-  user    User     @relation(fields: [userId], references: [id]) // Liên kết với mô hình User
+  user    User     @relation(fields: [userId], references: [id])
 
-  InvoiceDetail InvoiceDetail[] // Liên kết tới InvoiceDetail (nếu có)
+  InvoiceDetail InvoiceDetail[]
 
-  @@map("payments") // Tên bảng trong cơ sở dữ liệu
+  @@map("payments")
 }
 
 enum PaymentMethod {
-  CASH // Thanh toán bằng tiền mặt
-  CREDIT_CARD // Thanh toán bằng thẻ tín dụng
-  DEBIT_CARD // Thanh toán bằng thẻ ghi nợ
-  PAYPAL // Thanh toán qua PayPal
-  BANK_TRANSFER // Thanh toán qua chuyển khoản ngân hàng
+  CASH
+  CREDIT_CARD
+  DEBIT_CARD
+  PAYPAL
+  BANK_TRANSFER
 }
 
 enum PaymentStatus {
-  PENDING // Thanh toán đang chờ xử lý
-  COMPLETED // Thanh toán đã hoàn tất
-  FAILED // Thanh toán thất bại
+  PENDING
+  COMPLETED
+  FAILED
 }
 
 model InvoiceDetail {

@@ -291,7 +291,6 @@ export class TourService {
       })
     );
 
-    // Tạo lịch trình cho tour
     const tripSchedules = [];
     const startDay = dayjs(startDate);
     for (let i = 0; i < numberOfDays; i++) {
@@ -313,7 +312,6 @@ export class TourService {
       });
     }
 
-    // Lưu tour cùng với lịch trình vào database
     return this.prismaService.tour.create({
       data: {
         ...data,
@@ -328,7 +326,7 @@ export class TourService {
         road_vehicle: roadVehicleType,
         tour_code: tourCode,
         TripSchedule: {
-          create: tripSchedules, // Lưu lịch trình vào database
+          create: tripSchedules,
         },
       },
     });

@@ -80,6 +80,9 @@ export class RoadVehicleService {
       filters.max_price?.toString() || `${Number.MAX_SAFE_INTEGER}`,
     );
 
+    const searchFrom = filters.search_from || ''; // Điểm đi
+    const searchTo = filters.search_to || ''; // Điểm đến
+
     const startDate = this.parseDateString(filters.start_day);
     const endDate = this.parseDateString(filters.end_day);
 
@@ -113,12 +116,31 @@ export class RoadVehicleService {
                 },
               ]
             : []),
+          ...(searchFrom
+            ? [
+                {
+                  take_place: {
+                    contains: searchFrom,
+                  },
+                },
+              ]
+            : []),
+          ...(searchTo
+            ? [
+                {
+                  destination: {
+                    contains: searchTo,
+                  },
+                },
+              ]
+            : []),
         ],
       },
       orderBy: {
         price: sort_by_price,
       },
     });
+
     const total = await this.prismaService.roadVehicle.count({
       where: {
         AND: [
@@ -147,12 +169,28 @@ export class RoadVehicleService {
                 },
               ]
             : []),
+          ...(searchFrom
+            ? [
+                {
+                  take_place: {
+                    contains: searchFrom,
+                  },
+                },
+              ]
+            : []),
+          ...(searchTo
+            ? [
+                {
+                  destination: {
+                    contains: searchTo,
+                  },
+                },
+              ]
+            : []),
         ],
       },
-      orderBy: {
-        price: sort_by_price,
-      },
     });
+
     return {
       data: roadVehicleCraw,
       total,
@@ -160,6 +198,7 @@ export class RoadVehicleService {
       itemsPerPage: items_per_page,
     };
   }
+
   async getRoadVehicleCrawlById(id: string): Promise<RoadVehicle> {
     return this.prismaService.roadVehicle.findFirst({
       where: {

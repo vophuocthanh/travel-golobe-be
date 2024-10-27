@@ -73,6 +73,8 @@ export class RoadVehicleController {
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'items_per_page', required: false })
   @ApiQuery({ name: 'search', required: false })
+  @ApiQuery({ name: 'search_from', required: false })
+  @ApiQuery({ name: 'search_to', required: false })
   @ApiOperation({
     summary: 'Lấy thông tin phương tiện đường bộ từ các trang web khác',
   })

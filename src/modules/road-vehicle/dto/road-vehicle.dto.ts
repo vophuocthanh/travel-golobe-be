@@ -15,6 +15,8 @@ export class RoadVehicleCrawlDto {
   @IsOptional()
   @IsString()
   end_day?: string;
+  search_from?: string;
+  search_to?: string;
 }
 
 export interface RoadVehicleCrawlPaginationResponseType {

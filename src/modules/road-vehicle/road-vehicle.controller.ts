@@ -27,6 +27,7 @@ import { extname } from 'path';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import { CreateRoadVehicleDto } from 'src/modules/road-vehicle/dto/create.dto';
 import {
+  RoadVehicleBrands,
   RoadVehicleCrawlDto,
   RoadVehicleCrawlPaginationResponseType,
 } from 'src/modules/road-vehicle/dto/road-vehicle.dto';
@@ -69,6 +70,12 @@ export class RoadVehicleController {
     required: false,
     type: String,
     description: 'End day in format dd-mm-yyyy',
+  })
+  @ApiQuery({
+    name: 'brand',
+    required: false,
+    enum: Object.values(RoadVehicleBrands),
+    description: 'Airline brand',
   })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'items_per_page', required: false })

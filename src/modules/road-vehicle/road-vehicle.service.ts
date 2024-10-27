@@ -83,6 +83,8 @@ export class RoadVehicleService {
     const searchFrom = filters.search_from || ''; // Điểm đi
     const searchTo = filters.search_to || ''; // Điểm đến
 
+    const filterBrand = filters.brand || '';
+
     const startDate = this.parseDateString(filters.start_day);
     const endDate = this.parseDateString(filters.end_day);
 
@@ -130,6 +132,15 @@ export class RoadVehicleService {
                 {
                   destination: {
                     contains: searchTo,
+                  },
+                },
+              ]
+            : []),
+          ...(filterBrand
+            ? [
+                {
+                  brand: {
+                    equals: filterBrand,
                   },
                 },
               ]
@@ -183,6 +194,15 @@ export class RoadVehicleService {
                 {
                   destination: {
                     contains: searchTo,
+                  },
+                },
+              ]
+            : []),
+          ...(filterBrand
+            ? [
+                {
+                  brand: {
+                    equals: filterBrand,
                   },
                 },
               ]

@@ -27,6 +27,9 @@ export class FlightCrawlDto {
   @IsOptional()
   @IsEnum(AirlineBrand)
   brand?: AirlineBrand;
+
+  search_from?: string;
+  search_to?: string;
 }
 
 export interface FlightCrawlPaginationResponseType {

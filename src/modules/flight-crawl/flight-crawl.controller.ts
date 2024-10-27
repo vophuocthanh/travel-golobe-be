@@ -81,6 +81,8 @@ export class FlightCrawlController {
     enum: ['Vietnam Airlines', 'VietJet Air', 'Bamboo Airways'],
     description: 'Airline brand',
   })
+  @ApiQuery({ name: 'search_from', required: false })
+  @ApiQuery({ name: 'search_to', required: false })
   @ApiOperation({ summary: 'Lấy thông tin chuyến bay từ các trang web khác' })
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })

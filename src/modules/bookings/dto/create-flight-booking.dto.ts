@@ -13,7 +13,4 @@ export class CreateFlightBookingDto {
   @ApiProperty()
   @IsString()
   ticketFlighttId?: string;
-
-  @ApiProperty()
-  flightDate?: string;
 }

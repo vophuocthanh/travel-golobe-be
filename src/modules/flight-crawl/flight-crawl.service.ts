@@ -150,55 +150,159 @@ export class FlightCrawlService {
     filters: FlightCrawlDto,
     userId?: string,
   ): Promise<FlightCrawlPaginationResponseType> {
-    const itemsPerPage = Number(filters.items_per_page) || 10;
+    const items_per_page = Number(filters.items_per_page) || 10;
     const page = Number(filters.page) || 1;
-    const skip = (page - 1) * itemsPerPage;
-
-    const minPrice = parseFloat(filters.min_price?.toString() || '0');
-    const maxPrice = parseFloat(
+    const search = filters.search || '';
+    const sort_by_price = filters.sort_by_price || 'asc';
+    const min_price = parseFloat(filters.min_price?.toString() || '0');
+    const max_price = parseFloat(
       filters.max_price?.toString() || `${Number.MAX_SAFE_INTEGER}`,
     );
-    const startDate =
-      this.parseDateString(filters.start_day) || new Date('1970-01-01');
-    const endDate = this.parseDateString(filters.end_day) || new Date();
+    const searchFrom = filters.search_from || '';
+    const searchTo = filters.search_to || '';
+    const startDate = this.parseDateString(filters.start_day);
+    const endDate = this.parseDateString(filters.end_day);
+    const filterBrand = filters.brand || '';
+    const skip = page > 1 ? (page - 1) * items_per_page : 0;
 
-    const whereConditions = {
-      price: { gte: minPrice, lte: maxPrice },
-      brand: filters.brand ? { equals: filters.brand } : undefined,
-      take_place: filters.search_from
-        ? { contains: filters.search_from }
-        : undefined,
-      destination: filters.search_to
-        ? { contains: filters.search_to }
-        : undefined,
-      start_day: { gte: startDate, lte: endDate },
-      OR: filters.search
-        ? [{ brand: { contains: filters.search } }]
-        : undefined,
-    };
-
-    const flights = await this.prismaService.flightCrawl.findMany({
-      take: itemsPerPage,
+    const flightCrawl = await this.prismaService.flightCrawl.findMany({
+      take: items_per_page,
       skip,
-      where: whereConditions,
+      where: {
+        AND: [
+          {
+            price: {
+              gte: min_price,
+              lte: max_price,
+            },
+          },
+          {
+            OR: [
+              {
+                brand: {
+                  contains: search,
+                },
+              },
+            ],
+          },
+          ...(startDate || endDate
+            ? [
+                {
+                  start_day: {
+                    gte: startDate || new Date('1970-01-01'),
+                    lte: endDate || new Date(),
+                  },
+                },
+              ]
+            : []),
+          ...(filterBrand
+            ? [
+                {
+                  brand: {
+                    equals: filterBrand,
+                  },
+                },
+              ]
+            : []),
+          ...(searchFrom
+            ? [
+                {
+                  take_place: {
+                    contains: searchFrom,
+                  },
+                },
+              ]
+            : []),
+          ...(searchTo
+            ? [
+                {
+                  destination: {
+                    contains: searchTo,
+                  },
+                },
+              ]
+            : []),
+        ],
+      },
       include: {
         flightFavorites: {
-          where: { userId },
-          select: { isFavorite: true },
+          where: {
+            userId,
+          },
+          select: {
+            isFavorite: true,
+          },
         },
       },
-      orderBy: { price: filters.sort_by_price || 'asc' },
+      orderBy: {
+        price: sort_by_price,
+      },
     });
 
     const total = await this.prismaService.flightCrawl.count({
-      where: whereConditions,
+      where: {
+        AND: [
+          {
+            price: {
+              gte: min_price,
+              lte: max_price,
+            },
+          },
+          {
+            OR: [
+              {
+                brand: {
+                  contains: search,
+                },
+              },
+            ],
+          },
+          ...(startDate || endDate
+            ? [
+                {
+                  start_day: {
+                    gte: startDate || new Date('1970-01-01'),
+                    lte: endDate || new Date(),
+                  },
+                },
+              ]
+            : []),
+          ...(filterBrand
+            ? [
+                {
+                  brand: {
+                    equals: filterBrand,
+                  },
+                },
+              ]
+            : []),
+          ...(searchFrom
+            ? [
+                {
+                  take_place: {
+                    contains: searchFrom,
+                  },
+                },
+              ]
+            : []),
+          ...(searchTo
+            ? [
+                {
+                  destination: {
+                    contains: searchTo,
+                  },
+                },
+              ]
+            : []),
+        ],
+      },
     });
 
     return {
-      data: flights,
+      data: flightCrawl,
       total,
       currentPage: page,
-      itemsPerPage,
+      itemsPerPage: items_per_page,
     };
   }
 

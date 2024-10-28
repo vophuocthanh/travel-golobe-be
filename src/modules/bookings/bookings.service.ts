@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Booking, BookingStatus } from '@prisma/client';
 import * as moment from 'moment-timezone';
 import { mailService } from 'src/lib/mail.service';
@@ -241,14 +237,8 @@ export class BookingsService {
     createFlightBookingDto: CreateFlightBookingDto,
     userId: string,
   ): Promise<Booking> {
-    const { flightCrawlId, flightQuantity, ticketFlighttId, flightDate } =
+    const { flightCrawlId, flightQuantity, ticketFlighttId } =
       createFlightBookingDto;
-
-    if (!moment(flightDate, 'DD-MM-YYYY', true).isValid()) {
-      throw new BadRequestException(
-        'flightDate must be in the format dd-mm-yyyy',
-      );
-    }
 
     const flight = await this.prismaService.flightCrawl.findUnique({
       where: { id: flightCrawlId },
@@ -271,27 +261,6 @@ export class BookingsService {
       throw new Error('Not enough available seats for the requested quantity');
     }
 
-    const holidays = [
-      moment('01-01-2024', 'DD-MM-YYYY').toDate(),
-      moment('21-01-2024', 'DD-MM-YYYY').toDate(),
-    ];
-
-    const flightMomentDate = moment(flightDate, 'DD-MM-YYYY').toDate();
-
-    const isHoliday = holidays.some((holiday) => {
-      return (
-        holiday.getDate() === flightMomentDate.getDate() &&
-        holiday.getMonth() === flightMomentDate.getMonth() &&
-        holiday.getFullYear() === flightMomentDate.getFullYear()
-      );
-    });
-
-    let totalAmountFlight = ticket.price * flightQuantity;
-
-    if (isHoliday) {
-      totalAmountFlight *= 1.2;
-    }
-
     await this.prismaService.flightCrawl.update({
       where: { id: flightCrawlId },
       data: {
@@ -300,7 +269,7 @@ export class BookingsService {
       },
     });
 
-    const isoFlightDate = moment(flightDate, 'DD-MM-YYYY').toISOString();
+    const totalAmountFlight = ticket.price * flightQuantity;
 
     return this.prismaService.booking.create({
       data: {
@@ -309,7 +278,6 @@ export class BookingsService {
         flightQuantity,
         ticketFlighttId,
         totalAmount: totalAmountFlight,
-        flightDate: isoFlightDate,
       },
     });
   }

@@ -36,6 +36,27 @@ export class FlightCrawlService {
     }
   }
 
+  private calculateTripTime(startTime: string, endTime: string): string {
+    const [startHours, startMinutes] = startTime.split(':').map(Number);
+    const [endHours, endMinutes] = endTime.split(':').map(Number);
+
+    const start = new Date();
+    start.setHours(startHours, startMinutes);
+
+    const end = new Date();
+    end.setHours(endHours, endMinutes);
+
+    let duration = (end.getTime() - start.getTime()) / (1000 * 60); // in minutes
+
+    if (duration < 0) {
+      duration += 24 * 60; // adjust if end time is past midnight
+    }
+
+    const hours = Math.floor(duration / 60);
+    const minutes = duration % 60;
+    return `${hours}h ${minutes}m`;
+  }
+
   async importFlightsFromCSV(filePath: string): Promise<void> {
     const flights = [];
 
@@ -319,6 +340,10 @@ export class FlightCrawlService {
   }
 
   async createFlight(flightData: CreateFlightCrawlDto): Promise<FlightCrawl> {
+    const tripTime = this.calculateTripTime(
+      flightData.start_time,
+      flightData.end_time,
+    );
     const createdFlight = await this.prismaService.flightCrawl.create({
       data: {
         brand: flightData.brand,
@@ -326,7 +351,7 @@ export class FlightCrawlService {
         start_day: this.parseDateString(flightData.start_day),
         end_day: this.parseDateString(flightData.end_day),
         end_time: flightData.end_time,
-        trip_time: flightData.trip_time,
+        trip_time: tripTime,
         take_place: flightData.take_place,
         destination: flightData.destination,
         trip_to: flightData.trip_to,

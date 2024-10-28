@@ -21,4 +21,16 @@ export class CreateRoadVehicleDto {
   @ApiProperty()
   @IsNotEmpty()
   number_of_seat: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  image: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  start_time: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  end_time: string;
 }

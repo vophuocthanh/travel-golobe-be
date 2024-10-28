@@ -241,6 +241,7 @@ Table road_vehicles {
   location String
   isFavorite Boolean [default: false]
   number_of_seats_remaining Int
+  image String
   users user_on_road_vehicles [not null]
   bookings bookings [not null]
   roadVehicleReview road_vehicle_reviews [not null]

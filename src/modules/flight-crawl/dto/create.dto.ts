@@ -28,10 +28,6 @@ export class CreateFlightCrawlDto {
 
   @ApiProperty()
   @IsOptional()
-  trip_time?: string;
-
-  @ApiProperty()
-  @IsOptional()
   take_place?: string;
 
   @ApiProperty()

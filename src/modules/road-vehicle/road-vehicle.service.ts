@@ -253,13 +253,55 @@ export class RoadVehicleService {
   async createRoadVehicleCrawl(
     data: CreateRoadVehicleDto,
   ): Promise<RoadVehicle> {
+    const startDay = this.parseDateString(data.start_day);
+    const endDay = this.parseDateString(data.end_day);
+
+    if (!startDay || !endDay) {
+      throw new Error('Invalid start day or end day');
+    }
+
+    const startTime = new Date(startDay);
+    const endTime = new Date(endDay);
+
+    const startHourMinute = data.start_time.split(':');
+    const endHourMinute = data.end_time.split(':');
+
+    startTime.setHours(
+      Number(startHourMinute[0]),
+      Number(startHourMinute[1]),
+      0,
+      0,
+    );
+    endTime.setHours(Number(endHourMinute[0]), Number(endHourMinute[1]), 0, 0);
+
+    if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
+      throw new Error('Invalid start time or end time');
+    }
+
+    const tripDurationInMillis = endTime.getTime() - startTime.getTime();
+
+    if (tripDurationInMillis < 0) {
+      throw new Error('End time must be later than start time');
+    }
+
+    const tripDurationInMinutes = Math.floor(
+      tripDurationInMillis / (1000 * 60),
+    );
+
+    const hours = Math.floor(tripDurationInMinutes / 60);
+    const minutes = tripDurationInMinutes % 60;
+
+    const trip_time = `${hours} hours ${minutes} minutes`;
+
     const roadVehicle = await this.prismaService.roadVehicle.create({
       data: {
         ...data,
-        start_day: this.parseDateString(data.start_day),
-        end_day: this.parseDateString(data.end_day),
+        start_day: startDay,
+        end_day: endDay,
+        trip_time: trip_time,
       },
     });
+
     return roadVehicle;
   }
 }

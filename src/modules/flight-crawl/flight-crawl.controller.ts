@@ -7,7 +7,6 @@ import {
   Post,
   Put,
   Query,
-  Req,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -34,7 +33,6 @@ import {
 } from 'src/modules/flight-crawl/dto/flight.dto';
 import { UpdateFlightCrawlDto } from 'src/modules/flight-crawl/dto/update.dto';
 import { FlightCrawlService } from 'src/modules/flight-crawl/flight-crawl.service';
-import { RequestWithUser } from 'src/types/users';
 
 @ApiBearerAuth()
 @ApiTags('flight-crawl')
@@ -176,60 +174,5 @@ export class FlightCrawlController {
     @Param('id') id: string,
   ): Promise<{ message: string }> {
     return this.flightCrawlService.deleteFlightCrawl(id);
-  }
-
-  //  isFavorite
-
-  // Đánh dấu chuyến bay là yêu thích
-  @UseGuards(HandleAuthGuard)
-  @ApiOperation({ summary: 'Đánh dấu chuyến bay là yêu thích' })
-  @ApiResponse({ status: 200, description: 'Successfully marked as favorite' })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  @Post(':id/favorite')
-  async markAsFavorite(
-    @Param('id') flightId: string,
-    @Req() req: RequestWithUser,
-  ) {
-    const userId = req.user.id;
-    await this.flightCrawlService.markAsFavorite(userId, flightId);
-    return { message: 'Marked as favorite' };
-  }
-
-  // Bỏ yêu thích
-  @UseGuards(HandleAuthGuard)
-  @ApiOperation({ summary: 'Bỏ đánh dấu yêu thích chuyến bay' })
-  @ApiResponse({
-    status: 200,
-    description: 'Successfully unmarked as favorite',
-  })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  @Post(':id/unfavorite')
-  async unmarkAsFavorite(
-    @Param('id') flightId: string,
-    @Req() req: RequestWithUser,
-  ) {
-    const userId = req.user.id;
-    await this.flightCrawlService.unmarkAsFavorite(userId, flightId);
-    return { message: 'Unmarked as favorite' };
-  }
-
-  // Lấy danh sách các chuyến bay yêu thích của người dùng
-  @UseGuards(HandleAuthGuard)
-  @ApiOperation({
-    summary: 'Lấy danh sách các chuyến bay yêu thích của người dùng',
-  })
-  @ApiResponse({ status: 200, description: 'Successfully' })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  @Get('favorites')
-  async getFavoriteFlights(@Req() req: RequestWithUser) {
-    const userId = req.user.id;
-    const favorites = await this.flightCrawlService.getFavoriteFlights(userId);
-    return favorites;
   }
 }

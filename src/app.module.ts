@@ -7,7 +7,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { BookingsModule } from './modules/bookings/bookings.module';
-import { FlightCommentModule } from './modules/flight-comment/flight-comment.module';
 import { FlightCrawlModule } from './modules/flight-crawl/flight-crawl.module';
 import { HotelCommentModule } from './modules/hotel-comment/hotel-comment.module';
 import { HotelCrawlModule } from './modules/hotel-crawl/hotel-crawl.module';
@@ -32,7 +31,6 @@ import { UserModule } from './modules/user/user.module';
     TourModule,
     RoleModule,
     BookingsModule,
-    FlightCommentModule,
     HotelCommentModule,
     TourCommentModule,
     FlightCrawlModule,

@@ -142,7 +142,7 @@ export class TourCommentService {
     content: string,
     userId: string,
   ): Promise<ReviewReplyTour> {
-    const parentReply = await this.prismaService.reviewReplyFlight.findUnique({
+    const parentReply = await this.prismaService.reviewReplyTour.findUnique({
       where: { id: parentReplyId },
     });
 
@@ -150,7 +150,7 @@ export class TourCommentService {
       throw new NotFoundException('Parent reply not found');
     }
 
-    return this.prismaService.reviewReplyFlight.create({
+    return this.prismaService.reviewReplyTour.create({
       data: {
         content,
         review: {

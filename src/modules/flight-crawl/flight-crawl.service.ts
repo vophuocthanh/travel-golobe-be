@@ -148,7 +148,6 @@ export class FlightCrawlService {
 
   async getFlightsCrawl(
     filters: FlightCrawlDto,
-    userId?: string,
   ): Promise<FlightCrawlPaginationResponseType> {
     const items_per_page = Number(filters.items_per_page) || 10;
     const page = Number(filters.page) || 1;
@@ -224,16 +223,6 @@ export class FlightCrawlService {
             : []),
         ],
       },
-      include: {
-        flightFavorites: {
-          where: {
-            userId,
-          },
-          select: {
-            isFavorite: true,
-          },
-        },
-      },
       orderBy: {
         price: sort_by_price,
       },
@@ -306,33 +295,20 @@ export class FlightCrawlService {
     };
   }
 
-  async getFlightCrawlById(id: string, userId?: string) {
+  async getFlightCrawlById(id: string) {
     const flight = await this.prismaService.flightCrawl.findFirst({
       where: {
         id,
       },
       include: {
         Ticket: true,
-        flightFavorites: {
-          where: {
-            userId,
-          },
-          select: {
-            isFavorite: true,
-          },
-        },
       },
     });
 
-    const isFavorite =
-      flight.flightFavorites.length > 0 && flight.flightFavorites[0].isFavorite;
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { flightFavorites, ...flightWithoutFavorites } = flight;
+    const { ...flightWithoutFavorites } = flight;
 
     return {
       ...flightWithoutFavorites,
-      isFavorite,
     };
   }
 
@@ -349,12 +325,6 @@ export class FlightCrawlService {
   }
 
   async deleteFlightCrawl(id: string): Promise<{ message: string }> {
-    await this.prismaService.flightFavorite.deleteMany({
-      where: {
-        flightId: id,
-      },
-    });
-
     await this.prismaService.ticket.deleteMany({
       where: {
         flightId: id,
@@ -369,77 +339,6 @@ export class FlightCrawlService {
 
     return {
       message: 'Successfully deleted the flight',
-    };
-  }
-
-  // isFavorite
-
-  // Đánh dấu chuyến bay là yêu thích
-
-  async markAsFavorite(userId: string, flightId: string): Promise<void> {
-    await this.prismaService.flightFavorite.upsert({
-      where: {
-        userId_flightId: {
-          userId,
-          flightId,
-        },
-      },
-      create: {
-        userId,
-        flightId,
-        isFavorite: true,
-      },
-      update: {
-        isFavorite: true,
-      },
-    });
-  }
-
-  // Bỏ đánh dấu yêu thích
-
-  async unmarkAsFavorite(userId: string, flightId: string): Promise<void> {
-    await this.prismaService.flightFavorite.updateMany({
-      where: {
-        userId,
-        flightId,
-      },
-      data: {
-        isFavorite: false,
-      },
-    });
-  }
-
-  // Lấy danh sách các chuyến bay yêu thích của người dùng
-
-  async getFavoriteFlights(userId: string) {
-    const isFavoriteFlight = await this.prismaService.flightCrawl.findMany({
-      where: {
-        flightFavorites: {
-          some: {
-            userId,
-            isFavorite: true,
-          },
-        },
-      },
-      include: {
-        flightFavorites: {
-          where: {
-            userId,
-          },
-        },
-      },
-    });
-
-    const totalFavoriteFlight = await this.prismaService.flightFavorite.count({
-      where: {
-        userId,
-        isFavorite: true,
-      },
-    });
-
-    return {
-      data: isFavoriteFlight,
-      total: totalFavoriteFlight,
     };
   }
 

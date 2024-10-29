@@ -151,20 +151,12 @@ export class TourService {
     };
   }
 
-  async getTourById(tourId: string, userId?: string) {
+  async getTourById(tourId: string) {
     const tour = await this.prismaService.tour.findUnique({
       where: {
         id: tourId,
       },
       include: {
-        tourFavorites: {
-          where: {
-            userId,
-          },
-          select: {
-            isFavorite: true,
-          },
-        },
         hotel: true,
         flight: true,
         roadVehicle: true,
@@ -176,12 +168,7 @@ export class TourService {
       throw new NotFoundException('Tour not found');
     }
 
-    const isFavorite =
-      tour.tourFavorites.length > 0 && tour.tourFavorites[0].isFavorite;
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {
-      // tourFavorites,
       flight,
       roadVehicle,
       TripSchedule: tripSchedules,
@@ -204,7 +191,6 @@ export class TourService {
 
     return {
       ...tourWithoutFavorites,
-      isFavorite,
       hotel: tour.hotel || null,
       road_vehicle: roadVehicleDetails || null,
       trip_schedules: tripSchedules || [],
@@ -356,69 +342,6 @@ export class TourService {
   }
 
   // isFavorite
-
-  async markAsFavorite(userId: string, tourId: string): Promise<void> {
-    await this.prismaService.tourFavorite.upsert({
-      where: {
-        userId_tourId: {
-          userId,
-          tourId,
-        },
-      },
-      create: {
-        userId,
-        tourId,
-        isFavorite: true,
-      },
-      update: {
-        isFavorite: true,
-      },
-    });
-  }
-
-  async unmarkAsFavorite(userId: string, tourId: string): Promise<void> {
-    await this.prismaService.tourFavorite.updateMany({
-      where: {
-        userId,
-        tourId,
-      },
-      data: {
-        isFavorite: false,
-      },
-    });
-  }
-
-  async getFavoriteTours(userId: string) {
-    const isFavoriteTour = await this.prismaService.tour.findMany({
-      where: {
-        tourFavorites: {
-          some: {
-            userId,
-            isFavorite: true,
-          },
-        },
-      },
-      include: {
-        tourFavorites: {
-          where: {
-            userId,
-          },
-        },
-      },
-    });
-
-    const totalFavoriteTour = await this.prismaService.tourFavorite.count({
-      where: {
-        userId,
-        isFavorite: true,
-      },
-    });
-
-    return {
-      data: isFavoriteTour,
-      total: totalFavoriteTour,
-    };
-  }
 
   async updateTripSchedule(
     tourId: string,

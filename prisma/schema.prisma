@@ -30,22 +30,17 @@ model User {
   isVerified                Boolean   @default(false)
   role                      Role?     @relation(fields: [roleId], references: [id])
 
-  flightCrawls         UserOnFlightCrawl[]
-  hotelCrawlReviews    HotelCrawlReview[]
-  hotelCrawls          UserOnHotelCrawl[]
-  bookings             Booking[]
-  tours                UserOnTour[]
-  tourReviews          TourReview[]
-  reviewReplyTour      ReviewReplyTour[]
-  reviewReplyHotel     ReviewReplyHotel[]
-  UserFlightFavorite   UserFlightFavorite[]
-  roadVehicles         UserOnRoadVehicle[]
-  hotelFavorites       HotelFavorite[]
-  flightFavorites      FlightFavorite[]
-  tourFavorites        TourFavorite[]
-  roadVehicleFavorites RoadVehicleFavorite[]
-  InvoiceDetail        InvoiceDetail[]
-  Payment              Payment[]
+  flightCrawls      UserOnFlightCrawl[]
+  hotelCrawlReviews HotelCrawlReview[]
+  hotelCrawls       UserOnHotelCrawl[]
+  bookings          Booking[]
+  tours             UserOnTour[]
+  tourReviews       TourReview[]
+  reviewReplyTour   ReviewReplyTour[]
+  reviewReplyHotel  ReviewReplyHotel[]
+  roadVehicles      UserOnRoadVehicle[]
+  InvoiceDetail     InvoiceDetail[]
+  Payment           Payment[]
 
   @@map("users")
 }
@@ -83,7 +78,6 @@ model HotelCrawl {
   users             UserOnHotelCrawl[]
   hotelCrawlReviewa HotelCrawlReview[]
   bookings          Booking[]
-  hotelFavorites    HotelFavorite[]
   Tour              Tour[]
 
   @@map("hotel_crawl")
@@ -111,20 +105,6 @@ enum RoomType {
   DELUXE
 }
 
-model HotelFavorite {
-  id         String     @id @default(cuid())
-  user       User       @relation(fields: [userId], references: [id])
-  userId     String
-  hotel      HotelCrawl @relation(fields: [hotelId], references: [id])
-  hotelId    String
-  isFavorite Boolean    @default(false)
-  createdAt  DateTime?  @default(now())
-  updatedAt  DateTime?  @updatedAt
-
-  @@unique([userId, hotelId])
-  @@map("hotel_favorites")
-}
-
 model FlightCrawl {
   id                        String        @id @default(uuid())
   brand                     String
@@ -145,11 +125,10 @@ model FlightCrawl {
   type_ticket               TicketType
   baggage_weight            BaggageWeight
 
-  users           UserOnFlightCrawl[]
-  bookings        Booking[]
-  flightFavorites FlightFavorite[]
-  Ticket          Ticket[]
-  Tour            Tour[]
+  users    UserOnFlightCrawl[]
+  bookings Booking[]
+  Ticket   Ticket[]
+  Tour     Tour[]
 
   @@map("flight_crawl")
 }
@@ -179,20 +158,6 @@ enum TicketType {
   ECONOMY
   BUSINESS
   FIRST_CLASS
-}
-
-model FlightFavorite {
-  id          String      @id @default(uuid())
-  user        User        @relation(fields: [userId], references: [id])
-  userId      String
-  flightCrawl FlightCrawl @relation(fields: [flightId], references: [id])
-  flightId    String
-  isFavorite  Boolean?    @default(false)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime?   @updatedAt
-
-  @@unique([userId, flightId])
-  @@map("flight_favorites")
 }
 
 model Tour {
@@ -233,11 +198,10 @@ model Tour {
   roadVehicle               RoadVehicle? @relation(fields: [roadVehicleId], references: [id])
   tour_code                 String?
 
-  bookings      Booking[]
-  users         UserOnTour[]
-  tourReviews   TourReview[]
-  tourFavorites TourFavorite[]
-  TripSchedule  TripSchedule[]
+  bookings     Booking[]
+  users        UserOnTour[]
+  tourReviews  TourReview[]
+  TripSchedule TripSchedule[]
 
   @@map("tours")
 }
@@ -251,20 +215,6 @@ model TripSchedule {
   date     DateTime
 
   @@map("trip_schedules")
-}
-
-model TourFavorite {
-  id         String    @id @default(uuid())
-  userId     String
-  user       User      @relation(fields: [userId], references: [id])
-  tourId     String
-  tour       Tour      @relation(fields: [tourId], references: [id])
-  isFavorite Boolean?  @default(false)
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime? @updatedAt
-
-  @@unique([userId, tourId])
-  @@map("tour_favorites")
 }
 
 // Road vehicles (phương tiện đường bộ)
@@ -286,37 +236,11 @@ model RoadVehicle {
   number_of_seats_remaining Int?
   image                     String?
 
-  users               UserOnRoadVehicle[]
-  bookings            Booking[]
-  roadVehicleFavorite RoadVehicleFavorite[]
-  Tour                Tour[]
+  users    UserOnRoadVehicle[]
+  bookings Booking[]
+  Tour     Tour[]
 
   @@map("road_vehicles")
-}
-
-model RoadVehicleFavorite {
-  id            String   @id @default(uuid())
-  userId        String
-  roadVehicleId String
-  createdAt     DateTime @default(now())
-
-  roadVehicle RoadVehicle @relation(fields: [roadVehicleId], references: [id])
-  user        User        @relation(fields: [userId], references: [id])
-
-  @@unique([userId, roadVehicleId])
-  @@map("road_vehicle_favorites")
-}
-
-model UserFlightFavorite {
-  id        String   @id @default(uuid())
-  userId    String
-  flightId  String
-  createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id])
-
-  @@unique([userId, flightId])
-  @@map("user_flight_favorites")
 }
 
 //  Booking in system
@@ -479,8 +403,8 @@ model ReviewReplyHotel {
   createAt      DateTime           @default(now())
   updateAt      DateTime           @updatedAt
   parentReplyId String?
-  parentReply   ReviewReplyHotel?  @relation("ReplyToParent", fields: [parentReplyId], references: [id])
-  replies       ReviewReplyHotel[] @relation("ReplyToParent")
+  parentReply   ReviewReplyHotel?  @relation("ReplyToParentHotel", fields: [parentReplyId], references: [id])
+  replies       ReviewReplyHotel[] @relation("ReplyToParentHotel")
 
   @@map("replies_hotel")
 }
@@ -495,8 +419,8 @@ model ReviewReplyTour {
   createAt      DateTime          @default(now())
   updateAt      DateTime          @updatedAt
   parentReplyId String?
-  parentReply   ReviewReplyTour?  @relation("ReplyToParent", fields: [parentReplyId], references: [id])
-  replies       ReviewReplyTour[] @relation("ReplyToParent")
+  parentReply   ReviewReplyTour?  @relation("ReplyToParentTour", fields: [parentReplyId], references: [id])
+  replies       ReviewReplyTour[] @relation("ReplyToParentTour")
 
   @@map("replies_tour")
 }

@@ -28,12 +28,7 @@ Table users {
   tourReviews tour_reviews [not null]
   reviewReplyTour replies_tour [not null]
   reviewReplyHotel replies_hotel [not null]
-  UserFlightFavorite user_flight_favorites [not null]
   roadVehicles user_on_road_vehicles [not null]
-  hotelFavorites hotel_favorites [not null]
-  flightFavorites flight_favorites [not null]
-  tourFavorites tour_favorites [not null]
-  roadVehicleFavorites road_vehicle_favorites [not null]
   InvoiceDetail invoice_details [not null]
   Payment payments [not null]
 }
@@ -68,7 +63,6 @@ Table hotel_crawl {
   users user_on_hotel_crawls [not null]
   hotelCrawlReviewa hotel_crawl_reviews [not null]
   bookings bookings [not null]
-  hotelFavorites hotel_favorites [not null]
   Tour tours [not null]
 }
 
@@ -82,21 +76,6 @@ Table rooms {
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   Booking bookings [not null]
-}
-
-Table hotel_favorites {
-  id String [pk]
-  user users [not null]
-  userId String [not null]
-  hotel hotel_crawl [not null]
-  hotelId String [not null]
-  isFavorite Boolean [not null, default: false]
-  createdAt DateTime [default: `now()`]
-  updatedAt DateTime
-
-  indexes {
-    (userId, hotelId) [unique]
-  }
 }
 
 Table flight_crawl {
@@ -120,7 +99,6 @@ Table flight_crawl {
   baggage_weight BaggageWeight [not null]
   users user_on_flight_crawls [not null]
   bookings bookings [not null]
-  flightFavorites flight_favorites [not null]
   Ticket Ticket [not null]
   Tour tours [not null]
 }
@@ -136,21 +114,6 @@ Table Ticket {
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   Booking bookings [not null]
-}
-
-Table flight_favorites {
-  id String [pk]
-  user users [not null]
-  userId String [not null]
-  flightCrawl flight_crawl [not null]
-  flightId String [not null]
-  isFavorite Boolean [default: false]
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime
-
-  indexes {
-    (userId, flightId) [unique]
-  }
 }
 
 Table tours {
@@ -193,7 +156,6 @@ Table tours {
   bookings bookings [not null]
   users user_on_tours [not null]
   tourReviews tour_reviews [not null]
-  tourFavorites tour_favorites [not null]
   TripSchedule trip_schedules [not null]
 }
 
@@ -204,21 +166,6 @@ Table trip_schedules {
   day Int [not null]
   schedule String [not null]
   date DateTime [not null]
-}
-
-Table tour_favorites {
-  id String [pk]
-  userId String [not null]
-  user users [not null]
-  tourId String [not null]
-  tour tours [not null]
-  isFavorite Boolean [default: false]
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime
-
-  indexes {
-    (userId, tourId) [unique]
-  }
 }
 
 Table road_vehicles {
@@ -239,33 +186,7 @@ Table road_vehicles {
   image String
   users user_on_road_vehicles [not null]
   bookings bookings [not null]
-  roadVehicleFavorite road_vehicle_favorites [not null]
   Tour tours [not null]
-}
-
-Table road_vehicle_favorites {
-  id String [pk]
-  userId String [not null]
-  roadVehicleId String [not null]
-  createdAt DateTime [default: `now()`, not null]
-  roadVehicle road_vehicles [not null]
-  user users [not null]
-
-  indexes {
-    (userId, roadVehicleId) [unique]
-  }
-}
-
-Table user_flight_favorites {
-  id String [pk]
-  userId String [not null]
-  flightId String [not null]
-  createdAt DateTime [default: `now()`, not null]
-  user users [not null]
-
-  indexes {
-    (userId, flightId) [unique]
-  }
 }
 
 Table bookings {
@@ -436,11 +357,6 @@ Table user_on_road_vehicles {
   }
 }
 
-Table ReplyToParent {
-  repliesId String [ref: > replies_hotel.id]
-  repliesId String [ref: > replies_tour.id]
-}
-
 Enum RoomType {
   SINGLE
   DOUBLE
@@ -487,15 +403,7 @@ Ref: users.roleId > roles.id
 
 Ref: rooms.hotelId > hotel_crawl.id
 
-Ref: hotel_favorites.userId > users.id
-
-Ref: hotel_favorites.hotelId > hotel_crawl.id
-
 Ref: Ticket.flightId > flight_crawl.id
-
-Ref: flight_favorites.userId > users.id
-
-Ref: flight_favorites.flightId > flight_crawl.id
 
 Ref: tours.hotelId > hotel_crawl.id
 
@@ -504,16 +412,6 @@ Ref: tours.flightId > flight_crawl.id
 Ref: tours.roadVehicleId > road_vehicles.id
 
 Ref: trip_schedules.tourId > tours.id [delete: Cascade]
-
-Ref: tour_favorites.userId > users.id
-
-Ref: tour_favorites.tourId > tours.id
-
-Ref: road_vehicle_favorites.roadVehicleId > road_vehicles.id
-
-Ref: road_vehicle_favorites.userId > users.id
-
-Ref: user_flight_favorites.userId > users.id
 
 Ref: bookings.tourId > tours.id
 

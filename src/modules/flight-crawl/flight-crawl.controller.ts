@@ -25,6 +25,7 @@ import {
 import { FlightCrawl } from '@prisma/client';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { RolesGuard } from 'src/guard/roles.guard';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import { CreateFlightCrawlDto } from 'src/modules/flight-crawl/dto/create.dto';
 import {
@@ -102,7 +103,7 @@ export class FlightCrawlController {
     return this.flightCrawlService.getFlightCrawlById(id);
   }
 
-  @UseGuards(HandleAuthGuard)
+  @UseGuards(HandleAuthGuard, RolesGuard)
   @Post('import-csv')
   @ApiOperation({ summary: 'Import chuyến bay từ file CSV' })
   @ApiConsumes('multipart/form-data')
@@ -139,7 +140,7 @@ export class FlightCrawlController {
     return { message: 'File uploaded and flights imported successfully' };
   }
 
-  @UseGuards(HandleAuthGuard)
+  @UseGuards(HandleAuthGuard, RolesGuard)
   @Post('crawl')
   @ApiOperation({ summary: 'Thêm thông tin chuyến bay crawl' })
   @ApiResponse({ status: 200, description: 'Successfully added the flight' })
@@ -164,7 +165,7 @@ export class FlightCrawlController {
     return this.flightCrawlService.putFlightCrawl(id, updateFlightDto);
   }
 
-  @UseGuards(HandleAuthGuard)
+  @UseGuards(HandleAuthGuard, RolesGuard)
   @Delete('crawl/:id')
   @ApiOperation({ summary: 'Xóa chuyến bay crawl' })
   @ApiResponse({ status: 200, description: 'Successfully deleted the flight' })

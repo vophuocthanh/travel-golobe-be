@@ -29,6 +29,7 @@ import {
   UserPaginationResponseType,
 } from 'src/modules/user/dto/user.dto';
 import { UserService } from 'src/modules/user/user.service';
+import { RequestWithUser } from 'src/types/users';
 
 @ApiBearerAuth()
 @ApiTags('user')
@@ -75,6 +76,7 @@ export class UserController {
     return this.userService.getDetail(id);
   }
 
+  @UseGuards(HandleAuthGuard)
   @Put(':id/role')
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
@@ -84,8 +86,10 @@ export class UserController {
   async updateUserRole(
     @Param('id') id: string,
     @Body('roleId') roleId: string,
+    @Req() req: RequestWithUser,
   ) {
-    return this.userService.updateUserRole(id, roleId);
+    const userId = req.user.id;
+    return this.userService.updateUserRole(id, roleId, userId);
   }
 
   @UseGuards(HandleAuthGuard)

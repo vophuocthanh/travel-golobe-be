@@ -25,6 +25,7 @@ import {
 import { HotelCrawl } from '@prisma/client';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { RolesGuard } from 'src/guard/roles.guard';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import { CreateHotelCrawlDto } from 'src/modules/hotel-crawl/dto/create.dto';
 import {
@@ -88,7 +89,7 @@ export class HotelCrawlController {
     return this.hotelCrawlService.getHotelCrawlById(id);
   }
 
-  @UseGuards(HandleAuthGuard)
+  @UseGuards(HandleAuthGuard, RolesGuard)
   @Post('crawl')
   @ApiOperation({ summary: 'Thêm thông tin khách sạn từ trang web khác' })
   @ApiResponse({ status: 201, description: 'Created successfully' })
@@ -99,7 +100,7 @@ export class HotelCrawlController {
     return this.hotelCrawlService.createHotelCrawl(hotelCrawlDto);
   }
 
-  @UseGuards(HandleAuthGuard)
+  @UseGuards(HandleAuthGuard, RolesGuard)
   @Post('import-csv')
   @ApiOperation({ summary: 'Import danh sách khách sạn từ file csv' })
   @ApiConsumes('multipart/form-data')
@@ -150,7 +151,7 @@ export class HotelCrawlController {
     return this.hotelCrawlService.putHotelCrawl(id, updateHotelCrawlDto);
   }
 
-  @UseGuards(HandleAuthGuard)
+  @UseGuards(HandleAuthGuard, RolesGuard)
   @ApiResponse({ status: 200, description: 'Delete successfully the hotel' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })

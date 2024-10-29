@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -105,11 +106,17 @@ export class UserService {
     });
   }
 
-  async updateUserRole(userId: string, roleId: string): Promise<User> {
+  async updateUserRole(
+    userId: string, // ID của người dùng cần cập nhật
+    roleId: string,
+    currentUserId: string, // ID của người dùng hiện tại
+  ): Promise<User> {
+    if (userId === currentUserId) {
+      throw new ForbiddenException('You cannot update your own role.');
+    }
+
     const role = await this.prismaService.role.findUnique({
-      where: {
-        id: roleId,
-      },
+      where: { id: roleId },
     });
 
     if (!role) {
@@ -120,21 +127,8 @@ export class UserService {
     }
 
     return await this.prismaService.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        roleId,
-      },
-    });
-  }
-
-  async updateMeUserS3(data: UpdateUserDto, id: string): Promise<User> {
-    return await this.prismaService.user.update({
-      where: {
-        id,
-      },
-      data,
+      where: { id: userId },
+      data: { roleId },
     });
   }
 

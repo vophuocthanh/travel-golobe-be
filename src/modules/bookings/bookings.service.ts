@@ -691,14 +691,6 @@ export class BookingsService {
       },
     });
 
-    await this.prismaService.invoiceDetail.create({
-      data: {
-        bookingId: updatedBooking.id,
-        userId: updatedBooking.userId,
-        totalAmount: updatedBooking.totalAmount,
-      },
-    });
-
     const htmlContent = `<h1>Xác Nhận Đặt Phòng</h1>
       <p>Thông tin đặt phòng của bạn:</p>
       <pre>${JSON.stringify(updatedBooking, null, 2)}</pre>`;

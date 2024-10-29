@@ -39,7 +39,6 @@ model User {
   reviewReplyTour   ReviewReplyTour[]
   reviewReplyHotel  ReviewReplyHotel[]
   roadVehicles      UserOnRoadVehicle[]
-  InvoiceDetail     InvoiceDetail[]
   Payment           Payment[]
 
   @@map("users")
@@ -288,8 +287,7 @@ model Booking {
 
   confirmationTime DateTime?
 
-  InvoiceDetail InvoiceDetail[]
-  Payment       Payment[]
+  Payment Payment[]
 
   @@map("bookings")
 }
@@ -316,8 +314,6 @@ model Payment {
   booking Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
   user    User     @relation(fields: [userId], references: [id])
 
-  InvoiceDetail InvoiceDetail[]
-
   @@map("payments")
 }
 
@@ -333,31 +329,6 @@ enum PaymentStatus {
   PENDING
   COMPLETED
   FAILED
-}
-
-model InvoiceDetail {
-  id        String   @id @default(uuid())
-  bookingId String
-  booking   Booking  @relation(fields: [bookingId], references: [id])
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  paymentId String?
-  payment   Payment? @relation(fields: [paymentId], references: [id])
-
-  flightQuantity      Int?
-  hotelQuantity       Int?
-  tourQuantity        Int?
-  roadVehicleQuantity Int?
-
-  flightPrice      Float?
-  hotelPrice       Float?
-  tourPrice        Float?
-  roadVehiclePrice Float?
-  totalAmount      Float?
-
-  createdAt DateTime @default(now())
-
-  @@map("invoice_details")
 }
 
 //  Review

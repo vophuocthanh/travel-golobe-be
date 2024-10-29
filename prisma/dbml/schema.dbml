@@ -29,7 +29,6 @@ Table users {
   reviewReplyTour replies_tour [not null]
   reviewReplyHotel replies_hotel [not null]
   roadVehicles user_on_road_vehicles [not null]
-  InvoiceDetail invoice_details [not null]
   Payment payments [not null]
 }
 
@@ -220,7 +219,6 @@ Table bookings {
   flightDate DateTime
   status BookingStatus [not null, default: 'PENDING']
   confirmationTime DateTime
-  InvoiceDetail invoice_details [not null]
   Payment payments [not null]
 }
 
@@ -236,27 +234,6 @@ Table payments {
   updatedAt DateTime
   booking bookings
   user users [not null]
-  InvoiceDetail invoice_details [not null]
-}
-
-Table invoice_details {
-  id String [pk]
-  bookingId String [not null]
-  booking bookings [not null]
-  userId String [not null]
-  user users [not null]
-  paymentId String
-  payment payments
-  flightQuantity Int
-  hotelQuantity Int
-  tourQuantity Int
-  roadVehicleQuantity Int
-  flightPrice Float
-  hotelPrice Float
-  tourPrice Float
-  roadVehiclePrice Float
-  totalAmount Float
-  createdAt DateTime [default: `now()`, not null]
 }
 
 Table tour_reviews {
@@ -430,12 +407,6 @@ Ref: bookings.ticketFlighttId > Ticket.id
 Ref: payments.bookingId > bookings.id [delete: Set Null]
 
 Ref: payments.userId > users.id
-
-Ref: invoice_details.bookingId > bookings.id
-
-Ref: invoice_details.userId > users.id
-
-Ref: invoice_details.paymentId > payments.id
 
 Ref: tour_reviews.userId > users.id
 

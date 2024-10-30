@@ -22,6 +22,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { User } from '@prisma/client';
+import { Roles } from 'src/decorator/roles.decorator';
+import { RolesGuard } from 'src/guard/roles.guard';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import {
   UpdateUserDto,
@@ -76,7 +78,8 @@ export class UserController {
     return this.userService.getDetail(id);
   }
 
-  @UseGuards(HandleAuthGuard)
+  @UseGuards(HandleAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @Put(':id/role')
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })

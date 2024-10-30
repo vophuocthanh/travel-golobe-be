@@ -23,6 +23,7 @@ import {
 } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { Roles } from 'src/decorator/roles.decorator';
 import { RolesGuard } from 'src/guard/roles.guard';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import { CreateHotelCrawlDto } from 'src/modules/hotel-crawl/dto/create.dto';
@@ -78,6 +79,7 @@ export class HotelCrawlController {
   }
 
   @UseGuards(HandleAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @Post('crawl')
   @ApiOperation({ summary: 'Thêm thông tin khách sạn từ trang web khác' })
   @ApiResponse({ status: 201, description: 'Created successfully' })
@@ -89,6 +91,7 @@ export class HotelCrawlController {
   }
 
   @UseGuards(HandleAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EMPLOYEE')
   @Post('import-csv')
   @ApiOperation({ summary: 'Import danh sách khách sạn từ file csv' })
   @ApiConsumes('multipart/form-data')
@@ -125,7 +128,8 @@ export class HotelCrawlController {
     return { message: 'File uploaded and hotels imported successfully' };
   }
 
-  @UseGuards(HandleAuthGuard)
+  @UseGuards(HandleAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EMPLOYEE')
   @ApiResponse({ status: 200, description: 'Update successfully the hotel' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -140,6 +144,7 @@ export class HotelCrawlController {
   }
 
   @UseGuards(HandleAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @ApiResponse({ status: 200, description: 'Delete successfully the hotel' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })

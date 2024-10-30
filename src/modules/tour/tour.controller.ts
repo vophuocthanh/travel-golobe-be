@@ -18,6 +18,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Tour } from '@prisma/client';
+import { Roles } from 'src/decorator/roles.decorator';
 import { RolesGuard } from 'src/guard/roles.guard';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import { CreateDtoTour } from 'src/modules/tour/dto/create.dto';
@@ -99,6 +100,7 @@ export class TourController {
   }
 
   @UseGuards(HandleAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @Post()
   @ApiOperation({ summary: 'Tạo tour' })
   @ApiResponse({ status: 200, description: 'Successfully' })
@@ -114,6 +116,7 @@ export class TourController {
   }
 
   @UseGuards(HandleAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EMPLOYEE')
   @Put(':id')
   @ApiOperation({ summary: 'Cập nhật thông tin tour' })
   @ApiResponse({ status: 200, description: 'Successfully' })
@@ -125,6 +128,7 @@ export class TourController {
   }
 
   @UseGuards(HandleAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EMPLOYEE')
   @Put(':tourId/trip-schedule/:tripScheduleId')
   @ApiOperation({ summary: 'Sửa lịch trình của chueyesn tour' })
   @ApiResponse({ status: 200, description: 'Successfully' })
@@ -144,6 +148,7 @@ export class TourController {
   }
 
   @UseGuards(HandleAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @Delete(':id')
   @ApiOperation({ summary: 'Xóa tour' })
   @ApiResponse({ status: 200, description: 'Successfully' })

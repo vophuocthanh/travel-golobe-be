@@ -24,6 +24,7 @@ import {
 import { FlightCrawl } from '@prisma/client';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { Roles } from 'src/decorator/roles.decorator';
 import { RolesGuard } from 'src/guard/roles.guard';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import { CreateFlightCrawlDto } from 'src/modules/flight-crawl/dto/create.dto';
@@ -102,6 +103,7 @@ export class FlightCrawlController {
   }
 
   @UseGuards(HandleAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EMPLOYEE')
   @Post('import-csv')
   @ApiOperation({ summary: 'Import chuyến bay từ file CSV' })
   @ApiConsumes('multipart/form-data')
@@ -139,6 +141,7 @@ export class FlightCrawlController {
   }
 
   @UseGuards(HandleAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @Post('crawl')
   @ApiOperation({ summary: 'Thêm thông tin chuyến bay crawl' })
   @ApiResponse({ status: 200, description: 'Successfully added the flight' })
@@ -150,6 +153,7 @@ export class FlightCrawlController {
   }
 
   @UseGuards(HandleAuthGuard)
+  @Roles('ADMIN', 'EMPLOYEE')
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -164,6 +168,7 @@ export class FlightCrawlController {
   }
 
   @UseGuards(HandleAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @Delete('crawl/:id')
   @ApiOperation({ summary: 'Xóa chuyến bay crawl' })
   @ApiResponse({ status: 200, description: 'Successfully deleted the flight' })

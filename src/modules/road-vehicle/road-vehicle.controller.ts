@@ -24,6 +24,7 @@ import {
 import { RoadVehicle } from '@prisma/client';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { Roles } from 'src/decorator/roles.decorator';
 import { RolesGuard } from 'src/guard/roles.guard';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import { CreateRoadVehicleDto } from 'src/modules/road-vehicle/dto/create.dto';
@@ -105,6 +106,7 @@ export class RoadVehicleController {
   }
 
   @UseGuards(HandleAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @Post('crawl')
   @ApiOperation({ summary: 'Thêm thông tin phương tiện đường bộ' })
   @ApiResponse({ status: 200, description: 'Successfully' })
@@ -118,6 +120,7 @@ export class RoadVehicleController {
   }
 
   @UseGuards(HandleAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EMPLOYEE')
   @Post('import-csv')
   @ApiOperation({
     summary: 'Import thông tin phương tiện đường bộ từ file CSV',
@@ -161,6 +164,7 @@ export class RoadVehicleController {
   }
 
   @UseGuards(HandleAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EMPLOYEE')
   @ApiOperation({ summary: 'Cập nhật thông tin phương tiện đường bộ' })
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
@@ -175,6 +179,7 @@ export class RoadVehicleController {
   }
 
   @UseGuards(HandleAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @Delete('crawl/:id')
   @ApiOperation({ summary: 'Xóa thông tin phương tiện đường bộ' })
   @ApiResponse({ status: 200, description: 'Successfully' })

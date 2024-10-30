@@ -663,47 +663,78 @@ export class BookingsService {
 
   // confirmBooking
 
-  async confirmBooking(bookingId: string, userId: string): Promise<Booking> {
+  async confirmBooking(bookingId: string, userId: string) {
     const booking = await this.prismaService.booking.findUnique({
       where: { id: bookingId },
+      include: { user: true },
     });
+
     if (!booking) {
       throw new NotFoundException('Booking not found');
     }
 
     if (booking.userId !== userId) {
-      throw new Error('You are not authorized to confirm this booking');
+      throw new Error('Unauthorized access to booking');
     }
 
-    const user = await this.prismaService.user.findUnique({
-      where: { id: userId },
-      select: { email: true },
-    });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    const updatedBooking = await this.prismaService.booking.update({
+    await this.prismaService.booking.update({
       where: { id: bookingId },
       data: {
         status: BookingStatus.WAITING_PAYMENT,
       },
     });
 
-    const htmlContent = `<h1>Xác Nhận Đặt Phòng</h1>
-      <p>Thông tin đặt phòng của bạn:</p>
-      <pre>${JSON.stringify(updatedBooking, null, 2)}</pre>`;
+    const formattedTotalAmount = new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(booking.totalAmount);
 
     await mailService.sendMail({
-      to: user.email,
-      subject: 'Xác Nhận Đặt Phòng',
-      html: htmlContent,
+      to: booking.user.email,
+      subject: 'Xác nhận đặt chỗ thành công!',
+      html: `
+        <html>
+          <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+            <div style="max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 8px; padding: 20px;">
+              <header style="text-align: center; padding: 10px 0; border-bottom: 1px solid #ddd;">
+                <img src="https://travel-golobe-web.s3.ap-southeast-1.amazonaws.com/avatars/85367661-7c4b-4d0b-8873-580af5e43191.png" alt="Company Logo" style="width: 120px;">
+              </header>
+              <section style="padding: 20px;">
+                <h2 style="color: #2C3E50;">Xin chào, ${booking.user.name}</h2>
+                <p>Cảm ơn bạn đã đặt chỗ với chúng tôi. Dưới đây là thông tin chi tiết của bạn:</p>
+                <div style="padding: 15px; background-color: #f7f7f7; border-radius: 8px; margin-top: 20px;">
+                  <h3 style="color: #2C3E50;">Thông tin Đặt chỗ</h3>
+                  <table style="width: 100%; border-collapse: collapse;">
+                    <tr style="border-bottom: 1px solid #ddd;">
+                      <td style="padding: 10px; color: #555;">Mã đặt:</td>
+                      <td style="padding: 10px; font-weight: bold;">${booking.id}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #ddd;">
+                      <td style="padding: 10px; color: #555;">Ngày đặt:</td>
+                      <td style="padding: 10px;">${new Date(booking.createdAt).toLocaleDateString()}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #ddd;">
+                      <td style="padding: 10px; color: #555;">Tổng số tiền:</td>
+                      <td style="padding: 10px; font-weight: bold; color: #e74c3c;">${formattedTotalAmount}</td>
+                    </tr>
+                  </table>
+                </div>
+                <p style="margin-top: 20px;">Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi qua email hoặc số điện thoại bên dưới.</p>
+                <p>Chúc bạn có một trải nghiệm tuyệt vời!</p>
+              </section>
+              <footer style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #ddd; text-align: center; font-size: 12px; color: #777;">
+                <p>Đội ngũ Hỗ trợ Khách hàng</p>
+                <p><a href="https://travel-golobe.vercel.app" style="color: #3498db;">travel-golobe.vercel.app</a></p>
+                <p>Email: support@example.com | Hotline: 123-456-789</p>
+              </footer>
+            </div>
+          </body>
+        </html>
+      `,
     });
 
-    return updatedBooking;
+    return { message: 'Booking confirmed and email sent successfully' };
   }
-
   // hàm xoá khi mà đặt booking quá 24h thì nó sẽ tự động xoá trong database
 
   private async deleteExpiredBookings(entity: string) {

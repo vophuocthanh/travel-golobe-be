@@ -84,7 +84,6 @@ export class HotelCrawlController {
   ): Promise<HotelCrawlPaginationResponseType> {
     return this.hotelCrawlService.getHotelCrawl(params);
   }
-
   @Get('crawl/:id')
   @ApiOperation({ summary: 'Lấy thông tin khách sạn crawl theo id' })
   @ApiResponse({ status: 200, description: 'Successfully' })

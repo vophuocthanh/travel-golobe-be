@@ -186,9 +186,8 @@ export class HotelCrawlService {
       itemsPerPage: items_per_page,
     };
   }
-
   async getHotelCrawlById(id: string) {
-    const hotelId = await this.prismaService.hotelCrawl.findFirst({
+    const hotel = await this.prismaService.hotelCrawl.findFirst({
       where: {
         id,
       },
@@ -197,10 +196,8 @@ export class HotelCrawlService {
       },
     });
 
-    const { ...hotelWithoutFavorites } = hotelId;
-
     return {
-      ...hotelWithoutFavorites,
+      ...hotel,
     };
   }
 

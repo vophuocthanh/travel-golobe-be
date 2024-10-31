@@ -9,6 +9,7 @@ export class HotelCrawlDto {
   max_price?: string;
   sort_by_number_rating?: 'asc' | 'desc';
   star_number?: string;
+  place?: string;
 }
 
 export interface HotelCrawlPaginationResponseType {

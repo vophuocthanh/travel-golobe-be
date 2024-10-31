@@ -72,10 +72,21 @@ export class HotelCrawlController {
     type: Number,
     description: 'Filter hotels by star number',
   })
+  @ApiQuery({
+    name: 'place',
+    required: false,
+    type: String,
+    description: 'Filter hotels by place (comma-separated for multiple values)',
+  })
   async crawlFlights(
     @Query() params: HotelCrawlDto,
   ): Promise<HotelCrawlPaginationResponseType> {
     return this.hotelCrawlService.getHotelCrawl(params);
+  }
+
+  @Get('crawl/count-place')
+  async getCountPlace() {
+    return this.hotelCrawlService.getUniquePlaces();
   }
 
   @UseGuards(HandleAuthGuard, RolesGuard)

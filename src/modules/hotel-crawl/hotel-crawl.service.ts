@@ -111,6 +111,9 @@ export class HotelCrawlService {
       ? Number(filters.star_number)
       : undefined;
 
+    // Lấy danh sách các place duy nhất nếu có
+    const places = filters.place ? filters.place.split(',') : undefined;
+
     const hotelCrawl = await this.prismaService.hotelCrawl.findMany({
       take: items_per_page,
       skip,
@@ -127,6 +130,13 @@ export class HotelCrawlService {
               contains: search,
             },
           },
+          places && places.length > 0
+            ? {
+                place: {
+                  in: places, // Lọc theo danh sách các place
+                },
+              }
+            : {},
           starNumber !== undefined
             ? {
                 star_number: starNumber,
@@ -153,6 +163,13 @@ export class HotelCrawlService {
               contains: search,
             },
           },
+          places && places.length > 0
+            ? {
+                place: {
+                  in: places,
+                },
+              }
+            : {},
           starNumber !== undefined
             ? {
                 star_number: starNumber,
@@ -162,16 +179,8 @@ export class HotelCrawlService {
       },
     });
 
-    const hotelCrawlWithFavorites = hotelCrawl.map((hotel) => {
-      const { ...hotelWithoutFavorites } = hotel;
-
-      return {
-        ...hotelWithoutFavorites,
-      };
-    });
-
     return {
-      data: hotelCrawlWithFavorites,
+      data: hotelCrawl,
       total,
       currentPage: page,
       itemsPerPage: items_per_page,
@@ -249,5 +258,18 @@ export class HotelCrawlService {
     }
 
     return createdHotel;
+  }
+
+  async getUniquePlaces(): Promise<{ data: string[] }> {
+    const uniquePlaces = await this.prismaService.hotelCrawl.findMany({
+      distinct: ['place'],
+      select: {
+        place: true,
+      },
+    });
+
+    const places = uniquePlaces.map((hotel) => hotel.place).filter(Boolean);
+
+    return { data: places };
   }
 }

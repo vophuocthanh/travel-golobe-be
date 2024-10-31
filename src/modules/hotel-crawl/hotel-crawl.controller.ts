@@ -21,6 +21,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { HotelCrawl } from '@prisma/client';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { Roles } from 'src/decorator/roles.decorator';
@@ -82,6 +83,15 @@ export class HotelCrawlController {
     @Query() params: HotelCrawlDto,
   ): Promise<HotelCrawlPaginationResponseType> {
     return this.hotelCrawlService.getHotelCrawl(params);
+  }
+
+  @Get('crawl/:id')
+  @ApiOperation({ summary: 'Lấy thông tin khách sạn crawl theo id' })
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async getFlightCrawlById(@Param('id') id: string): Promise<HotelCrawl> {
+    return this.hotelCrawlService.getHotelCrawlById(id);
   }
 
   @Get('crawl/count-place')

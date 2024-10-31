@@ -197,8 +197,10 @@ export class HotelCrawlService {
       },
     });
 
+    const { ...hotelWithoutFavorites } = hotelId;
+
     return {
-      data: hotelId,
+      ...hotelWithoutFavorites,
     };
   }
 

@@ -84,6 +84,12 @@ export class HotelCrawlController {
   ): Promise<HotelCrawlPaginationResponseType> {
     return this.hotelCrawlService.getHotelCrawl(params);
   }
+
+  @Get('crawl/count-place')
+  async getCountPlace() {
+    return this.hotelCrawlService.getUniquePlaces();
+  }
+
   @Get('crawl/:id')
   @ApiOperation({ summary: 'Lấy thông tin khách sạn crawl theo id' })
   @ApiResponse({ status: 200, description: 'Successfully' })
@@ -91,11 +97,6 @@ export class HotelCrawlController {
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async getFlightCrawlById(@Param('id') id: string): Promise<HotelCrawl> {
     return this.hotelCrawlService.getHotelCrawlById(id);
-  }
-
-  @Get('crawl/count-place')
-  async getCountPlace() {
-    return this.hotelCrawlService.getUniquePlaces();
   }
 
   @UseGuards(HandleAuthGuard, RolesGuard)

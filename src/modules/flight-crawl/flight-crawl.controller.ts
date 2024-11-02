@@ -93,6 +93,11 @@ export class FlightCrawlController {
     return this.flightCrawlService.getFlightsCrawl(params);
   }
 
+  @Get('crawl/count-place')
+  async getCountPlace() {
+    return this.flightCrawlService.getUniqueBrands();
+  }
+
   @Get('crawl/:id')
   @ApiOperation({ summary: 'Lấy thông tin chuyến bay crawl theo id' })
   @ApiResponse({ status: 200, description: 'Successfully' })

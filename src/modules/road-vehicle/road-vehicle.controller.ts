@@ -96,6 +96,11 @@ export class RoadVehicleController {
     return this.roadVehicleService.getRoadVehicleCrawl(params);
   }
 
+  @Get('crawl/count-place')
+  async getCountPlace() {
+    return this.roadVehicleService.getUniqueBrands();
+  }
+
   @Get('crawl/:id')
   @ApiOperation({ summary: 'Lấy thông tin phương tiện đường bộ crawl theo id' })
   @ApiResponse({ status: 200, description: 'Successfully' })

@@ -304,4 +304,17 @@ export class RoadVehicleService {
 
     return roadVehicle;
   }
+
+  async getUniqueBrands(): Promise<{ data: string[] }> {
+    const uniqueBrands = await this.prismaService.roadVehicle.findMany({
+      distinct: ['brand'],
+      select: {
+        brand: true,
+      },
+    });
+
+    const brand = uniqueBrands.map((item) => item.brand);
+
+    return { data: brand };
+  }
 }

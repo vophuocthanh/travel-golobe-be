@@ -389,4 +389,14 @@ export class FlightCrawlService {
 
     return createdFlight;
   }
+
+  async getUniqueBrands(): Promise<{ data: string[] }> {
+    const uniqueBrands = await this.prismaService.flightCrawl.findMany({
+      distinct: ['brand'],
+    });
+
+    return {
+      data: uniqueBrands.map((brand) => brand.brand),
+    };
+  }
 }

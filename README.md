@@ -19,12 +19,15 @@
     <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
   <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
 </p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+## Tech Stack
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+  <div align="center">
+    <img src="https://img.shields.io/badge/nestjs-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" alt="nestjs" />
+    <img src="https://img.shields.io/badge/-TypeScript-black?style=for-the-badge&logoColor=white&logo=typescript&color=3178C6" alt="typescript" />
+    <img src="https://img.shields.io/badge/postgresql-4169e1?style=for-the-badge&logo=postgresql&logoColor=white" alt="postgresql" />
+    <img src="https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white" alt="prisma" />
+  </div>
 
 ## Installation
 
@@ -32,12 +35,31 @@
 $ npm install
 ```
 
+## Set Up Environment Variables
+
+Create a new file named `.env` in the root of your project and add the following content:
+
+```env
+DATABASE_URL=
+ACCESS_TOKEN_KEY=
+REFRESH_TOKEN_KEY=
+MAIL_TRANSPORT=
+MAIL_FROM=
+JWT_SECRET=
+AWS_REGION=
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_S3_BUCKET_NAME=
+MOMO_YOUR_SECRET_KEY=
+MOMO_PARTNER_CODE=
+MOMO_ACCESS_KEY=
+MOMO_REDIRECT_URL=
+MOMO_IPN_URL=
+```
+
 ## Running the app
 
 ```bash
-# development
-$ npm run start
-
 # watch mode
 $ npm run start:dev
 
@@ -58,16 +80,8 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## Support
+Open http://localhost:3001/api with your favorite browser to swagger.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+---
 
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+Made with ♥ by [ThanhDev](https://www.facebook.com/thanh.vophuoc.50)

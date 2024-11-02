@@ -1,11 +1,5 @@
 import { FlightCrawl } from '@prisma/client';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
-
-export enum AirlineBrand {
-  VIETNAM_AIRLINES = 'Vietnam Airlines',
-  VIETJET_AIR = 'VietJet Air',
-  BAMBOO_AIRWAYS = 'Bamboo Airways',
-}
+import { IsOptional, IsString } from 'class-validator';
 
 export class FlightCrawlDto {
   search?: string;
@@ -25,8 +19,7 @@ export class FlightCrawlDto {
   year?: number;
 
   @IsOptional()
-  @IsEnum(AirlineBrand)
-  brand?: AirlineBrand;
+  brand?: string;
 
   search_from?: string;
   search_to?: string;

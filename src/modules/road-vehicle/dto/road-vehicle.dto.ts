@@ -1,30 +1,5 @@
 import { RoadVehicle } from '@prisma/client';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
-
-export enum RoadVehicleBrands {
-  LienHung = 'Lien Hung',
-  HoaMai = 'Hoa Mai',
-  PhucAnExpress = 'Phuc An Express',
-  KhanhPhong = 'Khanh Phong',
-  TraLanVien = 'Tra Lan Vien',
-  HuyHoangVungTau = 'Huy Hoang-Vung Tau',
-  PhuongNam = 'Phuong Nam',
-  DaLatOi = 'Da Lat oi',
-  HoangHai = 'Hoàng Hải',
-  CucTung = 'Cuc Tung',
-  VieLimousine = 'Vie Limousine',
-  DinhNhan = 'Dinh Nhan',
-  TrongThang = 'Trong Thang',
-  HongSonPhuYen = 'Hong Son (Phu Yen)',
-  PhiLong = 'Phi Long',
-  XeNha = 'Xe Nha',
-  QuangHanh = 'Quang Hanh',
-  HuynhGia = 'Huynh Gia',
-  AVIGO = 'AVIGO',
-  HoangTrung = 'Hoang Trung',
-  HanhCafe = 'Hanh Cafe',
-  ThanhVinhVungTau = 'Thanh Vinh - Vung Tau',
-}
+import { IsOptional, IsString } from 'class-validator';
 
 export class RoadVehicleCrawlDto {
   search?: string;
@@ -44,8 +19,7 @@ export class RoadVehicleCrawlDto {
   search_to?: string;
 
   @IsOptional()
-  @IsEnum(RoadVehicleBrands)
-  brand?: RoadVehicleBrands;
+  brand?: string;
 }
 
 export interface RoadVehicleCrawlPaginationResponseType {

@@ -78,7 +78,7 @@ export class FlightCrawlController {
   @ApiQuery({
     name: 'brand',
     required: false,
-    enum: ['Vietnam Airlines', 'VietJet Air', 'Bamboo Airways'],
+    type: String,
     description: 'Airline brand',
   })
   @ApiQuery({ name: 'search_from', required: false })

@@ -17,7 +17,7 @@ export class MomoService {
   private readonly ACCESS_KEY = process.env.MOMO_ACCESS_KEY;
   private readonly REDIRECT_URL = 'http://localhost:5173';
   private readonly IPN_URL =
-    'https://6ecc-2001-ee0-4b76-e030-11e0-aa59-6507-f791.ngrok-free.app/api/momo/ipn';
+    'https://c77a-2001-ee0-4b7b-b4f0-617e-eac3-6810-12ac.ngrok-free.app/api/momo/ipn';
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -281,6 +281,19 @@ export class MomoService {
         userId: userId,
         status: PaymentStatus.COMPLETED,
       },
+      include: {
+        booking: {
+          select: {
+            id: true,
+            flightCrawls: true,
+            hotelCrawls: true,
+            tour: true,
+            roadVehicles: true,
+            totalAmount: true,
+            createdAt: true,
+          },
+        },
+      },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -291,6 +304,42 @@ export class MomoService {
       },
     });
 
-    return { data: paymentUser, total };
+    const responseData = paymentUser
+      .map((payment) => {
+        const booking = payment.booking;
+
+        if (!booking) {
+          return null;
+        }
+
+        const responseEntry: any = {
+          paymentId: payment.id,
+          bookingId: booking.id,
+          totalAmount: booking.totalAmount,
+          createdAt: booking.createdAt,
+          status: payment.status,
+          paymentMethod: payment.paymentMethod,
+        };
+
+        if (booking.flightCrawls) {
+          responseEntry.flightCrawls = booking.flightCrawls;
+        }
+        if (booking.hotelCrawls) {
+          responseEntry.hotelCrawls = booking.hotelCrawls;
+        }
+        if (booking.tour) {
+          responseEntry.tour = booking.tour;
+        }
+        if (booking.roadVehicles) {
+          responseEntry.roadVehicles = booking.roadVehicles;
+        }
+
+        const hasValidData = Object.keys(responseEntry).length > 6;
+
+        return hasValidData ? responseEntry : null;
+      })
+      .filter(Boolean);
+
+    return { data: responseData, total };
   }
 }

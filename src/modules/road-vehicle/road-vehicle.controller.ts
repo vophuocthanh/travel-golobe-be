@@ -29,7 +29,6 @@ import { RolesGuard } from 'src/guard/roles.guard';
 import { HandleAuthGuard } from 'src/modules/auth/guard/auth.guard';
 import { CreateRoadVehicleDto } from 'src/modules/road-vehicle/dto/create.dto';
 import {
-  RoadVehicleBrands,
   RoadVehicleCrawlDto,
   RoadVehicleCrawlPaginationResponseType,
 } from 'src/modules/road-vehicle/dto/road-vehicle.dto';
@@ -76,7 +75,7 @@ export class RoadVehicleController {
   @ApiQuery({
     name: 'brand',
     required: false,
-    enum: Object.values(RoadVehicleBrands),
+    type: String,
     description: 'Airline brand',
   })
   @ApiQuery({ name: 'page', required: false })

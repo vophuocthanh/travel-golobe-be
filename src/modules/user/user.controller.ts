@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -127,5 +128,22 @@ export class UserController {
       throw new BadRequestException('No file provided');
     }
     return await this.userService.updateAvatarS3(req.user.id, file);
+  }
+
+  @UseGuards(HandleAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Delete(':id')
+  @ApiResponse({ status: 200, description: 'User deleted successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiOperation({ summary: 'Delete a user' })
+  async deleteUser(
+    @Param('id') id: string,
+    @Req() req: RequestWithUser,
+  ): Promise<{ message: string }> {
+    const currentUserId = req.user.id;
+    return this.userService.deleteUser(id, currentUserId);
   }
 }

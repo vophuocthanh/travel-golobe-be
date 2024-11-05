@@ -154,4 +154,27 @@ export class UserService {
       data: { avatar: avatarUrl },
     });
   }
+
+  async deleteUser(
+    userId: string,
+    currentUserId: string,
+  ): Promise<{ message: string }> {
+    if (userId === currentUserId) {
+      throw new ForbiddenException('You cannot delete your own account.');
+    }
+
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    await this.prismaService.user.delete({
+      where: { id: userId },
+    });
+
+    return { message: 'User deleted successfully' };
+  }
 }

@@ -58,6 +58,10 @@ export class TourService {
       ? filters.starting_gate.split(',')
       : undefined;
 
+    const sortRoadVehicle = filters.road_vehicle
+      ? filters.road_vehicle.split(',')
+      : undefined;
+
     const tours = await this.prismaService.tour.findMany({
       take: items_per_page,
       skip,
@@ -100,6 +104,13 @@ export class TourService {
             ? {
                 starting_gate: {
                   in: sortStartingGate,
+                },
+              }
+            : {},
+          sortRoadVehicle
+            ? {
+                road_vehicle: {
+                  in: sortRoadVehicle,
                 },
               }
             : {},
@@ -150,6 +161,13 @@ export class TourService {
             ? {
                 starting_gate: {
                   in: sortStartingGate,
+                },
+              }
+            : {},
+          sortRoadVehicle
+            ? {
+                road_vehicle: {
+                  in: sortRoadVehicle,
                 },
               }
             : {},

@@ -76,7 +76,13 @@ export class TourController {
     name: 'rating',
     required: false,
     type: Number,
-    description: 'Filter hotels by rating',
+    description: 'Filter tours by rating',
+  })
+  @ApiQuery({
+    name: 'starting_gate',
+    required: false,
+    type: String,
+    description: 'Filter tours by starting gate',
   })
   @ApiOperation({ summary: 'Lấy tất cả các tour' })
   @ApiResponse({ status: 200, description: 'Successfully' })
@@ -87,6 +93,16 @@ export class TourController {
     @Query() params: TourDto,
   ): Promise<TourPaginationResponseType> {
     return this.tourService.getTours(params);
+  }
+
+  @Get('unique-starting-gate')
+  async getUniqueStartingGate(): Promise<{ data: string[] }> {
+    return this.tourService.getUniqueStartingGate();
+  }
+
+  @Get('unique-road-vehicle')
+  async getUniqueRoadVehicle(): Promise<{ data: string[] }> {
+    return this.tourService.getUniqueRoadVehicle();
   }
 
   @Get(':id')

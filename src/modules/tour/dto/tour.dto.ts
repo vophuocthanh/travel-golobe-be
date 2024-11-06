@@ -17,6 +17,10 @@ export class TourDto {
   @IsOptional()
   @IsString()
   end_date?: string;
+
+  starting_gate?: string;
+
+  road_vehicle?: string;
 }
 
 export interface TourPaginationResponseType {

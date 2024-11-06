@@ -54,6 +54,10 @@ export class TourService {
 
     const filterRating = filters.rating ? Number(filters.rating) : undefined;
 
+    const sortStartingGate = filters.starting_gate
+      ? filters.starting_gate.split(',')
+      : undefined;
+
     const tours = await this.prismaService.tour.findMany({
       take: items_per_page,
       skip,
@@ -89,6 +93,13 @@ export class TourService {
             ? {
                 rating: {
                   equals: filterRating,
+                },
+              }
+            : {},
+          sortStartingGate
+            ? {
+                starting_gate: {
+                  in: sortStartingGate,
                 },
               }
             : {},
@@ -132,6 +143,13 @@ export class TourService {
             ? {
                 rating: {
                   equals: filterRating,
+                },
+              }
+            : {},
+          sortStartingGate
+            ? {
+                starting_gate: {
+                  in: sortStartingGate,
                 },
               }
             : {},
@@ -366,5 +384,28 @@ export class TourService {
         schedule,
       },
     });
+  }
+
+  async getUniqueStartingGate(): Promise<{ data: string[] }> {
+    const uniqueStartingGate = await this.prismaService.tour.findMany({
+      distinct: ['starting_gate'],
+      select: { starting_gate: true },
+    });
+    const startingGates = uniqueStartingGate
+      .map((tour) => tour.starting_gate)
+      .filter(Boolean);
+    return { data: startingGates };
+  }
+
+  async getUniqueRoadVehicle(): Promise<{ data: string[] }> {
+    const uniqueRoadVehicle = await this.prismaService.tour.findMany({
+      distinct: ['road_vehicle'],
+      select: { road_vehicle: true },
+    });
+
+    const roadVehicles = uniqueRoadVehicle
+      .map((tour) => tour.road_vehicle)
+      .filter(Boolean);
+    return { data: roadVehicles };
   }
 }

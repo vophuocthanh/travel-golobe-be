@@ -1,4 +1,3 @@
-import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -34,18 +33,18 @@ async function bootstrap() {
   });
 
   // Configure port on Frontend access side
-  const corsOptions: CorsOptions = {
-    origin: [
-      'http://localhost:5173',
-      'http://localhost:3000',
-      'http://localhost:3002',
-      'https://travel-golobe.vercel.app',
-      'https://travel-golobe.s3.amazonaws.com',
-    ],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    credentials: true,
-  };
-  app.enableCors(corsOptions);
+  // const corsOptions: CorsOptions = {
+  //   origin: [
+  //     'http://localhost:5173',
+  //     'http://localhost:3000',
+  //     'http://localhost:3002',
+  //     'https://travel-golobe.vercel.app',
+  //     'https://travel-golobe.s3.amazonaws.com',
+  //   ],
+  //   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  //   credentials: true,
+  // };
+  // app.enableCors(corsOptions);
   app.useStaticAssets(join(__dirname, '../uploads'));
   await app.listen(3001);
 }

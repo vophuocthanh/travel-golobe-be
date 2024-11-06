@@ -128,6 +128,7 @@ export class HotelCrawlService {
           {
             place: {
               contains: search,
+              mode: 'insensitive',
             },
           },
           places && places.length > 0

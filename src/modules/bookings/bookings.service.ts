@@ -783,4 +783,9 @@ export class BookingsService {
       message: `${deletedCount} expired road vehicle bookings deleted successfully`,
     };
   }
+
+  async getCountBooking(): Promise<{ data: { total: number } }> {
+    const total = await this.prismaService.booking.count();
+    return { data: { total } };
+  }
 }

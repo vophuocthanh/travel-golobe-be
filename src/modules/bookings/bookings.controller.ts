@@ -70,6 +70,13 @@ export class BookingsController {
   }
 
   @UseGuards(HandleAuthGuard)
+  @Get('count-booking')
+  @ApiOperation({ summary: 'Lấy ra số lượng booking' })
+  async countBooking(): Promise<{ data: { total: number } }> {
+    return this.bookingService.getCountBooking();
+  }
+
+  @UseGuards(HandleAuthGuard)
   @Get('flight/:bookingId')
   @ApiOperation({ summary: 'Lấy thông tin chi tiết của booking flight' })
   async getBookedFlightDetails(@Param('bookingId') bookingId: string): Promise<{

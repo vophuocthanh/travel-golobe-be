@@ -55,6 +55,15 @@ export class UserController {
     return user;
   }
 
+  @Get('/count-user')
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @ApiOperation({ summary: 'Lấy ra số lượng user' })
+  async countUser(): Promise<{ data: { total: number } }> {
+    return this.userService.getCountUser();
+  }
+
   @UseGuards(HandleAuthGuard)
   @Get()
   @ApiResponse({ status: 200, description: 'Successfully' })

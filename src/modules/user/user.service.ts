@@ -177,4 +177,9 @@ export class UserService {
 
     return { message: 'User deleted successfully' };
   }
+
+  async getCountUser(): Promise<{ data: { total: number } }> {
+    const totalUsers = await this.prismaService.user.count();
+    return { data: { total: totalUsers } };
+  }
 }

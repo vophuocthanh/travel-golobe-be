@@ -111,6 +111,11 @@ export class TourController {
     return this.tourService.getUniqueRoadVehicle();
   }
 
+  @Get('count-tour')
+  async countTour() {
+    return this.tourService.getCountTour();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Lấy thông tin tour theo id' })
   @ApiResponse({ status: 200, description: 'Successfully' })

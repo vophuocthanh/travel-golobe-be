@@ -426,4 +426,9 @@ export class TourService {
       .filter(Boolean);
     return { data: roadVehicles };
   }
+
+  async getCountTour(): Promise<{ data: { total: number } }> {
+    const total = await this.prismaService.tour.count();
+    return { data: { total } };
+  }
 }

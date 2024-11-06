@@ -342,4 +342,11 @@ export class MomoService {
 
     return { data: responseData, total };
   }
+
+  async getCountPaymentDone(): Promise<{ data: { total: number } }> {
+    const total = await this.prisma.payment.count({
+      where: { status: PaymentStatus.COMPLETED },
+    });
+    return { data: { total } };
+  }
 }

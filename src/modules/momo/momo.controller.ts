@@ -72,6 +72,16 @@ export class MomoController {
     return this.momoService.getPaymentById(id);
   }
 
+  @UseGuards(HandleAuthGuard)
+  @ApiOperation({ summary: 'Đếm số lượng giao dịch thành công' })
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @Get('count-payment-success')
+  async countSuccessPayment() {
+    return this.momoService.getCountPaymentDone();
+  }
+
   @Post('payment')
   @UseGuards(HandleAuthGuard)
   @ApiOperation({ summary: 'Tạo giao dịch' })

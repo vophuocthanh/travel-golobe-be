@@ -84,6 +84,12 @@ export class TourController {
     type: String,
     description: 'Filter tours by starting gate',
   })
+  @ApiQuery({
+    name: 'road_vehicle',
+    required: false,
+    type: String,
+    description: 'Filter tours by road vehicle',
+  })
   @ApiOperation({ summary: 'Lấy tất cả các tour' })
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })

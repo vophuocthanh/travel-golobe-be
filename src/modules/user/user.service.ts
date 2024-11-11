@@ -18,7 +18,10 @@ export class UserService {
   ) {}
 
   async getAll(filters: UserFilterType): Promise<any> {
-    const { items_per_page = 10, page = 1, search } = filters;
+    const items_per_page = Number(filters.items_per_page) || 10;
+    const page = Number(filters.page) || 1;
+    const search = filters.search || '';
+    const skip = page > 1 ? (page - 1) * items_per_page : 0;
 
     const where: Prisma.UserWhereInput = search
       ? {
@@ -31,7 +34,7 @@ export class UserService {
 
     const users = await this.prismaService.user.findMany({
       where,
-      skip: (page - 1) * items_per_page,
+      skip,
       take: items_per_page,
       select: {
         id: true,
@@ -59,7 +62,7 @@ export class UserService {
 
     return {
       data: users,
-      totalItems: totalUsers,
+      total: totalUsers,
       currentPage: page,
       itemsPerPage: items_per_page,
     };

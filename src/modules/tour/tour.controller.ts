@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -99,6 +100,26 @@ export class TourController {
     @Query() params: TourDto,
   ): Promise<TourPaginationResponseType> {
     return this.tourService.getTours(params);
+  }
+
+  @Get('find-by-budget')
+  @ApiOperation({
+    summary: 'Tìm kiếm tour phù hợp với ngân sách người dùng',
+    description:
+      'Dựa trên ngân sách tổng nhập vào, tìm kiếm các gợi ý tour với khách sạn, tour và phương tiện di chuyển phù hợp.',
+  })
+  @ApiQuery({
+    name: 'totalBudget',
+    description: 'Ngân sách tổng mà người dùng muốn chi cho tour',
+    required: true,
+    type: Number,
+  })
+  async findByBudget(@Query('totalBudget') totalBudget: number) {
+    if (!totalBudget || totalBudget <= 0) {
+      throw new NotFoundException('Ngân sách không hợp lệ');
+    }
+
+    return await this.tourService.findToursWithinBudget(totalBudget);
   }
 
   @Get('unique-starting-gate')

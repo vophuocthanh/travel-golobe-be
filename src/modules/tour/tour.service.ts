@@ -386,7 +386,6 @@ export class TourService {
   ): Promise<TripSchedule> {
     const { schedule } = data;
 
-    // Kiểm tra xem lịch trình có tồn tại không
     const existingSchedule = await this.prismaService.tripSchedule.findUnique({
       where: { id: tripScheduleId },
     });
@@ -395,7 +394,6 @@ export class TourService {
       throw new NotFoundException('Trip schedule not found');
     }
 
-    // Cập nhật chỉ trường schedule
     return this.prismaService.tripSchedule.update({
       where: { id: tripScheduleId },
       data: {
@@ -430,5 +428,70 @@ export class TourService {
   async getCountTour(): Promise<{ data: { total: number } }> {
     const total = await this.prismaService.tour.count();
     return { data: { total } };
+  }
+
+  async findToursWithinBudget(totalBudget: number): Promise<any> {
+    const hotels = await this.prismaService.hotelCrawl.findMany({
+      select: { id: true, price: true, hotel_names: true },
+    });
+    const tours = await this.prismaService.tour.findMany({
+      select: { id: true, totalAmount: true, tour_code: true, name: true },
+    });
+    const flights = await this.prismaService.flightCrawl.findMany({
+      select: { id: true, price: true, brand: true },
+    });
+    const roadVehicles = await this.prismaService.roadVehicle.findMany({
+      select: { id: true, price: true, brand: true },
+    });
+
+    const recommendations = [];
+
+    for (const hotel of hotels) {
+      for (const tour of tours) {
+        const remainingBudget = totalBudget - (hotel.price + tour.totalAmount);
+
+        if (remainingBudget <= 0) continue;
+
+        const matchingFlights = flights.filter(
+          (flight) => flight.price <= remainingBudget,
+        );
+        const matchingRoadVehicles = roadVehicles.filter(
+          (roadVehicle) => roadVehicle.price <= remainingBudget,
+        );
+
+        matchingFlights.forEach((flight) => {
+          if (recommendations.length < 20) {
+            recommendations.push({
+              totalPrice: hotel.price + tour.totalAmount + flight.price,
+              hotel,
+              tour,
+              transport: { type: 'Máy bay', details: flight },
+            });
+          }
+        });
+
+        matchingRoadVehicles.forEach((roadVehicle) => {
+          if (recommendations.length < 20) {
+            recommendations.push({
+              totalPrice: hotel.price + tour.totalAmount + roadVehicle.price,
+              hotel,
+              tour,
+              transport: { type: 'Xe khách', details: roadVehicle },
+            });
+          }
+        });
+
+        if (recommendations.length >= 20) break;
+      }
+      if (recommendations.length >= 20) break;
+    }
+
+    if (recommendations.length === 0) {
+      throw new NotFoundException(
+        'Không tìm thấy gợi ý tour nào phù hợp với ngân sách đã nhập',
+      );
+    }
+
+    return recommendations;
   }
 }

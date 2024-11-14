@@ -126,7 +126,7 @@ export class HotelCrawlService {
             },
           },
           {
-            place: {
+            hotel_names: {
               contains: search,
               mode: 'insensitive',
             },
@@ -160,8 +160,9 @@ export class HotelCrawlService {
             },
           },
           {
-            place: {
+            hotel_names: {
               contains: search,
+              mode: 'insensitive',
             },
           },
           places && places.length > 0

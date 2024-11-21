@@ -90,6 +90,18 @@ export class HotelCrawlController {
     return this.hotelCrawlService.getUniquePlaces();
   }
 
+  @Get('/crawl/popular')
+  @ApiOperation({ summary: 'Lấy danh sách khách sạn phổ biến' })
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async getPopularFlights(@Query('limit') limit?: number) {
+    const popularFlights = await this.hotelCrawlService.getPopularHotelCrawl(
+      limit ? +limit : 10,
+    );
+    return { data: popularFlights };
+  }
+
   @Get('crawl/:id')
   @ApiOperation({ summary: 'Lấy thông tin khách sạn crawl theo id' })
   @ApiResponse({ status: 200, description: 'Successfully' })

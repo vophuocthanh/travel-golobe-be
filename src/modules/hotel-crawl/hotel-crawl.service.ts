@@ -273,4 +273,13 @@ export class HotelCrawlService {
 
     return { data: places };
   }
+
+  async getPopularHotelCrawl(limit: number = 10): Promise<HotelCrawl[]> {
+    return this.prismaService.hotelCrawl.findMany({
+      take: limit,
+      orderBy: {
+        star_number: 'desc',
+      },
+    });
+  }
 }

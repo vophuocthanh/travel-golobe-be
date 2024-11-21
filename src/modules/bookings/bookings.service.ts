@@ -666,7 +666,13 @@ export class BookingsService {
   async confirmBooking(bookingId: string, userId: string) {
     const booking = await this.prismaService.booking.findUnique({
       where: { id: bookingId },
-      include: { user: true },
+      include: {
+        user: true,
+        flightCrawls: true,
+        hotelCrawls: true,
+        tour: true,
+        roadVehicles: true,
+      },
     });
 
     if (!booking) {
@@ -689,6 +695,19 @@ export class BookingsService {
       currency: 'VND',
     }).format(booking.totalAmount);
 
+    let productName = '';
+
+    const totalProducts =
+      (booking.flightQuantity || 0) +
+      (booking.hotelQuantity || 0) +
+      (booking.tourQuantity || 0) +
+      (booking.roadVehicleQuantity || 0);
+
+    if (booking.tour) productName = booking.tour.name;
+    if (booking.flightCrawls) productName = booking.flightCrawls.brand;
+    if (booking.hotelCrawls) productName = booking.hotelCrawls.hotel_names;
+    if (booking.roadVehicles) productName = booking.roadVehicles.brand;
+
     await mailService.sendMail({
       to: booking.user.email,
       subject: 'Xác nhận đặt chỗ thành công!',
@@ -701,17 +720,25 @@ export class BookingsService {
               </header>
               <section style="padding: 20px;">
                 <h2 style="color: #2C3E50;">Xin chào, ${booking.user.name}</h2>
-                <p>Cảm ơn bạn đã đặt chỗ với chúng tôi. Dưới đây là thông tin chi tiết của bạn:</p>
+                <p>Cảm ơn bạn đã đặt chỗ trên website của chúng tôi. Dưới đây là thông tin chi tiết về đơn đặt hàng của bạn:</p>
                 <div style="padding: 15px; background-color: #f7f7f7; border-radius: 8px; margin-top: 20px;">
-                  <h3 style="color: #2C3E50;">Thông tin Đặt chỗ</h3>
+                  <h3 style="color: #2C3E50;">Thông tin đơn hàng</h3>
                   <table style="width: 100%; border-collapse: collapse;">
                     <tr style="border-bottom: 1px solid #ddd;">
                       <td style="padding: 10px; color: #555;">Mã đặt:</td>
                       <td style="padding: 10px; font-weight: bold;">${booking.id}</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #ddd;">
+                      <td style="padding: 10px; color: #555;">Tên dịch vụ:</td>
+                      <td style="padding: 10px; font-weight: bold;">${productName}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #ddd;">
+                      <td style="padding: 10px; color: #555;">Số lượng dịch vụ đặt:</td>
+                      <td style="padding: 10px; font-weight: bold;">${totalProducts}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #ddd;">
                       <td style="padding: 10px; color: #555;">Ngày đặt:</td>
-                      <td style="padding: 10px;">${new Date(booking.createdAt).toLocaleDateString()}</td>
+                      <td style="padding: 10px;">${new Date(booking.createdAt).toLocaleString()}</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #ddd;">
                       <td style="padding: 10px; color: #555;">Tổng số tiền:</td>

@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateIf,
+} from 'class-validator';
 
 export class CreateDtoTour {
   @ApiProperty()
@@ -12,6 +19,13 @@ export class CreateDtoTour {
 
   @ApiProperty()
   @IsNotEmpty()
+  @IsEnum(['open', 'closed'], {
+    message: 'Type must be either "open" or "closed"',
+  })
+  type: 'open' | 'closed';
+
+  @ApiProperty()
+  @IsNotEmpty()
   image: string;
 
   @ApiProperty()
@@ -20,15 +34,18 @@ export class CreateDtoTour {
   price: number;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @ValidateIf((o) => o.type === 'closed')
+  @IsNotEmpty({ message: 'Hotel ID is required for closed tours' })
   @IsString()
   hotelId?: string;
 
+  @ValidateIf((o) => o.type === 'closed')
   @ApiProperty()
   @IsOptional()
   @IsString()
   flightId?: string;
 
+  @ValidateIf((o) => o.type === 'closed')
   @ApiProperty()
   @IsOptional()
   @IsString()

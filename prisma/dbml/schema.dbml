@@ -137,6 +137,7 @@ Table tours {
   baby_price Float
   child_price Float
   adult_price Float
+  type String
   image String [not null]
   image_2 String
   image_3 String

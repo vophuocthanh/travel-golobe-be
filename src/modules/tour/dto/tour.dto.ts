@@ -20,6 +20,8 @@ export class TourDto {
 
   starting_gate?: string;
 
+  type?: string;
+
   road_vehicle?: string;
 }
 

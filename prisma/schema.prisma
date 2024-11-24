@@ -181,6 +181,7 @@ model Tour {
   baby_price                Float? // Giá em bé (dưới 2 tuổi)
   child_price               Float? // Giá trẻ em (2-12 tuổi)
   adult_price               Float? // Giá người lớn (từ 12 tuổi trở lên)
+  type                      String?
   image                     String
   image_2                   String?
   image_3                   String?

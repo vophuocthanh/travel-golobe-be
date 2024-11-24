@@ -52,6 +52,8 @@ export class TourService {
     const startDate = this.parseDateString(filters.start_date);
     const endDate = this.parseDateString(filters.end_date);
 
+    const filterType = filters.type ? filters.type : undefined;
+
     const filterRating = filters.rating ? Number(filters.rating) : undefined;
 
     const sortStartingGate = filters.starting_gate
@@ -114,6 +116,7 @@ export class TourService {
                 },
               }
             : {},
+          filterType ? { type: filterType } : {},
         ],
       },
       orderBy: {
@@ -171,6 +174,7 @@ export class TourService {
                 },
               }
             : {},
+          filterType ? { type: filterType } : {},
         ],
       },
     });
@@ -233,6 +237,81 @@ export class TourService {
     };
   }
 
+  private generateTripSchedules(startDate: Date, numberOfDays: number): any[] {
+    const schedules = [];
+    const startDay = dayjs(startDate);
+
+    for (let i = 0; i < numberOfDays; i++) {
+      const currentDate = startDay.add(i, 'day').toDate();
+      let defaultSchedule = `Ngày ${i + 1}: `;
+
+      if (i === 0) {
+        defaultSchedule += 'Ngày đầu tiên, khởi hành và nhận phòng.';
+      } else if (i === numberOfDays - 1) {
+        defaultSchedule += 'Ngày cuối, chuẩn bị kết thúc chuyến đi và trở về.';
+      } else {
+        defaultSchedule += `Ngày ${i + 1}, tham quan và khám phá các địa điểm du lịch.`;
+      }
+
+      schedules.push({
+        day: i + 1,
+        schedule: defaultSchedule,
+        date: currentDate,
+      });
+    }
+
+    return schedules;
+  }
+
+  private async validateHotel(hotelId: string) {
+    const hotel = await this.prismaService.hotelCrawl.findUnique({
+      where: { id: hotelId },
+      select: { price: true, number_of_seats_remaining: true },
+    });
+
+    if (!hotel) {
+      throw new NotFoundException('Hotel not found');
+    }
+    if (hotel.number_of_seats_remaining === 0) {
+      throw new Error('No available seats remaining in the selected hotel');
+    }
+
+    return hotel;
+  }
+
+  private async validateFlight(flightId: string) {
+    const flight = await this.prismaService.flightCrawl.findUnique({
+      where: { id: flightId },
+      select: { price: true, number_of_seats_remaining: true },
+    });
+
+    if (!flight) {
+      throw new NotFoundException('Flight not found');
+    }
+    if (flight.number_of_seats_remaining === 0) {
+      throw new Error('No available seats remaining in the selected flight');
+    }
+
+    return { ...flight, type: 'Máy bay' };
+  }
+  private async validateRoadVehicle(roadVehicleId: string) {
+    const roadVehicle = await this.prismaService.roadVehicle.findUnique({
+      where: { id: roadVehicleId },
+      select: { price: true, number_of_seats_remaining: true },
+    });
+
+    if (!roadVehicle) {
+      throw new NotFoundException('Road vehicle not found');
+    }
+    if (roadVehicle.number_of_seats_remaining === 0) {
+      throw new Error(
+        'No available seats remaining in the selected road vehicle',
+      );
+    }
+
+    return { ...roadVehicle, type: 'Xe khách' };
+  }
+
   async createTours(data: CreateDtoTour, userId: string): Promise<Tour> {
     const startDate = this.parseDateString(data.start_date);
     const endDate = this.parseDateString(data.end_date);
@@ -246,93 +325,47 @@ export class TourService {
 
     const timeTripFormatted = `${numberOfDays}N${numberOfNights}D`;
 
-    let hotelPrice = 0;
-    if (data.hotelId) {
-      const hotel = await this.prismaService.hotelCrawl.findUnique({
-        where: { id: data.hotelId },
-        select: { price: true, number_of_seats_remaining: true },
-      });
-      if (!hotel) {
-        throw new NotFoundException('Hotel not found');
+    if (data.type === 'closed') {
+      if (!data.hotelId) {
+        throw new Error('Hotel ID is required for closed tours.');
       }
-      if (hotel.number_of_seats_remaining === 0) {
-        throw new Error('No available seats remaining in the selected hotel');
+      if (!data.flightId && !data.roadVehicleId) {
+        throw new Error(
+          'Either flightId or roadVehicleId is required for closed tours.',
+        );
       }
-      hotelPrice = hotel.price;
     }
 
-    let transportPrice = 0;
-    let roadVehicleType: string | null = null;
-
-    if (data.flightId && data.roadVehicleId) {
+    if (
+      data.type === 'open' &&
+      (data.hotelId || data.flightId || data.roadVehicleId)
+    ) {
       throw new Error(
-        'You can only select either flightId or roadVehicleId, not both.',
+        'HotelId, flightId, and roadVehicleId must not be provided for open tours.',
       );
     }
 
-    if (data.flightId) {
-      const flight = await this.prismaService.flightCrawl.findUnique({
-        where: { id: data.flightId },
-        select: { price: true, number_of_seats_remaining: true },
-      });
-      if (!flight) {
-        throw new NotFoundException('Flight not found');
-      }
-      if (flight.number_of_seats_remaining === 0) {
-        throw new Error('No available seats remaining in the selected flight');
-      }
-      transportPrice = flight.price;
-      roadVehicleType = 'Máy bay';
-    }
+    const hotel = data.hotelId
+      ? await this.validateHotel(data.hotelId)
+      : { price: 0, number_of_seats_remaining: 0 };
 
-    if (data.roadVehicleId) {
-      const roadVehicle = await this.prismaService.roadVehicle.findUnique({
-        where: { id: data.roadVehicleId },
-        select: { price: true, number_of_seats_remaining: true },
-      });
-      if (!roadVehicle) {
-        throw new NotFoundException('Road vehicle not found');
-      }
-      if (roadVehicle.number_of_seats_remaining === 0) {
-        throw new Error(
-          'No available seats remaining in the selected road vehicle',
-        );
-      }
-      transportPrice = roadVehicle.price;
-      roadVehicleType = 'Xe khách';
-    }
+    const transport = data.flightId
+      ? await this.validateFlight(data.flightId)
+      : data.roadVehicleId
+        ? await this.validateRoadVehicle(data.roadVehicleId)
+        : { price: 0, type: null };
 
-    const totalAmount = hotelPrice + transportPrice + data.price;
+    const tourPrice = data.type === 'closed' ? data.price * 0.93 : data.price; // giảm 7% mỗi loại
+    const hotelPrice =
+      data.type === 'closed' ? hotel.price * 0.93 : hotel.price; // giảm 7% mỗi loại
+    const transportPrice =
+      data.type === 'closed' ? transport.price * 0.93 : transport.price; // giảm 7% mỗi loại
 
-    let tourCode: string;
-    do {
-      tourCode = this.generateTourCode();
-    } while (
-      await this.prismaService.tour.findFirst({
-        where: { tour_code: tourCode },
-      })
-    );
+    const totalAmount = tourPrice + hotelPrice + transportPrice;
 
-    const tripSchedules = [];
-    const startDay = dayjs(startDate);
-    for (let i = 0; i < numberOfDays; i++) {
-      const currentDate = startDay.add(i, 'day').toDate();
-      let defaultSchedule = `Ngày ${i + 1}: `;
+    const tripSchedules = this.generateTripSchedules(startDate, numberOfDays);
 
-      if (i === 0) {
-        defaultSchedule += 'Ngày đầu tiên, khởi hành và nhận phòng.';
-      } else if (i === numberOfDays - 1) {
-        defaultSchedule += 'Ngày cuối, chuẩn bị kết thúc chuyến đi và trở về.';
-      } else {
-        defaultSchedule += `Ngày ${i + 1}, tham quan và khám phá các địa điểm du lịch.`;
-      }
-
-      tripSchedules.push({
-        day: i + 1,
-        schedule: defaultSchedule,
-        date: currentDate,
-      });
-    }
+    const tourCode = await this.generateTourCode();
 
     return this.prismaService.tour.create({
       data: {
@@ -341,11 +374,11 @@ export class TourService {
         start_date: startDate.toISOString(),
         end_date: endDate.toISOString(),
         time_trip: timeTripFormatted,
-        baby_price: 0,
-        child_price: totalAmount / 2,
+        baby_price: totalAmount * 0.2,
+        child_price: totalAmount * 0.5,
         adult_price: totalAmount,
         totalAmount,
-        road_vehicle: roadVehicleType,
+        road_vehicle: transport.type,
         tour_code: tourCode,
         TripSchedule: {
           create: tripSchedules,

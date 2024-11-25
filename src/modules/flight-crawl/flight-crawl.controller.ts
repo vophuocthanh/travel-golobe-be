@@ -81,6 +81,12 @@ export class FlightCrawlController {
     type: String,
     description: 'Airline brand',
   })
+  @ApiQuery({
+    name: 'type',
+    required: false,
+    type: String,
+    description: 'Type of flight',
+  })
   @ApiQuery({ name: 'search_from', required: false })
   @ApiQuery({ name: 'search_to', required: false })
   @ApiOperation({ summary: 'Lấy thông tin chuyến bay từ các trang web khác' })

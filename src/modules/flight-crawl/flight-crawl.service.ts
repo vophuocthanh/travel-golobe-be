@@ -1,5 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { BaggageWeight, FlightCrawl, TicketType } from '@prisma/client';
+import {
+  BaggageWeight,
+  FlightCrawl,
+  FlightType,
+  TicketType,
+} from '@prisma/client';
+import { randomBytes } from 'crypto';
 import * as csv from 'csv-parser';
 import * as fs from 'fs';
 import { CreateFlightCrawlDto } from 'src/modules/flight-crawl/dto/create.dto';
@@ -163,6 +169,7 @@ export class FlightCrawlService {
     const endDate = this.parseDateString(filters.end_day);
     const filterBrand = filters.brand || '';
     const skip = page > 1 ? (page - 1) * items_per_page : 0;
+    const filterType = filters.type || '';
 
     const flightCrawl = await this.prismaService.flightCrawl.findMany({
       take: items_per_page,
@@ -221,6 +228,7 @@ export class FlightCrawlService {
                 },
               ]
             : []),
+          ...(filterType ? [{ type: filterType as FlightType }] : []),
         ],
       },
       orderBy: {
@@ -283,6 +291,7 @@ export class FlightCrawlService {
                 },
               ]
             : []),
+          ...(filterType ? [{ type: filterType as FlightType }] : []),
         ],
       },
     });
@@ -347,20 +356,59 @@ export class FlightCrawlService {
       flightData.start_time,
       flightData.end_time,
     );
+
+    // Tính thời gian chuyến về nếu type là ROUND_TRIP
+    let returnTripTime: string | null = null;
+    if (flightData.type === FlightType.ROUND_TRIP) {
+      if (flightData.return_start_time && flightData.return_end_time) {
+        returnTripTime = this.calculateTripTime(
+          flightData.return_start_time,
+          flightData.return_end_time,
+        );
+      } else {
+        throw new Error(
+          'return_start_time and return_end_time are required for ROUND_TRIP.',
+        );
+      }
+    }
+
+    const flightPrice =
+      flightData.type === FlightType.ROUND_TRIP
+        ? flightData.price * 2 // Nhân đôi giá nếu là khứ hồi
+        : flightData.price;
+
+    const flightCode = `${flightData.brand.slice(0, 3).toUpperCase()}-${randomBytes(
+      3,
+    )
+      .toString('hex')
+      .toUpperCase()}`;
+
     const createdFlight = await this.prismaService.flightCrawl.create({
       data: {
+        flightCode,
         brand: flightData.brand,
         start_time: flightData.start_time,
         start_day: this.parseDateString(flightData.start_day),
         end_day: this.parseDateString(flightData.end_day),
+        type_ticket: TicketType.ECONOMY,
+        baggage_weight: BaggageWeight.FREE_7KG,
         end_time: flightData.end_time,
         trip_time: tripTime,
         take_place: flightData.take_place,
         destination: flightData.destination,
         trip_to: flightData.trip_to,
-        price: flightData.price,
-        type_ticket: TicketType.ECONOMY,
-        baggage_weight: BaggageWeight.FREE_7KG,
+        price: flightPrice,
+        type: flightData.type,
+        // Các trường của chuyến về
+        return_start_time: flightData.return_start_time,
+        return_start_day: flightData.return_start_day
+          ? this.parseDateString(flightData.return_start_day)
+          : null,
+        return_end_day: flightData.return_end_day
+          ? this.parseDateString(flightData.return_end_day)
+          : null,
+        return_end_time: flightData.return_end_time,
+        return_trip_time: returnTripTime, // Gán thời gian chuyến về đã tính
       },
     });
 
@@ -370,13 +418,12 @@ export class FlightCrawlService {
       { type: TicketType.FIRST_CLASS, multiplier: 2 },
     ];
 
-    for (const ticket of ticketTypes) {
+    const ticketPromises = ticketTypes.map((ticket) => {
       const baggageWeight = BaggageWeight.FREE_7KG;
       const baggagePrice = this.getBaggagePrice(baggageWeight);
-      const calculatedPrice =
-        flightData.price * ticket.multiplier + baggagePrice;
+      const calculatedPrice = flightPrice * ticket.multiplier + baggagePrice;
 
-      await this.prismaService.ticket.create({
+      return this.prismaService.ticket.create({
         data: {
           type_ticket: ticket.type,
           price: calculatedPrice,
@@ -385,7 +432,9 @@ export class FlightCrawlService {
           flightId: createdFlight.id,
         },
       });
-    }
+    });
+
+    await Promise.all(ticketPromises);
 
     return createdFlight;
   }

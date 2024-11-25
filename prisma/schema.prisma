@@ -123,6 +123,13 @@ model FlightCrawl {
   number_of_seats_remaining Int?
   type_ticket               TicketType
   baggage_weight            BaggageWeight
+  type                      FlightType?
+  return_start_time         String? // Thời gian khởi hành chuyến về (nếu là khứ hồi)
+  return_start_day          DateTime? // Ngày khởi hành chuyến về (nếu là khứ hồi)
+  return_end_day            DateTime? // Ngày kết thúc chuyến về (nếu là khứ hồi)
+  return_end_time           String? // Thời gian kết thúc chuyến về (nếu là khứ hồi)
+  return_trip_time          String? // Thời gian hành trình chuyến về (nếu là khứ hồi)
+  flightCode                String?       @unique
 
   users    UserOnFlightCrawl[]
   bookings Booking[]
@@ -130,6 +137,11 @@ model FlightCrawl {
   Tour     Tour[]
 
   @@map("flight_crawl")
+}
+
+enum FlightType {
+  ONE_WAY // Vé một chiều
+  ROUND_TRIP // Vé khứ hồi
 }
 
 enum BaggageWeight {

@@ -23,6 +23,8 @@ export class FlightCrawlDto {
 
   search_from?: string;
   search_to?: string;
+
+  type?: string;
 }
 
 export interface FlightCrawlPaginationResponseType {

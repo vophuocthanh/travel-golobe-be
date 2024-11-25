@@ -96,6 +96,13 @@ Table flight_crawl {
   number_of_seats_remaining Int
   type_ticket TicketType [not null]
   baggage_weight BaggageWeight [not null]
+  type FlightType
+  return_start_time String
+  return_start_day DateTime
+  return_end_day DateTime
+  return_end_time String
+  return_trip_time String
+  flightCode String [unique]
   users user_on_flight_crawls [not null]
   bookings bookings [not null]
   Ticket Ticket [not null]
@@ -340,6 +347,11 @@ Enum RoomType {
   DOUBLE
   SUITE
   DELUXE
+}
+
+Enum FlightType {
+  ONE_WAY
+  ROUND_TRIP
 }
 
 Enum BaggageWeight {

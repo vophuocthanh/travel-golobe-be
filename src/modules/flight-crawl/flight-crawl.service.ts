@@ -387,6 +387,7 @@ export class FlightCrawlService {
       data: {
         flightCode,
         brand: flightData.brand,
+        image: flightData.image,
         start_time: flightData.start_time,
         start_day: this.parseDateString(flightData.start_day),
         end_day: this.parseDateString(flightData.end_day),

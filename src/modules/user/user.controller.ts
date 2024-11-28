@@ -56,6 +56,18 @@ export class UserController {
     return user;
   }
 
+  @UseGuards(HandleAuthGuard)
+  @Get('/points-user')
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @ApiOperation({ summary: 'Lấy ra số điểm của user' })
+  async getPointsUser(@Req() req): Promise<{ data: { points: number } }> {
+    const userId = req.user.id;
+    const points = await this.userService.getUserPoints(userId);
+    return { data: { points } };
+  }
+
   @Get('/count-user')
   @ApiResponse({ status: 200, description: 'Successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })

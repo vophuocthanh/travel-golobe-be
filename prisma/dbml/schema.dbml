@@ -20,6 +20,7 @@ Table users {
   verificationCodeExpiresAt DateTime
   isVerified Boolean [not null, default: false]
   role roles
+  points Int [unique, default: 0]
   flightCrawls user_on_flight_crawls [not null]
   hotelCrawlReviews hotel_crawl_reviews [not null]
   hotelCrawls user_on_hotel_crawls [not null]

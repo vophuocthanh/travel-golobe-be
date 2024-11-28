@@ -29,6 +29,7 @@ model User {
   verificationCodeExpiresAt DateTime?
   isVerified                Boolean   @default(false)
   role                      Role?     @relation(fields: [roleId], references: [id])
+  points                    Int?      @unique @default(0)
 
   flightCrawls      UserOnFlightCrawl[]
   hotelCrawlReviews HotelCrawlReview[]

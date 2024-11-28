@@ -17,9 +17,40 @@ export class MomoService {
   private readonly ACCESS_KEY = process.env.MOMO_ACCESS_KEY;
   private readonly REDIRECT_URL = 'http://localhost:5173';
   private readonly IPN_URL =
-    'https://194a-2001-ee0-4b7b-b4f0-5400-c64f-ed80-23c5.ngrok-free.app/api/momo/ipn';
+    'https://4838-2001-ee0-4b7b-b4f0-e517-ab9b-5503-3e0e.ngrok-free.app/api/momo/ipn';
 
   constructor(private readonly prisma: PrismaService) {}
+
+  private async addPointsToUser(userId: string): Promise<boolean> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { points: true },
+    });
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    const currentPoints = user.points || 0;
+    const newPoints = currentPoints + 5;
+
+    // Nếu điểm đạt 100 hoặc hơn, reset điểm về 0 và trả về trạng thái giảm giá
+    if (newPoints >= 100) {
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { points: 0 },
+      });
+      return true; // Đủ điều kiện giảm giá
+    }
+
+    // Cập nhật điểm nếu chưa đủ 100 điểm
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { points: newPoints },
+    });
+
+    return false; // Không đủ điều kiện giảm giá
+  }
 
   async createPayment(data: MomoDto, userId: string) {
     const booking = await this.prisma.booking.findUnique({
@@ -31,13 +62,22 @@ export class MomoService {
       throw new Error('Booking not found');
     }
 
-    const { totalAmount: amount } = booking;
+    const { totalAmount } = booking;
+
+    // Chỉ cộng 10 điểm mỗi lần mua và kiểm tra điều kiện giảm giá
+    const isEligibleForDiscount = await this.addPointsToUser(userId);
+
+    // Áp dụng giảm giá nếu đủ điểm
+    const finalAmount = isEligibleForDiscount
+      ? totalAmount * 0.8 // Giảm 20%
+      : totalAmount;
+
     const orderId = `${this.PARTNER_CODE}_${data.bookingId}_${Date.now()}`;
     const requestId = orderId;
     const extraData = '';
 
     const signature = this.generateSignatureForPayment(
-      amount,
+      finalAmount,
       orderId,
       requestId,
       extraData,
@@ -48,7 +88,7 @@ export class MomoService {
       partnerName: 'Test',
       storeId: 'MomoTestStore',
       requestId,
-      amount: amount.toString(),
+      amount: finalAmount.toString(),
       orderId,
       orderInfo: 'pay with MoMo',
       redirectUrl: this.REDIRECT_URL,
@@ -72,7 +112,7 @@ export class MomoService {
         data: {
           bookingId: data.bookingId,
           userId,
-          amount,
+          amount: finalAmount,
           paymentMethod: PaymentMethod.CREDIT_CARD,
           status: PaymentStatus.PENDING,
           orderId,
@@ -82,7 +122,7 @@ export class MomoService {
       return {
         partnerCode: this.PARTNER_CODE,
         orderId,
-        amount,
+        finalAmount,
         requestId,
         paymentUrl,
       };
@@ -144,7 +184,6 @@ export class MomoService {
       data: { status },
     });
 
-    // Nếu thanh toán thành công, cập nhật trạng thái đặt chỗ thành CONFIRMED
     if (status === PaymentStatus.COMPLETED) {
       const bookingId = payment.bookingId;
 
@@ -153,9 +192,12 @@ export class MomoService {
         where: { id: bookingId },
         data: {
           status: BookingStatus.CONFIRMED,
-          confirmationTime: new Date(), // Thay đổi thời gian xác nhận nếu cần
+          confirmationTime: new Date(),
         },
       });
+
+      // // Cộng điểm cho người dùng
+      // await this.addPointsToUser(payment.userId); // Mỗi giao dịch cộng 10 điểm
     }
 
     return updatedPayment;
@@ -180,15 +222,24 @@ export class MomoService {
   }
 
   async handleIpn(ipnData: MomoIpnDto): Promise<void> {
-    // const signature = this.generateSignatureForIpn(ipnData);
-    // if (signature !== ipnData.signature) {
-    //   console.error('Signature mismatch! Invalid IPN.');
-    //   throw new HttpException('Invalid signature', HttpStatus.BAD_REQUEST);
-    // }
-
     if (ipnData.resultCode === 0) {
       console.log('Payment successful:', ipnData);
+
+      // Lấy thông tin thanh toán
+      const payment = await this.prisma.payment.findUnique({
+        where: { orderId: ipnData.orderId },
+      });
+
+      if (!payment) {
+        throw new Error('Payment record not found');
+      }
+
+      // Cập nhật trạng thái thanh toán thành COMPLETED
       await this.updatePaymentStatus(ipnData.orderId, PaymentStatus.COMPLETED);
+
+      // Cộng điểm cho người dùng (chỉ cộng 10 điểm)
+      // await this.addPointsToUser(payment.userId);
+
       console.log(
         'Payment status updated to COMPLETED for orderId:',
         ipnData.orderId,
@@ -199,8 +250,6 @@ export class MomoService {
         ipnData.message,
       );
     }
-
-    console.log('IPN processed successfully.');
   }
 
   private createSignature(rawSignature: string): string {

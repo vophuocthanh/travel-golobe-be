@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Booking, BookingStatus } from '@prisma/client';
 import * as moment from 'moment-timezone';
+import * as cron from 'node-cron';
 import { mailService } from 'src/lib/mail.service';
 import {
   BookingDto,
@@ -16,6 +17,9 @@ import { PrismaService } from 'src/prisma.service';
 export class BookingsService {
   constructor(private prismaService: PrismaService) {}
 
+  onModuleInit() {
+    this.initializeCronJobs();
+  }
   private parseDateStringWithTimezone(dateString: string): Date | undefined {
     if (!dateString) return undefined;
     const [day, month, year] = dateString.split('-').map(Number);
@@ -26,6 +30,14 @@ export class BookingsService {
       .toDate();
 
     return dateInVN;
+  }
+  initializeCronJobs() {
+    cron.schedule('* * * * *', async () => {
+      await this.cancelExpiredBookings();
+    });
+    console.log(
+      'Cron job for canceling expired bookings initialized and runs every minute',
+    );
   }
 
   async getAllBookings(
@@ -249,9 +261,7 @@ export class BookingsService {
       throw new Error('Flight not found');
     }
 
-    const ticket = flight.Ticket.find(
-      (ticket) => ticket.id === ticketFlighttId,
-    );
+    const ticket = flight.Ticket.find((t) => t.id === ticketFlighttId);
 
     if (!ticket) {
       throw new Error('Ticket not found for this flight');
@@ -261,6 +271,7 @@ export class BookingsService {
       throw new Error('Not enough available seats for the requested quantity');
     }
 
+    // Giảm số ghế còn lại
     await this.prismaService.flightCrawl.update({
       where: { id: flightCrawlId },
       data: {
@@ -278,6 +289,9 @@ export class BookingsService {
         flightQuantity,
         ticketFlighttId,
         totalAmount: totalAmountFlight,
+        flightPrice: ticket.price,
+        status: 'PENDING',
+        confirmationTime: new Date(Date.now() + 3 * 60 * 1000),
       },
     });
   }
@@ -316,6 +330,8 @@ export class BookingsService {
         userId,
         roadVehicleQuantity,
         totalAmount: totalAmountRoadVehicle,
+        status: 'PENDING',
+        confirmationTime: new Date(Date.now() + 3 * 60 * 1000),
       },
     });
   }
@@ -380,6 +396,8 @@ export class BookingsService {
         checkInDate: parsedCheckInDate,
         checkOutDate: parsedCheckOutDate,
         totalAmount: totalAmountHotel,
+        status: 'PENDING',
+        confirmationTime: new Date(Date.now() + 3 * 60 * 1000),
       },
     });
   }
@@ -422,28 +440,78 @@ export class BookingsService {
         userId,
         tourQuantity,
         totalAmount: totalAmountTour,
+        status: 'PENDING',
+        confirmationTime: new Date(Date.now() + 3 * 60 * 1000),
       },
     });
   }
 
-  async cancelFlightBooking(bookingId: string, userId: string) {
-    const booking = await this.prismaService.booking.findUnique({
-      where: { id: bookingId },
+  async cancelExpiredBookings() {
+    const now = new Date();
+
+    // Lấy danh sách booking đã hết hạn
+    const expiredBookings = await this.prismaService.booking.findMany({
+      where: {
+        status: 'PENDING',
+        confirmationTime: { lte: now },
+      },
     });
 
-    if (!booking) {
-      throw new Error('Booking not found');
+    for (const booking of expiredBookings) {
+      if (booking.flightCrawlId && booking.flightQuantity) {
+        // Hoàn lại số ghế
+        await this.prismaService.flightCrawl.update({
+          where: { id: booking.flightCrawlId },
+          data: {
+            number_of_seats_remaining: {
+              increment: booking.flightQuantity,
+            },
+          },
+        });
+      }
+
+      if (booking.hotelCrawlId && booking.hotelQuantity) {
+        // Hoàn lại số phòng
+        await this.prismaService.hotelCrawl.update({
+          where: { id: booking.hotelCrawlId },
+          data: {
+            number_of_seats_remaining: {
+              increment: booking.hotelQuantity,
+            },
+          },
+        });
+      }
+
+      if (booking.roadVehicleId && booking.roadVehicleQuantity) {
+        // Hoàn lại số ghế
+        await this.prismaService.roadVehicle.update({
+          where: { id: booking.roadVehicleId },
+          data: {
+            number_of_seats_remaining: {
+              increment: booking.roadVehicleQuantity,
+            },
+          },
+        });
+      }
+
+      if (booking.tourId && booking.tourQuantity) {
+        // Hoàn lại số ghế
+        await this.prismaService.tour.update({
+          where: { id: booking.tourId },
+          data: {
+            number_of_seats_remaining: {
+              increment: booking.tourQuantity,
+            },
+          },
+        });
+
+        // Cập nhật trạng thái thành 'CANCELED'
+        await this.prismaService.booking.update({
+          where: { id: booking.id },
+          data: { status: 'CANCELED' },
+        });
+      }
     }
-
-    if (booking.userId !== userId) {
-      throw new Error('You are not authorized to cancel this booking');
-    }
-
-    await this.prismaService.booking.delete({
-      where: { id: bookingId },
-    });
-
-    return { message: 'Booking canceled successfully' };
   }
 
   async cancelRoadVehicleBooking(bookingId: string, userId: string) {

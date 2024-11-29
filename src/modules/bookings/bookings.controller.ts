@@ -154,7 +154,7 @@ export class BookingsController {
     @Query('bookingId') bookingId: string,
   ) {
     const userId = req.user.id;
-    return this.bookingService.cancelFlightBooking(bookingId, userId);
+    return this.bookingService.cancelHotelBooking(bookingId, userId);
   }
 
   @UseGuards(HandleAuthGuard)

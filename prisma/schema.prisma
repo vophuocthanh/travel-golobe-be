@@ -29,7 +29,7 @@ model User {
   verificationCodeExpiresAt DateTime?
   isVerified                Boolean   @default(false)
   role                      Role?     @relation(fields: [roleId], references: [id])
-  points                    Int?      @unique @default(0)
+  points                    Int?      @default(0)
 
   flightCrawls      UserOnFlightCrawl[]
   hotelCrawlReviews HotelCrawlReview[]
@@ -63,7 +63,7 @@ model HotelCrawl {
   star_number               Float?
   received_time             String
   giveback_time             String
-  description               String
+  description               String?
   hotel_link                String?
   place                     String?
   image                     String?

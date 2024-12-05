@@ -27,6 +27,5 @@ export class CreateHotelCrawlDto {
   giveback_time: string;
 
   @ApiProperty()
-  @IsNotEmpty()
-  description: string;
+  description?: string;
 }

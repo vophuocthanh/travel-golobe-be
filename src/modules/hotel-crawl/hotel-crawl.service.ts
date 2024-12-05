@@ -235,7 +235,10 @@ export class HotelCrawlService {
 
   async createHotelCrawl(data: CreateHotelCrawlDto): Promise<HotelCrawl> {
     const createdHotel = await this.prismaService.hotelCrawl.create({
-      data,
+      data: {
+        ...data,
+        description: data.description || '',
+      },
     });
     const defaultPrice = data.price;
 

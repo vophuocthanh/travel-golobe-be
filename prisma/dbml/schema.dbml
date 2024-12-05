@@ -20,7 +20,7 @@ Table users {
   verificationCodeExpiresAt DateTime
   isVerified Boolean [not null, default: false]
   role roles
-  points Int [unique, default: 0]
+  points Int [default: 0]
   flightCrawls user_on_flight_crawls [not null]
   hotelCrawlReviews hotel_crawl_reviews [not null]
   hotelCrawls user_on_hotel_crawls [not null]
@@ -49,7 +49,7 @@ Table hotel_crawl {
   star_number Float
   received_time String [not null]
   giveback_time String [not null]
-  description String [not null]
+  description String
   hotel_link String
   place String
   image String

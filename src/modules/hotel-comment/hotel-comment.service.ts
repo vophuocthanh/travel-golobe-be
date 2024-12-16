@@ -50,12 +50,25 @@ export class HotelCommentService {
       total: totalReview,
     };
   }
-
   async addReviewToHotel(
     hotelCrawlId: string,
     data: CreateHotelReviewDto,
     userId: string,
   ): Promise<HotelCrawlReview> {
+    const booking = await this.prismaService.booking.findFirst({
+      where: {
+        userId,
+        hotelCrawlId,
+        status: 'CONFIRMED',
+      },
+    });
+    console.log('booking:', booking);
+
+    if (!booking) {
+      throw new ForbiddenException('You are not allowed to review this hotel');
+    }
+
+    // Thêm review nếu user đã mua hotel
     return this.prismaService.hotelCrawlReview.create({
       data: {
         content: data.content,

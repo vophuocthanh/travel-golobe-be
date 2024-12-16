@@ -32,19 +32,6 @@ import { RequestWithUser } from 'src/types/users';
 export class TourCommentController {
   constructor(private tourCommentService: TourCommentService) {}
   @UseGuards(HandleAuthGuard)
-  @Get(':id/reviews')
-  @ApiOperation({ summary: 'Lấy tất cả đánh giá của từng tour' })
-  @ApiResponse({ status: 200, description: 'Successfully' })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  async getReviews(
-    @Param('id') tourId: string,
-  ): Promise<{ data: TourReview[] }> {
-    return this.tourCommentService.getTourReviews(tourId);
-  }
-
-  @UseGuards(HandleAuthGuard)
   @Post(':id/reviews')
   @ApiOperation({ summary: 'Thêm đánh giá cho tour' })
   @ApiResponse({ status: 201, description: 'Review added successfully' })
@@ -62,6 +49,19 @@ export class TourCommentController {
       createTourReview,
       userId,
     );
+  }
+
+  @UseGuards(HandleAuthGuard)
+  @Get(':id/reviews')
+  @ApiOperation({ summary: 'Lấy tất cả đánh giá của từng tour' })
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async getReviews(
+    @Param('id') tourId: string,
+  ): Promise<{ data: TourReview[] }> {
+    return this.tourCommentService.getTourReviews(tourId);
   }
 
   @UseGuards(HandleAuthGuard)

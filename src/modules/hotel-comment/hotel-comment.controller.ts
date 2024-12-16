@@ -54,6 +54,7 @@ export class HotelCommentController {
     @Req() req: RequestWithUser,
   ): Promise<HotelCrawlReview> {
     const userId = req.user.id;
+    console.log('userId:', userId);
     return this.hotelCommentService.addReviewToHotel(id, body, userId);
   }
 

@@ -16,6 +16,37 @@ export class TourCommentService {
     data: CreateTourReviewDto,
     userId: string,
   ): Promise<TourReview> {
+    const tour = await this.prismaService.tour.findUnique({
+      where: { id: tourId },
+    });
+    if (!tour) {
+      throw new NotFoundException('Tour not found');
+    }
+
+    const booking = await this.prismaService.booking.findFirst({
+      where: {
+        userId,
+        tourId,
+        status: 'CONFIRMED',
+      },
+    });
+    if (!booking) {
+      throw new ForbiddenException(
+        'You need a confirmed booking to review this tour',
+      );
+    }
+
+    const existingReview = await this.prismaService.tourReview.findFirst({
+      where: {
+        userId,
+        tourId,
+      },
+    });
+    if (existingReview) {
+      throw new ForbiddenException('You have already reviewed this tour');
+    }
+
+    // Tạo review mới
     return this.prismaService.tourReview.create({
       data: {
         content: data.content,

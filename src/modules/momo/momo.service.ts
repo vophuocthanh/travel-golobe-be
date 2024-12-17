@@ -65,19 +65,19 @@ export class MomoService {
     const { totalAmount } = booking;
 
     // Chỉ cộng 10 điểm mỗi lần mua và kiểm tra điều kiện giảm giá
-    const isEligibleForDiscount = await this.addPointsToUser(userId);
+    // const isEligibleForDiscount = await this.addPointsToUser(userId);
 
     // Áp dụng giảm giá nếu đủ điểm
-    const finalAmount = isEligibleForDiscount
-      ? totalAmount * 0.8 // Giảm 20%
-      : totalAmount;
+    // const finalAmount = isEligibleForDiscount
+    //   ? totalAmount * 0.8 // Giảm 20%
+    //   : totalAmount;
 
     const orderId = `${this.PARTNER_CODE}_${data.bookingId}_${Date.now()}`;
     const requestId = orderId;
     const extraData = '';
 
     const signature = this.generateSignatureForPayment(
-      finalAmount,
+      totalAmount,
       orderId,
       requestId,
       extraData,
@@ -88,7 +88,7 @@ export class MomoService {
       partnerName: 'Test',
       storeId: 'MomoTestStore',
       requestId,
-      amount: finalAmount.toString(),
+      // amount: finalAmount.toString(),
       orderId,
       orderInfo: 'pay with MoMo',
       redirectUrl: this.REDIRECT_URL,
@@ -112,7 +112,7 @@ export class MomoService {
         data: {
           bookingId: data.bookingId,
           userId,
-          amount: finalAmount,
+          amount: totalAmount,
           paymentMethod: PaymentMethod.CREDIT_CARD,
           status: PaymentStatus.PENDING,
           orderId,
@@ -122,7 +122,7 @@ export class MomoService {
       return {
         partnerCode: this.PARTNER_CODE,
         orderId,
-        finalAmount,
+        totalAmount,
         requestId,
         paymentUrl,
       };
@@ -197,7 +197,7 @@ export class MomoService {
       });
 
       // // Cộng điểm cho người dùng
-      // await this.addPointsToUser(payment.userId); // Mỗi giao dịch cộng 10 điểm
+      await this.addPointsToUser(payment.userId); // Mỗi giao dịch cộng 10 điểm
     }
 
     return updatedPayment;

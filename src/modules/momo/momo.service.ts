@@ -12,12 +12,12 @@ import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class MomoService {
-  private readonly YOUR_SECRET_KEY = process.env.MOMO_YOUR_SECRET_KEY;
-  private readonly PARTNER_CODE = process.env.MOMO_PARTNER_CODE;
-  private readonly ACCESS_KEY = process.env.MOMO_ACCESS_KEY;
+  private readonly YOUR_SECRET_KEY = 'K951B6PE1waDMi640xX08PD3vg6EkVlz';
+  private readonly PARTNER_CODE = 'MOMO';
+  private readonly ACCESS_KEY = 'F8BBA842ECF85';
   private readonly REDIRECT_URL = 'http://localhost:5173';
   private readonly IPN_URL =
-    'https://d72d-2001-ee0-4b7b-b4f0-214c-85f0-2fbd-57.ngrok-free.app/api/momo/ipn';
+    'https://5403-2001-ee0-4b7b-b4f0-214c-85f0-2fbd-57.ngrok-free.app/api/momo/ipn';
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -67,7 +67,7 @@ export class MomoService {
     // Chỉ cộng 10 điểm mỗi lần mua và kiểm tra điều kiện giảm giá
     // const isEligibleForDiscount = await this.addPointsToUser(userId);
 
-    // Áp dụng giảm giá nếu đủ điểm
+    // // Áp dụng giảm giá nếu đủ điểm
     // const finalAmount = isEligibleForDiscount
     //   ? totalAmount * 0.8 // Giảm 20%
     //   : totalAmount;
@@ -88,7 +88,7 @@ export class MomoService {
       partnerName: 'Test',
       storeId: 'MomoTestStore',
       requestId,
-      // amount: finalAmount.toString(),
+      amount: totalAmount,
       orderId,
       orderInfo: 'pay with MoMo',
       redirectUrl: this.REDIRECT_URL,

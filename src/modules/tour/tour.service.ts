@@ -70,7 +70,7 @@ export class TourService {
       where: {
         AND: [
           {
-            price: {
+            totalAmount: {
               gte: min_price,
               lte: max_price,
             },
@@ -128,7 +128,7 @@ export class TourService {
       where: {
         AND: [
           {
-            price: {
+            totalAmount: {
               gte: min_price,
               lte: max_price,
             },

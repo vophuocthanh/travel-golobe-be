@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Booking, BookingStatus } from '@prisma/client';
 import * as moment from 'moment-timezone';
 import * as cron from 'node-cron';
@@ -258,20 +263,32 @@ export class BookingsService {
     });
 
     if (!flight) {
-      throw new Error('Flight not found');
+      throw new NotFoundException('Flight not found');
+    }
+
+    const currentDate = new Date();
+    const endDate = new Date(flight.end_day);
+
+    if (currentDate > endDate) {
+      throw new HttpException(
+        'This flight has already ended, you cannot book tickets.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const ticket = flight.Ticket.find((t) => t.id === ticketFlighttId);
 
     if (!ticket) {
-      throw new Error('Ticket not found for this flight');
+      throw new NotFoundException('Ticket not found for this flight');
     }
 
     if (flight.number_of_seats_remaining < flightQuantity) {
-      throw new Error('Not enough available seats for the requested quantity');
+      throw new HttpException(
+        'Not enough available seats for the requested quantity',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
-    // Giảm số ghế còn lại
     await this.prismaService.flightCrawl.update({
       where: { id: flightCrawlId },
       data: {
@@ -312,6 +329,15 @@ export class BookingsService {
 
     if (roadVehicle.number_of_seats_remaining < roadVehicleQuantity) {
       throw new Error('Not enough available seats for the requested quantity');
+    }
+
+    const currentDate = new Date();
+    const endDate = new Date(roadVehicle.end_day);
+    if (currentDate > endDate) {
+      throw new HttpException(
+        'This road vehicle has already ended, you cannot book tickets.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     await this.prismaService.roadVehicle.update({
@@ -417,11 +443,23 @@ export class BookingsService {
     });
 
     if (!tour) {
-      throw new Error('Tour not found');
+      throw new HttpException('Tour not found', HttpStatus.NOT_FOUND);
+    }
+
+    const currentDate = new Date();
+    const endDate = new Date(tour.end_date);
+    if (currentDate > endDate) {
+      throw new HttpException(
+        'This tour has already ended, you cannot book tickets.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     if (tour.number_of_seats_remaining < tourQuantity) {
-      throw new Error('Not enough available seats for the requested quantity');
+      throw new HttpException(
+        'Not enough available seats for the requested quantity',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     await this.prismaService.tour.update({
@@ -441,7 +479,7 @@ export class BookingsService {
         tourQuantity,
         totalAmount: totalAmountTour,
         status: 'PENDING',
-        confirmationTime: new Date(Date.now() + 3 * 60 * 1000),
+        confirmationTime: new Date(Date.now() + 3 * 60 * 1000), // Thêm 3 phút
       },
     });
   }

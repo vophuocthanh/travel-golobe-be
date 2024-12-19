@@ -154,7 +154,7 @@ export class TourController {
   }
 
   @UseGuards(HandleAuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'EMPLOYEE')
   @Post()
   @ApiOperation({ summary: 'Tạo tour' })
   @ApiResponse({ status: 200, description: 'Successfully' })
@@ -202,7 +202,7 @@ export class TourController {
   }
 
   @UseGuards(HandleAuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'EMPLOYEE')
   @Delete(':id')
   @ApiOperation({ summary: 'Xóa tour' })
   @ApiResponse({ status: 200, description: 'Successfully' })

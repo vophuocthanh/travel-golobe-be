@@ -112,7 +112,7 @@ export class HotelCrawlController {
   }
 
   @UseGuards(HandleAuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'EMPLOYEE')
   @Post('crawl')
   @ApiOperation({ summary: 'Thêm thông tin khách sạn từ trang web khác' })
   @ApiResponse({ status: 201, description: 'Created successfully' })
@@ -177,7 +177,7 @@ export class HotelCrawlController {
   }
 
   @UseGuards(HandleAuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'EMPLOYEE')
   @ApiResponse({ status: 200, description: 'Delete successfully the hotel' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })

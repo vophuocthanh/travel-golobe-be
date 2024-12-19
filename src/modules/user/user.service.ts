@@ -110,9 +110,9 @@ export class UserService {
   }
 
   async updateUserRole(
-    userId: string, // ID của người dùng cần cập nhật
+    userId: string,
     roleId: string,
-    currentUserId: string, // ID của người dùng hiện tại
+    currentUserId: string,
   ): Promise<User> {
     if (userId === currentUserId) {
       throw new ForbiddenException('You cannot update your own role.');

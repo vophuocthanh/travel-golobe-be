@@ -152,7 +152,7 @@ export class FlightCrawlController {
   }
 
   @UseGuards(HandleAuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'EMPLOYEE')
   @Post('crawl')
   @ApiOperation({ summary: 'Thêm thông tin chuyến bay crawl' })
   @ApiResponse({ status: 200, description: 'Successfully added the flight' })
@@ -179,7 +179,7 @@ export class FlightCrawlController {
   }
 
   @UseGuards(HandleAuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'EMPLOYEE')
   @Delete('crawl/:id')
   @ApiOperation({ summary: 'Xóa chuyến bay crawl' })
   @ApiResponse({ status: 200, description: 'Successfully deleted the flight' })

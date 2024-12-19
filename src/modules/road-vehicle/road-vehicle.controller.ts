@@ -110,7 +110,7 @@ export class RoadVehicleController {
   }
 
   @UseGuards(HandleAuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'EMPLOYEE')
   @Post('crawl')
   @ApiOperation({ summary: 'Thêm thông tin phương tiện đường bộ' })
   @ApiResponse({ status: 200, description: 'Successfully' })
@@ -183,7 +183,7 @@ export class RoadVehicleController {
   }
 
   @UseGuards(HandleAuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'EMPLOYEE')
   @Delete('crawl/:id')
   @ApiOperation({ summary: 'Xóa thông tin phương tiện đường bộ' })
   @ApiResponse({ status: 200, description: 'Successfully' })

@@ -529,7 +529,7 @@ export class BookingsService {
       throw new NotFoundException('User not found');
     }
 
-    let totalAmountTour = tour.adult_price * tourQuantity;
+    let totalAmountTour = tour.totalAmount * tourQuantity;
 
     if (user.points >= 100) {
       totalAmountTour *= 0.8;

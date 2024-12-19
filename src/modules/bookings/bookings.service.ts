@@ -257,6 +257,7 @@ export class BookingsService {
     const { flightCrawlId, flightQuantity, ticketFlighttId } =
       createFlightBookingDto;
 
+    // Tìm kiếm chuyến bay
     const flight = await this.prismaService.flightCrawl.findUnique({
       where: { id: flightCrawlId },
       include: { Ticket: true },
@@ -269,6 +270,7 @@ export class BookingsService {
     const currentDate = new Date();
     const endDate = new Date(flight.end_day);
 
+    // Kiểm tra nếu chuyến bay đã kết thúc
     if (currentDate > endDate) {
       throw new HttpException(
         'This flight has already ended, you cannot book tickets.',
@@ -276,12 +278,14 @@ export class BookingsService {
       );
     }
 
+    // Kiểm tra vé hợp lệ
     const ticket = flight.Ticket.find((t) => t.id === ticketFlighttId);
 
     if (!ticket) {
       throw new NotFoundException('Ticket not found for this flight');
     }
 
+    // Kiểm tra số ghế còn lại
     if (flight.number_of_seats_remaining < flightQuantity) {
       throw new HttpException(
         'Not enough available seats for the requested quantity',
@@ -289,6 +293,7 @@ export class BookingsService {
       );
     }
 
+    // Cập nhật số ghế còn lại
     await this.prismaService.flightCrawl.update({
       where: { id: flightCrawlId },
       data: {
@@ -297,8 +302,25 @@ export class BookingsService {
       },
     });
 
-    const totalAmountFlight = ticket.price * flightQuantity;
+    // Lấy thông tin điểm của người dùng
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+      select: { points: true },
+    });
 
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Tính tổng giá vé
+    let totalAmountFlight = ticket.price * flightQuantity;
+
+    // Nếu người dùng có từ 100 điểm trở lên, giảm 20%
+    if (user.points >= 100) {
+      totalAmountFlight *= 0.8; // Giảm giá 20%
+    }
+
+    // Tạo bản ghi đặt vé
     return this.prismaService.booking.create({
       data: {
         flightCrawlId,
@@ -348,7 +370,22 @@ export class BookingsService {
       },
     });
 
-    const totalAmountRoadVehicle = roadVehicle.price * roadVehicleQuantity;
+    // Lấy điểm `points` của người dùng
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+      select: { points: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    let totalAmountRoadVehicle = roadVehicle.price * roadVehicleQuantity;
+
+    // Giảm giá nếu `points >= 100`
+    if (user.points >= 100) {
+      totalAmountRoadVehicle *= 0.8;
+    }
 
     return this.prismaService.booking.create({
       data: {
@@ -411,7 +448,20 @@ export class BookingsService {
       },
     });
 
-    const totalAmountHotel = room.pricePerDay * hotelQuantity * stayDuration;
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+      select: { points: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    let totalAmountHotel = room.pricePerDay * hotelQuantity * stayDuration;
+
+    if (user.points >= 100) {
+      totalAmountHotel *= 0.8;
+    }
 
     return this.prismaService.booking.create({
       data: {
@@ -470,7 +520,20 @@ export class BookingsService {
       },
     });
 
-    const totalAmountTour = tour.adult_price * tourQuantity;
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+      select: { points: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    let totalAmountTour = tour.adult_price * tourQuantity;
+
+    if (user.points >= 100) {
+      totalAmountTour *= 0.8;
+    }
 
     return this.prismaService.booking.create({
       data: {
@@ -479,7 +542,7 @@ export class BookingsService {
         tourQuantity,
         totalAmount: totalAmountTour,
         status: 'PENDING',
-        confirmationTime: new Date(Date.now() + 3 * 60 * 1000), // Thêm 3 phút
+        confirmationTime: new Date(Date.now() + 3 * 60 * 1000),
       },
     });
   }

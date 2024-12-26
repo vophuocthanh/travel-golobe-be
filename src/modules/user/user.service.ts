@@ -4,6 +4,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
 import { FileUploadService } from 'src/lib/file-upload.service';
@@ -158,27 +159,32 @@ export class UserService {
     });
   }
 
-  async deleteUser(
-    userId: string,
-    currentUserId: string,
-  ): Promise<{ message: string }> {
-    if (userId === currentUserId) {
-      throw new ForbiddenException('You cannot delete your own account.');
-    }
-
-    const user = await this.prismaService.user.findUnique({
+  async deleteUser(userId: string, currentUserId: string) {
+    // Kiểm tra user cần xóa có tồn tại không
+    const userToDelete = await this.prismaService.user.findUnique({
       where: { id: userId },
     });
 
-    if (!user) {
-      throw new BadRequestException('User not found');
+    if (!userToDelete) {
+      throw new NotFoundException('User không tồn tại');
     }
 
+    // Nếu là ADMIN thì không cho phép xóa
+    if (userToDelete.roleId === 'cm15v166c00011r12x9t0ik34') {
+      throw new ForbiddenException('Không thể xóa tài khoản có vai trò ADMIN');
+    }
+
+    // Ngăn người dùng tự xóa chính mình
+    if (userToDelete.id === currentUserId) {
+      throw new ForbiddenException('Không thể tự xóa chính mình');
+    }
+
+    // Tiến hành xóa user
     await this.prismaService.user.delete({
       where: { id: userId },
     });
 
-    return { message: 'User deleted successfully' };
+    return { message: 'Xóa user thành công' };
   }
 
   async getCountUser(): Promise<{ data: { total: number } }> {

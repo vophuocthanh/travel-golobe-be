@@ -37,11 +37,12 @@ export class BookingsService {
     return dateInVN;
   }
   initializeCronJobs() {
-    cron.schedule('* * * * *', async () => {
+    cron.schedule('*/2 * * * *', async () => {
+      // phút - giờ ngày trong tháng - tháng - ngày trong tuần
       await this.cancelExpiredBookings();
     });
     console.log(
-      'Cron job for canceling expired bookings initialized and runs every minute',
+      'Cron job for canceling expired bookings initialized and runs two minute',
     );
   }
 

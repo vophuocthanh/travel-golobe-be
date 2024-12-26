@@ -114,4 +114,9 @@ export class MomoController {
     console.log('ipnData:', ipnData);
     return this.momoService.handleIpn(ipnData);
   }
+
+  @Get('revenue')
+  async getTotalRevenue() {
+    return await this.momoService.getTotalRevenue();
+  }
 }

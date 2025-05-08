@@ -1,44 +1,106 @@
+<div align="center">
+ <h1>Travel GoLobe Backend 🚀</h1>
+</div>
+
 <p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
+  <img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" />
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## 📝 Overview
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
+Travel GoLobe is a comprehensive travel management system that provides a complete solution for tour booking, hotel reservations, and flight management. The system is built with modern technologies and follows best practices for scalability and maintainability.
 
-## Tech Stack
+## 🛠 Tech Stack
 
-  <div align="center">
-    <img src="https://img.shields.io/badge/nestjs-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" alt="nestjs" />
-    <img src="https://img.shields.io/badge/-TypeScript-black?style=for-the-badge&logoColor=white&logo=typescript&color=3178C6" alt="typescript" />
-    <img src="https://img.shields.io/badge/postgresql-4169e1?style=for-the-badge&logo=postgresql&logoColor=white" alt="postgresql" />
-    <img src="https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white" alt="prisma" />
-  </div>
+<div align="center">
+  <img src="https://img.shields.io/badge/nestjs-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" alt="nestjs" />
+  <img src="https://img.shields.io/badge/-TypeScript-black?style=for-the-badge&logoColor=white&logo=typescript&color=3178C6" alt="typescript" />
+  <img src="https://img.shields.io/badge/postgresql-4169e1?style=for-the-badge&logo=postgresql&logoColor=white" alt="postgresql" />
+  <img src="https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white" alt="prisma" />
+  <img src="https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens&logoColor=white" alt="jwt" />
+  <img src="https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white" alt="aws" />
+  <img src="https://img.shields.io/badge/MoMo-A50064?style=for-the-badge&logo=momo&logoColor=white" alt="momo" />
+</div>
 
-## Installation
+## ✨ Key Features
 
-```bash
-$ npm install
+### 🏨 Hotel Management
+- Hotel search and booking
+- Hotel reviews and ratings
+- Hotel crawling integration
+- Room availability management
+
+### ✈️ Flight Management
+- Flight search and booking
+- Flight crawling integration
+- Flight schedule management
+- Seat availability tracking
+
+### 🗺 Tour Management
+- Tour package creation and management
+- Tour booking system
+- Tour reviews and comments
+- Tour itinerary management
+
+### 👥 User Management
+- User authentication and authorization
+- Role-based access control
+- User profile management
+- Booking history
+
+### 💳 Payment Integration
+- MoMo payment gateway integration
+- Secure payment processing
+- Payment status tracking
+- Transaction history
+
+## 📁 Project Structure
+
+```
+src/
+├── modules/                 # Feature modules
+│   ├── auth/               # Authentication module
+│   ├── bookings/           # Booking management
+│   ├── flight-crawl/       # Flight data crawling
+│   ├── hotel-crawl/        # Hotel data crawling
+│   ├── hotel-comment/      # Hotel reviews
+│   ├── momo/              # Payment integration
+│   ├── role/              # Role management
+│   ├── road-vehicle/      # Transportation management
+│   ├── tour/              # Tour management
+│   ├── tour-comment/      # Tour reviews
+│   └── user/              # User management
+├── common/                 # Common utilities
+├── decorator/             # Custom decorators
+├── enums/                 # Enum definitions
+├── guard/                 # Authentication guards
+├── helpers/               # Helper functions
+├── lib/                   # Library configurations
+├── types/                 # TypeScript types
+└── utils/                 # Utility functions
 ```
 
-## Set Up Environment Variables
+## 🚀 Getting Started
 
-Create a new file named `.env` in the root of your project and add the following content:
+### Prerequisites
+- Node.js (v16 or higher)
+- PostgreSQL
+- AWS Account (for S3 storage)
 
+### Installation
+
+1. Clone the repository
+```bash
+git clone [repository-url]
+```
+
+2. Install dependencies
+```bash
+npm install
+```
+
+3. Set up environment variables
+Create a `.env` file in the root directory with the following variables:
 ```env
 DATABASE_URL=
 ACCESS_TOKEN_KEY=
@@ -57,31 +119,66 @@ MOMO_REDIRECT_URL=
 MOMO_IPN_URL=
 ```
 
-## Running the app
-
+4. Run database migrations
 ```bash
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npx prisma migrate dev
 ```
 
-## Test
-
+5. Start the development server
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run start:dev
 ```
 
-Open http://localhost:3001/api with your favorite browser to swagger.
+## 📚 API Documentation
+
+Access the Swagger API documentation at:
+```
+http://localhost:3001/api
+```
+
+## 🧪 Testing
+
+```bash
+# Unit tests
+npm run test
+
+# E2E tests
+npm run test:e2e
+
+# Test coverage
+npm run test:cov
+```
+
+## 🔐 Security Features
+
+- JWT-based authentication
+- Role-based access control
+- Secure password hashing
+- API rate limiting
+- CORS protection
+- Input validation
+- XSS protection
+
+## 📦 Deployment
+
+The application can be deployed using:
+```bash
+npm run build
+npm run start:prod
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License.
 
 ---
 
-Made with ♥ by [ThanhDev](https://www.facebook.com/thanh.vophuoc.50)
+Made with ❤️ by [ThanhDev](https://www.facebook.com/thanh.vophuoc.50)
